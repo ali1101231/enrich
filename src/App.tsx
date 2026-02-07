@@ -2,25 +2,63 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AppProvider } from "@/contexts/AppContext";
+import { AppLayout } from "@/components/layout/AppLayout";
+import Dashboard from "@/pages/Dashboard";
+import Runs from "@/pages/Runs";
+import RunDetail from "@/pages/RunDetail";
+import Files from "@/pages/Files";
+import SettingsLayout from "@/pages/SettingsLayout";
+import SettingsKeys from "@/pages/SettingsKeys";
+import SettingsAccount from "@/pages/SettingsAccount";
+import SettingsPreferences from "@/pages/SettingsPreferences";
+import ToolPage from "@/pages/ToolPage";
+import Login from "@/pages/Login";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
+    <AppProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            {/* Auth */}
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Login />} />
+            <Route path="/forgot-password" element={<Login />} />
+            
+            {/* App */}
+            <Route path="/" element={<AppLayout />}>
+              <Route index element={<Navigate to="/dashboard" replace />} />
+              <Route path="dashboard" element={<Dashboard />} />
+              <Route path="runs" element={<Runs />} />
+              <Route path="runs/:id" element={<RunDetail />} />
+              <Route path="files" element={<Files />} />
+              
+              {/* Tools */}
+              <Route path="apify/:toolId" element={<ToolPage />} />
+              <Route path="blitz/:toolId" element={<ToolPage />} />
+              <Route path="csv/:toolId" element={<ToolPage />} />
+              
+              {/* Settings */}
+              <Route path="settings" element={<SettingsLayout />}>
+                <Route index element={<Navigate to="keys" replace />} />
+                <Route path="keys" element={<SettingsKeys />} />
+                <Route path="account" element={<SettingsAccount />} />
+                <Route path="preferences" element={<SettingsPreferences />} />
+              </Route>
+            </Route>
+            
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </AppProvider>
   </QueryClientProvider>
 );
 
