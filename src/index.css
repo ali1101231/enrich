@@ -7,10 +7,10 @@
 
 @layer base {
   :root {
-    /* Koldify brand colors - deep purple + teal */
+    /* Koldify brand colors - deep purple gradient */
     --koldify-orange: 252 85% 55%;
     --koldify-orange-glow: 262 80% 60%;
-    --koldify-amber: 170 70% 45%;
+    --koldify-amber: 270 65% 48%;
     
     /* Light mode - primary (clean white/gray) */
     --background: 240 15% 97%;
