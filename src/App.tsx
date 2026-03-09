@@ -9,8 +9,8 @@ import Dashboard from "@/pages/Dashboard";
 import Runs from "@/pages/Runs";
 import RunDetail from "@/pages/RunDetail";
 import Files from "@/pages/Files";
+import Pricing from "@/pages/Pricing";
 import SettingsLayout from "@/pages/SettingsLayout";
-import SettingsKeys from "@/pages/SettingsKeys";
 import SettingsAccount from "@/pages/SettingsAccount";
 import SettingsPreferences from "@/pages/SettingsPreferences";
 import ToolPage from "@/pages/ToolPage";
@@ -39,14 +39,14 @@ const App = () => (
               <Route path="runs" element={<Runs />} />
               <Route path="runs/:id" element={<RunDetail />} />
               <Route path="files" element={<Files />} />
+              <Route path="pricing" element={<Pricing />} />
               
               {/* Tools */}
               <Route path="tools/:toolId" element={<ToolPage />} />
               
               {/* Settings */}
               <Route path="settings" element={<SettingsLayout />}>
-                <Route index element={<Navigate to="keys" replace />} />
-                <Route path="keys" element={<SettingsKeys />} />
+                <Route index element={<Navigate to="account" replace />} />
                 <Route path="account" element={<SettingsAccount />} />
                 <Route path="preferences" element={<SettingsPreferences />} />
               </Route>
