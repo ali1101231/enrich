@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 /* Koldify Design System - Premium dark SaaS aesthetic */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 
 @layer base {
   :root {
@@ -12,24 +12,24 @@
     --koldify-orange-glow: 262 80% 60%;
     --koldify-amber: 270 65% 48%;
     
-    /* Light mode - primary (clean white/gray) */
-    --background: 240 15% 97%;
-    --foreground: 240 30% 12%;
+    /* Light mode */
+    --background: 240 20% 98%;
+    --foreground: 240 30% 10%;
     
     --card: 0 0% 100%;
-    --card-foreground: 240 30% 12%;
+    --card-foreground: 240 30% 10%;
     
     --popover: 0 0% 100%;
-    --popover-foreground: 240 30% 12%;
+    --popover-foreground: 240 30% 10%;
     
     --primary: 252 85% 55%;
     --primary-foreground: 0 0% 100%;
     
-    --secondary: 240 15% 94%;
-    --secondary-foreground: 240 30% 12%;
+    --secondary: 240 15% 95%;
+    --secondary-foreground: 240 30% 10%;
     
-    --muted: 240 10% 92%;
-    --muted-foreground: 240 10% 45%;
+    --muted: 240 10% 93%;
+    --muted-foreground: 240 10% 42%;
     
     --accent: 252 85% 55%;
     --accent-foreground: 0 0% 100%;
@@ -43,8 +43,8 @@
     --warning: 38 92% 50%;
     --warning-foreground: 0 0% 9%;
     
-    --border: 240 12% 90%;
-    --input: 240 12% 90%;
+    --border: 240 10% 90%;
+    --input: 240 10% 90%;
     --ring: 252 85% 55%;
     
     --radius: 0.75rem;
@@ -54,33 +54,33 @@
     --sidebar-foreground: 240 15% 35%;
     --sidebar-primary: 252 85% 55%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 15% 95%;
-    --sidebar-accent-foreground: 240 30% 12%;
-    --sidebar-border: 240 12% 92%;
+    --sidebar-accent: 252 85% 97%;
+    --sidebar-accent-foreground: 252 85% 45%;
+    --sidebar-border: 240 10% 93%;
     --sidebar-ring: 252 85% 55%;
   }
 
   .dark {
     /* Dark mode */
-    --background: 240 20% 8%;
+    --background: 240 20% 6%;
     --foreground: 240 10% 95%;
     
-    --card: 240 18% 12%;
+    --card: 240 18% 10%;
     --card-foreground: 240 10% 95%;
     
-    --popover: 240 18% 12%;
+    --popover: 240 18% 10%;
     --popover-foreground: 240 10% 95%;
     
-    --primary: 252 85% 60%;
+    --primary: 252 85% 62%;
     --primary-foreground: 0 0% 100%;
     
-    --secondary: 240 15% 18%;
+    --secondary: 240 15% 16%;
     --secondary-foreground: 240 10% 95%;
     
-    --muted: 240 12% 20%;
+    --muted: 240 12% 18%;
     --muted-foreground: 240 10% 55%;
     
-    --accent: 252 85% 60%;
+    --accent: 252 85% 62%;
     --accent-foreground: 0 0% 100%;
     
     --destructive: 0 62% 50%;
@@ -92,19 +92,19 @@
     --warning: 38 92% 50%;
     --warning-foreground: 0 0% 9%;
     
-    --border: 240 12% 22%;
-    --input: 240 12% 22%;
-    --ring: 252 85% 60%;
+    --border: 240 12% 18%;
+    --input: 240 12% 18%;
+    --ring: 252 85% 62%;
     
     /* Sidebar */
-    --sidebar-background: 240 20% 10%;
-    --sidebar-foreground: 240 10% 70%;
-    --sidebar-primary: 252 85% 60%;
+    --sidebar-background: 240 20% 8%;
+    --sidebar-foreground: 240 10% 65%;
+    --sidebar-primary: 252 85% 62%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 15% 18%;
-    --sidebar-accent-foreground: 240 10% 95%;
-    --sidebar-border: 240 12% 20%;
-    --sidebar-ring: 252 85% 60%;
+    --sidebar-accent: 252 85% 15%;
+    --sidebar-accent-foreground: 252 85% 80%;
+    --sidebar-border: 240 12% 16%;
+    --sidebar-ring: 252 85% 62%;
   }
 }
 
@@ -147,21 +147,21 @@
   /* Grid pattern background */
   .bg-grid-pattern {
     background-image: 
-      radial-gradient(circle at 1px 1px, hsl(var(--muted-foreground) / 0.15) 1px, transparent 0);
-    background-size: 24px 24px;
+      radial-gradient(circle at 1px 1px, hsl(var(--border) / 0.5) 1px, transparent 0);
+    background-size: 28px 28px;
   }
   
   /* Glass effect */
   .glass {
     background: hsl(var(--card) / 0.8);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
   }
   
   .glass-dark {
     background: hsl(0 0% 0% / 0.6);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
   }
   
   /* Status indicators */
@@ -191,8 +191,8 @@
   
   /* Scrollbar styling */
   .scrollbar-thin::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: 5px;
+    height: 5px;
   }
   
   .scrollbar-thin::-webkit-scrollbar-track {
@@ -200,12 +200,12 @@
   }
   
   .scrollbar-thin::-webkit-scrollbar-thumb {
-    background: hsl(var(--muted-foreground) / 0.3);
+    background: hsl(var(--muted-foreground) / 0.2);
     border-radius: 3px;
   }
   
   .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-    background: hsl(var(--muted-foreground) / 0.5);
+    background: hsl(var(--muted-foreground) / 0.4);
   }
   
   /* Animation utilities */
@@ -227,5 +227,16 @@
   @keyframes shimmer {
     0% { background-position: 200% 0; }
     100% { background-position: -200% 0; }
+  }
+
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0px) rotate(0deg);
+      opacity: 0.7;
+    }
+    50% {
+      transform: translateY(-20px) rotate(180deg);
+      opacity: 1;
+    }
   }
 }

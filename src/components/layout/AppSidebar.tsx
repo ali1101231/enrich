@@ -56,19 +56,21 @@ export function AppSidebar() {
     <Link
       to={item.href}
       className={cn(
-        'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200',
-        'hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
+        'group flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200',
         isActive(item.href)
-          ? 'bg-primary/10 text-primary'
-          : 'text-sidebar-foreground'
+          ? 'bg-sidebar-accent text-sidebar-accent-foreground shadow-sm'
+          : 'text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground'
       )}
     >
-      <item.icon className="h-4 w-4 flex-shrink-0" />
+      <item.icon className={cn(
+        "h-[18px] w-[18px] flex-shrink-0 transition-colors",
+        isActive(item.href) ? 'text-primary' : 'text-muted-foreground group-hover:text-primary'
+      )} />
       {showText && (
         <>
           <span className="flex-1 truncate">{item.title}</span>
           {item.badge && (
-            <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground px-1.5">
+            <span className="flex h-5 min-w-5 items-center justify-center rounded-full gradient-koldify text-[10px] font-bold text-white px-1.5">
               {item.badge}
             </span>
           )}
@@ -81,22 +83,22 @@ export function AppSidebar() {
     <aside
       className={cn(
         'flex flex-col border-r border-sidebar-border bg-sidebar transition-all duration-300',
-        collapsed ? 'w-16' : 'w-64'
+        collapsed ? 'w-[68px]' : 'w-64'
       )}
     >
       {/* Logo */}
       <div className="flex h-16 items-center justify-between px-4 border-b border-sidebar-border">
         {!collapsed && (
-          <Link to="/dashboard" className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg gradient-koldify">
+          <Link to="/dashboard" className="flex items-center gap-2.5">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl gradient-koldify shadow-glow-sm">
               <Sparkles className="h-4 w-4 text-white" />
             </div>
-            <span className="text-lg font-bold gradient-koldify-text">Koldify</span>
+            <span className="text-lg font-bold gradient-koldify-text tracking-tight">Koldify</span>
           </Link>
         )}
         {collapsed && (
           <Link to="/dashboard" className="mx-auto">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg gradient-koldify">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl gradient-koldify shadow-glow-sm">
               <Sparkles className="h-4 w-4 text-white" />
             </div>
           </Link>
@@ -104,7 +106,7 @@ export function AppSidebar() {
         <Button
           variant="ghost"
           size="icon"
-          className={cn('h-8 w-8 text-sidebar-foreground', collapsed && 'hidden')}
+          className={cn('h-7 w-7 text-muted-foreground hover:text-foreground', collapsed && 'hidden')}
           onClick={() => setCollapsed(true)}
         >
           <ChevronLeft className="h-4 w-4" />
@@ -113,15 +115,15 @@ export function AppSidebar() {
 
       {/* Navigation */}
       <ScrollArea className="flex-1 py-4">
-        <nav className="space-y-1 px-2">
+        <nav className="space-y-1 px-3">
           {mainNavItems.map((item) => (
             <NavLink key={item.href} item={item} showText={!collapsed} />
           ))}
 
-          <div className="my-4 border-t border-sidebar-border" />
+          <div className="my-4 mx-2 border-t border-sidebar-border" />
 
           {!collapsed && (
-            <div className="px-3 pb-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+            <div className="px-3 pb-2 text-[11px] font-semibold text-muted-foreground uppercase tracking-widest">
               Tools
             </div>
           )}
@@ -129,22 +131,22 @@ export function AppSidebar() {
             <NavLink key={item.href} item={item} showText={!collapsed} />
           ))}
 
-          <div className="my-4 border-t border-sidebar-border" />
+          <div className="my-4 mx-2 border-t border-sidebar-border" />
 
           {bottomNavItems.map((item) => (
             <NavLink key={item.href} item={item} showText={!collapsed} />
           ))}
 
           {/* Admin Link */}
-          <div className="my-4 border-t border-sidebar-border" />
+          <div className="my-4 mx-2 border-t border-sidebar-border" />
           <Link
             to="/admin"
             className={cn(
-              'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200',
+              'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200',
               'bg-primary/5 hover:bg-primary/10 text-primary border border-primary/20'
             )}
           >
-            <Shield className="h-4 w-4 flex-shrink-0" />
+            <Shield className="h-[18px] w-[18px] flex-shrink-0" />
             {!collapsed && <span className="flex-1 truncate">Admin Portal</span>}
           </Link>
         </nav>
@@ -152,11 +154,11 @@ export function AppSidebar() {
 
       {/* Expand Button */}
       {collapsed && (
-        <div className="p-2 border-t border-sidebar-border">
+        <div className="p-3 border-t border-sidebar-border">
           <Button
             variant="ghost"
             size="icon"
-            className="w-full h-8 text-sidebar-foreground"
+            className="w-full h-8 text-muted-foreground hover:text-foreground"
             onClick={() => setCollapsed(false)}
           >
             <ChevronRight className="h-4 w-4" />

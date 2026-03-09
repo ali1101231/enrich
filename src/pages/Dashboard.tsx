@@ -13,6 +13,7 @@ import {
   Upload,
   Pin,
   Activity,
+  TrendingDown,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -47,13 +48,13 @@ function RunCard({ run }: { run: Run }) {
 
   return (
     <Card 
-      className="group cursor-pointer hover:border-primary/50 transition-all duration-200"
+      className="group cursor-pointer hover:border-primary/30 hover:shadow-lg transition-all duration-300"
       onClick={() => navigate(`/runs/${run.id}`)}
     >
       <CardContent className="p-4">
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
-            <div className={cn('flex h-10 w-10 items-center justify-center rounded-lg', config.bg)}>
+            <div className={cn('flex h-10 w-10 items-center justify-center rounded-xl', config.bg)}>
               <StatusIcon className={cn('h-5 w-5', config.color)} />
             </div>
             <div className="min-w-0">
@@ -61,7 +62,7 @@ function RunCard({ run }: { run: Run }) {
               <p className="text-sm text-muted-foreground truncate">{run.inputFileName}</p>
             </div>
           </div>
-          <Badge variant="secondary" className={cn('shrink-0', config.color)}>
+          <Badge variant="secondary" className={cn('shrink-0 text-[11px]', config.color)}>
             {config.label}
           </Badge>
         </div>
@@ -72,9 +73,9 @@ function RunCard({ run }: { run: Run }) {
               <span className="text-muted-foreground">
                 {run.rowsProcessed.toLocaleString()} / {run.totalRows.toLocaleString()} rows
               </span>
-              <span className="font-medium">{run.progress}%</span>
+              <span className="font-medium text-primary">{run.progress}%</span>
             </div>
-            <Progress value={run.progress} className="h-2" />
+            <Progress value={run.progress} className="h-1.5" />
             {run.eta && (
               <p className="text-xs text-muted-foreground">ETA: {run.eta}</p>
             )}
@@ -86,10 +87,10 @@ function RunCard({ run }: { run: Run }) {
             <Button
               size="sm"
               variant="outline"
-              className="flex-1"
+              className="flex-1 h-8 text-xs"
               onClick={() => pauseRun(run.id)}
             >
-              <Pause className="h-4 w-4 mr-1" />
+              <Pause className="h-3.5 w-3.5 mr-1" />
               Pause
             </Button>
           </div>
@@ -99,10 +100,10 @@ function RunCard({ run }: { run: Run }) {
           <div className="mt-3 flex gap-2" onClick={e => e.stopPropagation()}>
             <Button
               size="sm"
-              className="flex-1 gradient-koldify text-white"
+              className="flex-1 h-8 text-xs gradient-koldify text-white"
               onClick={() => resumeRun(run.id)}
             >
-              <Play className="h-4 w-4 mr-1" />
+              <Play className="h-3.5 w-3.5 mr-1" />
               Resume
             </Button>
           </div>
@@ -126,33 +127,34 @@ function StatCard({
   trend?: number;
 }) {
   return (
-    <Card>
-      <CardContent className="p-6">
+    <Card className="group hover:border-primary/20">
+      <CardContent className="p-5">
         <div className="flex items-start justify-between">
-          <div>
-            <p className="text-sm text-muted-foreground">{title}</p>
-            <p className="text-3xl font-bold mt-1">{value}</p>
+          <div className="space-y-1">
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{title}</p>
+            <p className="text-2xl font-bold tracking-tight">{value}</p>
             {subtitle && (
-              <p className="text-sm text-muted-foreground mt-1">{subtitle}</p>
+              <p className="text-xs text-muted-foreground">{subtitle}</p>
             )}
           </div>
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
-            <Icon className="h-6 w-6 text-primary" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 group-hover:bg-primary/15 transition-colors">
+            <Icon className="h-5 w-5 text-primary" />
           </div>
         </div>
         {trend !== undefined && (
-          <div className="flex items-center gap-1 mt-3">
-            <TrendingUp className={cn(
-              'h-4 w-4',
-              trend >= 0 ? 'text-success' : 'text-destructive'
-            )} />
+          <div className="flex items-center gap-1.5 mt-3 pt-3 border-t border-border">
+            {trend >= 0 ? (
+              <TrendingUp className="h-3.5 w-3.5 text-success" />
+            ) : (
+              <TrendingDown className="h-3.5 w-3.5 text-destructive" />
+            )}
             <span className={cn(
-              'text-sm font-medium',
+              'text-xs font-semibold',
               trend >= 0 ? 'text-success' : 'text-destructive'
             )}>
               {trend >= 0 ? '+' : ''}{trend}%
             </span>
-            <span className="text-sm text-muted-foreground">vs last week</span>
+            <span className="text-xs text-muted-foreground">vs last week</span>
           </div>
         )}
       </CardContent>
@@ -180,12 +182,12 @@ export default function Dashboard() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Welcome back, {user?.name?.split(' ')[0]}</h1>
-          <p className="text-muted-foreground mt-1">Here's what's happening with your runs</p>
+          <h1 className="text-2xl font-bold tracking-tight">Welcome back, {user?.name?.split(' ')[0]}</h1>
+          <p className="text-muted-foreground text-sm mt-0.5">Here's what's happening with your runs</p>
         </div>
         <Button 
           onClick={() => navigate('/runs')}
-          className="gradient-koldify text-white hover:opacity-90"
+          className="gradient-koldify text-white hover:opacity-90 shadow-glow-sm"
         >
           <Play className="h-4 w-4 mr-2" />
           Start New Run
@@ -224,11 +226,11 @@ export default function Dashboard() {
       {/* Keys Health */}
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-lg">Keys Health</CardTitle>
+          <CardTitle className="text-base font-semibold">Keys Health</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-wrap gap-4">
-            <div className="flex items-center gap-3 px-4 py-3 rounded-lg bg-muted">
+          <div className="flex flex-wrap gap-3">
+            <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-muted/60 border border-border">
               <span className={cn(
                 'status-dot',
                 apifyKeys.filter(k => k.enabled && k.status === 'active').length > 0
@@ -236,13 +238,13 @@ export default function Dashboard() {
                   : 'status-error'
               )} />
               <div>
-                <p className="font-medium">Apify Keys</p>
-                <p className="text-sm text-muted-foreground">
+                <p className="font-medium text-sm">Apify Keys</p>
+                <p className="text-xs text-muted-foreground">
                   {apifyKeys.filter(k => k.enabled && k.status === 'active').length} active
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-3 px-4 py-3 rounded-lg bg-muted">
+            <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-muted/60 border border-border">
               <span className={cn(
                 'status-dot',
                 blitzKeys.some(k => k.enabled && k.status === 'active')
@@ -250,19 +252,20 @@ export default function Dashboard() {
                   : 'status-error'
               )} />
               <div>
-                <p className="font-medium">Blitz Key</p>
-                <p className="text-sm text-muted-foreground">
+                <p className="font-medium text-sm">Blitz Key</p>
+                <p className="text-xs text-muted-foreground">
                   {blitzKeys.some(k => k.enabled && k.status === 'active') ? 'Valid' : 'Not configured'}
                 </p>
               </div>
             </div>
             <Button
               variant="ghost"
-              className="text-primary"
+              size="sm"
+              className="text-primary hover:text-primary"
               onClick={() => navigate('/settings/keys')}
             >
               Manage Keys
-              <ArrowRight className="h-4 w-4 ml-1" />
+              <ArrowRight className="h-3.5 w-3.5 ml-1" />
             </Button>
           </div>
         </CardContent>
@@ -275,15 +278,15 @@ export default function Dashboard() {
           {activeRuns.length > 0 && (
             <div>
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-semibold">Continue Running</h2>
+                <h2 className="text-base font-semibold">Continue Running</h2>
                 <Link 
                   to="/runs" 
-                  className="text-sm text-primary hover:underline flex items-center gap-1"
+                  className="text-xs text-primary hover:underline flex items-center gap-1 font-medium"
                 >
-                  View all <ArrowRight className="h-4 w-4" />
+                  View all <ArrowRight className="h-3.5 w-3.5" />
                 </Link>
               </div>
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-3 sm:grid-cols-2">
                 {activeRuns.slice(0, 4).map(run => (
                   <RunCard key={run.id} run={run} />
                 ))}
@@ -294,12 +297,12 @@ export default function Dashboard() {
           {/* Recent Runs */}
           <div>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold">Recent Runs</h2>
+              <h2 className="text-base font-semibold">Recent Runs</h2>
               <Link 
                 to="/runs" 
-                className="text-sm text-primary hover:underline flex items-center gap-1"
+                className="text-xs text-primary hover:underline flex items-center gap-1 font-medium"
               >
-                View all <ArrowRight className="h-4 w-4" />
+                View all <ArrowRight className="h-3.5 w-3.5" />
               </Link>
             </div>
             <Card>
@@ -319,21 +322,21 @@ export default function Dashboard() {
                       <Link
                         key={run.id}
                         to={`/runs/${run.id}`}
-                        className="flex items-center justify-between p-4 hover:bg-muted/50 transition-colors"
+                        className="flex items-center justify-between px-4 py-3.5 hover:bg-muted/40 transition-colors group"
                       >
                         <div className="flex items-center gap-3 min-w-0">
                           <div className="min-w-0">
-                            <p className="font-medium truncate">{run.toolName}</p>
-                            <p className="text-sm text-muted-foreground truncate">{run.inputFileName}</p>
+                            <p className="font-medium text-sm truncate group-hover:text-primary transition-colors">{run.toolName}</p>
+                            <p className="text-xs text-muted-foreground truncate">{run.inputFileName}</p>
                           </div>
                         </div>
                         <div className="flex items-center gap-4">
-                          <span className="text-sm text-muted-foreground hidden sm:block">
+                          <span className="text-xs text-muted-foreground hidden sm:block">
                             {run.rowsProcessed.toLocaleString()} rows
                           </span>
                           <Badge 
                             variant="secondary" 
-                            className={statusConfig[run.status].color}
+                            className={cn('text-[11px]', statusConfig[run.status].color)}
                           >
                             {run.status}
                           </Badge>
@@ -351,20 +354,20 @@ export default function Dashboard() {
         <div className="space-y-6">
           {/* Quick Actions */}
           <div>
-            <h2 className="text-xl font-semibold mb-4">Quick Actions</h2>
-            <div className="grid grid-cols-2 gap-3">
+            <h2 className="text-base font-semibold mb-4">Quick Actions</h2>
+            <div className="grid grid-cols-2 gap-2.5">
               {quickActions.map(action => (
                 <Button
                   key={action.title}
                   variant={action.primary ? 'default' : 'outline'}
                   className={cn(
-                    'h-auto py-4 flex-col gap-2',
-                    action.primary && 'gradient-koldify text-white hover:opacity-90'
+                    'h-auto py-4 flex-col gap-2 rounded-xl',
+                    action.primary && 'gradient-koldify text-white hover:opacity-90 shadow-glow-sm'
                   )}
                   onClick={() => navigate(action.href)}
                 >
                   <action.icon className="h-5 w-5" />
-                  <span className="text-sm">{action.title}</span>
+                  <span className="text-xs font-medium">{action.title}</span>
                 </Button>
               ))}
             </div>
@@ -373,14 +376,14 @@ export default function Dashboard() {
           {/* Pinned Tools */}
           <div>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold">Pinned Tools</h2>
-              <Pin className="h-4 w-4 text-muted-foreground" />
+              <h2 className="text-base font-semibold">Pinned Tools</h2>
+              <Pin className="h-3.5 w-3.5 text-muted-foreground" />
             </div>
             <div className="space-y-2">
               {pinnedTools.length === 0 ? (
                 <Card>
                   <CardContent className="p-6 text-center text-muted-foreground">
-                    <Pin className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                    <Pin className="h-8 w-8 mx-auto mb-2 opacity-30" />
                     <p className="text-sm">No pinned tools yet</p>
                     <p className="text-xs mt-1">Pin your favorite tools for quick access</p>
                   </CardContent>
@@ -389,19 +392,19 @@ export default function Dashboard() {
                 pinnedTools.map(tool => (
                   <Card 
                     key={tool.id}
-                    className="cursor-pointer hover:border-primary/50 transition-colors"
+                    className="cursor-pointer hover:border-primary/30 transition-all duration-200"
                     onClick={() => navigate(`/${tool.provider}/${tool.id}`)}
                   >
-                    <CardContent className="p-4">
+                    <CardContent className="p-3.5">
                       <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                          <Zap className="h-5 w-5 text-primary" />
+                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10">
+                          <Zap className="h-4 w-4 text-primary" />
                         </div>
                         <div className="min-w-0 flex-1">
-                          <p className="font-medium truncate">{tool.name}</p>
-                          <p className="text-xs text-muted-foreground truncate">{tool.description}</p>
+                          <p className="font-medium text-sm truncate">{tool.name}</p>
+                          <p className="text-[11px] text-muted-foreground truncate">{tool.description}</p>
                         </div>
-                        <Badge variant="outline" className="shrink-0">
+                        <Badge variant="outline" className="shrink-0 text-[10px]">
                           {tool.provider}
                         </Badge>
                       </div>
