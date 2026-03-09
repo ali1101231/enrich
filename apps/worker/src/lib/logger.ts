@@ -1,15 +1,16 @@
-import { logLine, type StructuredLogContext } from "@koldify/shared";
+import pino from "pino";
+import type { StructuredLogContext } from "@koldify/shared";
 
-const SERVICE = "worker-service";
+export const logger = pino({ name: "worker-service" });
 
 export function logInfo(message: string, context: StructuredLogContext = {}): void {
-  console.log(logLine(SERVICE, "info", message, context));
+  logger.info(context, message);
 }
 
 export function logWarn(message: string, context: StructuredLogContext = {}): void {
-  console.warn(logLine(SERVICE, "warn", message, context));
+  logger.warn(context, message);
 }
 
 export function logError(message: string, context: StructuredLogContext = {}): void {
-  console.error(logLine(SERVICE, "error", message, context));
+  logger.error(context, message);
 }

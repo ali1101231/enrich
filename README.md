@@ -58,40 +58,80 @@ frontend/
 
 ## Environment
 
-Configured in `.env` and `.env.example`.
+Configured in `.env` (copy from `.env.example`).
 
-Important values included as requested:
+See `.env.example` for all required and optional variables with defaults.
 
-- `DATABASE_URL=postgresql://postgres:Alimola@110@localhost:5433/Enrich_it`
-- `REDIS_URL=redis://default:pFWQFbf7UGQnGvdwbjLDAFUlDSWs060C@redis-19168.c322.us-east-1-2.ec2.cloud.redislabs.com:19168`
+## Local Setup
 
-## Run
+### Prerequisites
+
+- Node.js 20+
+- Docker (for PostgreSQL and Redis)
+
+### 1. Install dependencies
 
 ```sh
 npm install
-npm run prisma:generate
-npm run dev         # frontend
-npm run dev:web     # web service
-npm run dev:worker  # worker service
 ```
+
+### 2. Start infrastructure
+
+```sh
+docker compose up -d
+```
+
+This starts PostgreSQL on `localhost:5433` and Redis on `localhost:6379`.
+
+### 3. Configure environment
+
+```sh
+cp .env.example .env
+```
+
+Edit `.env` with your database credentials and any overrides.
+
+### 4. Generate Prisma client
+
+```sh
+npm run prisma:generate
+```
+
+### 5. Run database migrations
+
+```sh
+npm run prisma:migrate
+```
+
+### 6. Start services
+
+```sh
+npm run dev         # all: frontend + web + worker
+npm run dev:web     # web service only
+npm run dev:worker  # worker service only
+```
+
+Frontend runs at `http://localhost:8080`, web API at `http://localhost:4000`.
 
 PowerShell helpers:
 
 - `./scripts/start-web.ps1`
 - `./scripts/start-worker.ps1`
 
-## Infrastructure
-
-Local infra for development:
+### Build for production
 
 ```sh
-docker compose up -d
+npm run build
+npm run start       # starts web + worker
 ```
 
-Services:
+### Other scripts
 
-- PostgreSQL on `localhost:5433`
-- Redis on `localhost:6379`
+```sh
+npm run prisma:deploy   # apply migrations in production
+npm run test            # run tests across workspaces
+npm run lint            # lint across workspaces
+```
 
 ## Sample Routes
 

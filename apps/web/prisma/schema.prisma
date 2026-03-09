@@ -36,6 +36,7 @@ enum JobResultStatus {
 model User {
   id             String             @id @default(cuid())
   email          String             @unique
+  passwordHash   String?
   displayName    String?
   role           String             @default("user")
   isActive       Boolean            @default(true)
@@ -123,6 +124,7 @@ model Job {
   results      JobResult[]
 
   @@unique([batchId, sequence])
+  @@index([batchId, status])
   @@index([status, createdAt])
   @@index([userId, status, createdAt])
   @@index([apiKeyId, status, createdAt])
