@@ -44,6 +44,7 @@ export class BatchProgressService {
 
     return {
       batchId,
+      status: batch.status,
       totalRows: totals.totalRows,
       queuedRows: totals.queuedRows,
       runningRows: totals.runningRows,
