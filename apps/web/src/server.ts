@@ -1,4 +1,5 @@
 import express from "express";
+import cors from "cors";
 import { apiRouter } from "./routes/index.js";
 import { env } from "./lib/env.js";
 import { logError, logInfo } from "./lib/logger.js";
@@ -11,6 +12,7 @@ const app = express();
 const scheduler = new FairSchedulerService();
 
 app.disable("x-powered-by");
+app.use(cors({ origin: true, credentials: true }));
 app.use(express.json({ limit: "10mb" }));
 app.use(attachRequestId);
 app.use(attachAuthContext);

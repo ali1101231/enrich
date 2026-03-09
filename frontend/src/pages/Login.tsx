@@ -6,8 +6,9 @@ import { useApp } from '@/contexts/AppContext';
 export default function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { login, isLoading } = useApp();
+  const { login, register, isAuthenticated, user } = useApp();
   const [isRightPanelActive, setIsRightPanelActive] = useState(location.pathname === '/signup');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Form states
   const [signInEmail, setSignInEmail] = useState('');
@@ -16,31 +17,59 @@ export default function LoginPage() {
   const [signUpEmail, setSignUpEmail] = useState('');
   const [signUpPassword, setSignUpPassword] = useState('');
   const [signUpConfirm, setSignUpConfirm] = useState('');
+  const [formError, setFormError] = useState<string | null>(null);
 
   useEffect(() => {
     setIsRightPanelActive(location.pathname === '/signup');
   }, [location.pathname]);
 
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      if (user.role === 'admin') {
+        navigate('/admin', { replace: true });
+      } else {
+        navigate('/dashboard', { replace: true });
+      }
+    }
+  }, [isAuthenticated, user, navigate]);
+
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
-    await login(signInEmail, signInPassword);
-    navigate('/dashboard');
+    setFormError(null);
+    setIsSubmitting(true);
+    const err = await login(signInEmail, signInPassword);
+    if (err) {
+      setFormError(err);
+      setIsSubmitting(false);
+    }
   };
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    await login(signUpEmail, signUpPassword);
-    navigate('/dashboard');
+    setFormError(null);
+    if (signUpPassword !== signUpConfirm) {
+      setFormError('Passwords do not match');
+      return;
+    }
+    setIsSubmitting(true);
+    const err = await register(signUpEmail, signUpPassword, signUpName || undefined);
+    if (err) {
+      setFormError(err);
+      setIsSubmitting(false);
+    }
   };
 
   const switchToSignUp = () => {
     setIsRightPanelActive(true);
-    window.history.pushState({}, '', '/signup');
+    setFormError(null);
+    navigate('/signup', { replace: true });
   };
 
   const switchToSignIn = () => {
     setIsRightPanelActive(false);
-    window.history.pushState({}, '', '/login');
+    setFormError(null);
+    navigate('/login', { replace: true });
   };
 
   return (
@@ -59,13 +88,17 @@ export default function LoginPage() {
         
         {/* Sign Up Form */}
         <div className={`absolute w-1/2 h-full flex items-center justify-center transition-all duration-700 ease-[cubic-bezier(0.68,-0.55,0.265,1.55)] left-1/2 max-md:relative max-md:w-full max-md:left-0 ${
-          isRightPanelActive ? '-translate-x-full opacity-100 z-[5]' : 'opacity-0 z-[1]'
+          isRightPanelActive ? 'opacity-100 z-[5]' : 'opacity-0 z-[1]'
         }`}>
           <form onSubmit={handleSignUp} className="bg-white/90 backdrop-blur-sm p-8 rounded-2xl shadow-xl w-[320px] border border-white/50 animate-fade-in">
             <h1 className="text-2xl font-bold text-center mb-8 text-foreground relative pb-3">
               Create Account
               <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-16 h-[3px] rounded-full gradient-koldify" />
             </h1>
+
+            {formError && isRightPanelActive && (
+              <p className="text-sm text-red-600 text-center mb-4">{formError}</p>
+            )}
 
             <div className="space-y-4">
               <input
@@ -104,10 +137,10 @@ export default function LoginPage() {
 
             <button
               type="submit"
-              disabled={isLoading}
+              disabled={isSubmitting}
               className="w-full py-3.5 mt-6 rounded-xl text-base font-semibold text-white gradient-koldify transition-all duration-300 hover:-translate-y-1 hover:shadow-glow disabled:opacity-50 disabled:hover:translate-y-0"
             >
-              {isLoading ? <Loader2 className="h-5 w-5 animate-spin mx-auto" /> : 'Sign Up'}
+              {isSubmitting ? <Loader2 className="h-5 w-5 animate-spin mx-auto" /> : 'Sign Up'}
             </button>
 
             {/* Mobile only: switch link */}
@@ -121,14 +154,16 @@ export default function LoginPage() {
         </div>
 
         {/* Sign In Form */}
-        <div className={`absolute w-1/2 h-full flex items-center justify-center transition-all duration-700 ease-[cubic-bezier(0.68,-0.55,0.265,1.55)] left-0 z-[2] max-md:relative max-md:w-full ${
-          isRightPanelActive ? 'translate-x-full' : ''
-        }`}>
+        <div className={`absolute w-1/2 h-full flex items-center justify-center transition-all duration-700 ease-[cubic-bezier(0.68,-0.55,0.265,1.55)] left-0 z-[2] max-md:relative max-md:w-full`}>
           <form onSubmit={handleSignIn} className="bg-white/90 backdrop-blur-sm p-8 rounded-2xl shadow-xl w-[320px] border border-white/50 animate-fade-in">
             <h1 className="text-2xl font-bold text-center mb-8 text-foreground relative pb-3">
               Welcome Back
               <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-16 h-[3px] rounded-full gradient-koldify" />
             </h1>
+
+            {formError && !isRightPanelActive && (
+              <p className="text-sm text-red-600 text-center mb-4">{formError}</p>
+            )}
 
             <div className="space-y-4">
               <input
@@ -157,10 +192,10 @@ export default function LoginPage() {
 
             <button
               type="submit"
-              disabled={isLoading}
+              disabled={isSubmitting}
               className="w-full py-3.5 mt-4 rounded-xl text-base font-semibold text-white gradient-koldify transition-all duration-300 hover:-translate-y-1 hover:shadow-glow disabled:opacity-50 disabled:hover:translate-y-0"
             >
-              {isLoading ? <Loader2 className="h-5 w-5 animate-spin mx-auto" /> : 'Sign In'}
+              {isSubmitting ? <Loader2 className="h-5 w-5 animate-spin mx-auto" /> : 'Sign In'}
             </button>
 
             {/* Mobile only: switch link */}

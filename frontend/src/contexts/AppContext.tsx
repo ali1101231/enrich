@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { 
   User, 
   ApifyKey, 
@@ -10,7 +10,6 @@ import {
   DashboardStats 
 } from '@/types';
 import {
-  mockUser,
   mockApifyKeys,
   mockBlitzKeys,
   mockRuns,
@@ -18,6 +17,7 @@ import {
   mockNotifications,
   mockDashboardStats,
 } from '@/lib/mockData';
+import { authApi, type AuthUser, ApiError } from '@/lib/api';
 
 interface AppState {
   user: User | null;
@@ -34,8 +34,10 @@ interface AppState {
 
 interface AppContextType extends AppState {
   // Auth
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<string | null>;
+  register: (email: string, password: string, displayName?: string) => Promise<string | null>;
   logout: () => void;
+  authError: string | null;
   
   // Keys
   addApifyKey: (label: string, key: string) => void;
@@ -77,41 +79,54 @@ const defaultPreferences: UserPreferences = {
 
 const AppContext = createContext<AppContextType | null>(null);
 
+function authUserToUser(u: AuthUser): User {
+  return {
+    id: u.id,
+    email: u.email,
+    name: u.displayName ?? u.email,
+    role: u.role === 'admin' ? 'admin' : 'user',
+    plan: 'free',
+    createdAt: new Date().toISOString(),
+  };
+}
+
 export function AppProvider({ children }: { children: ReactNode }) {
-  const [state, setState] = useState<AppState>(() => {
-    // Load from localStorage if available
-    const saved = localStorage.getItem('koldify-state');
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        return {
-          ...parsed,
-          isLoading: false,
-        };
-      } catch {
-        // Fall through to defaults
-      }
-    }
-    
-    return {
-      user: mockUser,
-      isAuthenticated: true, // Start authenticated for demo
-      apifyKeys: mockApifyKeys,
-      blitzKeys: mockBlitzKeys,
-      runs: mockRuns,
-      files: mockOutputFiles,
-      notifications: mockNotifications,
-      stats: mockDashboardStats,
-      preferences: defaultPreferences,
-      isLoading: false,
-    };
+  const [state, setState] = useState<AppState>({
+    user: null,
+    isAuthenticated: false,
+    apifyKeys: mockApifyKeys,
+    blitzKeys: mockBlitzKeys,
+    runs: mockRuns,
+    files: mockOutputFiles,
+    notifications: mockNotifications,
+    stats: mockDashboardStats,
+    preferences: defaultPreferences,
+    isLoading: true, // true until we try to restore session
   });
 
-  // Persist state to localStorage
+  const [authError, setAuthError] = useState<string | null>(null);
+
+  // On mount, try to restore session from token
   useEffect(() => {
-    const { isLoading, ...stateToSave } = state;
-    localStorage.setItem('koldify-state', JSON.stringify(stateToSave));
-  }, [state]);
+    const token = localStorage.getItem('koldify-token');
+    if (!token) {
+      setState(prev => ({ ...prev, isLoading: false }));
+      return;
+    }
+    authApi.me()
+      .then(authUser => {
+        setState(prev => ({
+          ...prev,
+          user: authUserToUser(authUser),
+          isAuthenticated: true,
+          isLoading: false,
+        }));
+      })
+      .catch(() => {
+        localStorage.removeItem('koldify-token');
+        setState(prev => ({ ...prev, isLoading: false }));
+      });
+  }, []);
 
   // Simulate job progression
   useEffect(() => {
@@ -148,25 +163,50 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return () => clearInterval(interval);
   }, []);
 
-  const login = async (email: string, _password: string) => {
-    setState(prev => ({ ...prev, isLoading: true }));
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    setState(prev => ({
-      ...prev,
-      user: { ...mockUser, email },
-      isAuthenticated: true,
-      isLoading: false,
-    }));
-  };
+  const login = useCallback(async (email: string, password: string): Promise<string | null> => {
+    setAuthError(null);
+    try {
+      const { user: authUser, token } = await authApi.login(email, password);
+      localStorage.setItem('koldify-token', token);
+      setState(prev => ({
+        ...prev,
+        user: authUserToUser(authUser),
+        isAuthenticated: true,
+      }));
+      return null;
+    } catch (error) {
+      const msg = error instanceof ApiError ? error.message : 'Login failed';
+      setAuthError(msg);
+      return msg;
+    }
+  }, []);
 
-  const logout = () => {
+  const register = useCallback(async (email: string, password: string, displayName?: string): Promise<string | null> => {
+    setAuthError(null);
+    try {
+      const { user: authUser, token } = await authApi.register(email, password, displayName);
+      localStorage.setItem('koldify-token', token);
+      setState(prev => ({
+        ...prev,
+        user: authUserToUser(authUser),
+        isAuthenticated: true,
+      }));
+      return null;
+    } catch (error) {
+      const msg = error instanceof ApiError ? error.message : 'Registration failed';
+      setAuthError(msg);
+      return msg;
+    }
+  }, []);
+
+  const logout = useCallback(() => {
+    localStorage.removeItem('koldify-token');
     setState(prev => ({
       ...prev,
       user: null,
       isAuthenticated: false,
     }));
-  };
+  }, []);
 
   const addApifyKey = (label: string, key: string) => {
     const newKey: ApifyKey = {
@@ -411,7 +451,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     <AppContext.Provider value={{
       ...state,
       login,
+      register,
       logout,
+      authError,
       addApifyKey,
       updateApifyKey,
       deleteApifyKey,
