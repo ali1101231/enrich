@@ -59,7 +59,8 @@ export function TopBar() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
-  const unreadCount = notifications.filter(n => !n.read).length;
+  const visibleNotifications = notifications.filter((n) => n.type !== 'key-warning');
+  const unreadCount = visibleNotifications.filter((n) => !n.read).length;
   const isDark = preferences.theme === 'dark';
 
   const toggleTheme = () => {
@@ -174,14 +175,14 @@ export function TopBar() {
                 )}
               </div>
               <ScrollArea className="h-80">
-                {notifications.length === 0 ? (
+                {visibleNotifications.length === 0 ? (
                   <div className="p-8 text-center text-muted-foreground">
                     <Bell className="h-8 w-8 mx-auto mb-2 opacity-30" />
                     <p className="text-sm">No notifications</p>
                   </div>
                 ) : (
                   <div className="divide-y">
-                    {notifications.map((notif) => (
+                    {visibleNotifications.map((notif) => (
                       <button
                         key={notif.id}
                         className={cn(
@@ -199,12 +200,10 @@ export function TopBar() {
                             notif.type === 'run-completed' && 'bg-success/10 text-success',
                             notif.type === 'run-failed' && 'bg-destructive/10 text-destructive',
                             notif.type === 'run-paused' && 'bg-blue-500/10 text-blue-500',
-                            notif.type === 'key-warning' && 'bg-warning/10 text-warning',
                           )}>
                             {notif.type === 'run-completed' && <Check className="h-4 w-4" />}
                             {notif.type === 'run-failed' && <X className="h-4 w-4" />}
                             {notif.type === 'run-paused' && <Clock className="h-4 w-4" />}
-                            {notif.type === 'key-warning' && <Bell className="h-4 w-4" />}
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="font-medium text-sm">{notif.title}</p>
@@ -248,9 +247,9 @@ export function TopBar() {
                 <User className="mr-2 h-4 w-4" />
                 Account
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate('/settings/keys')} className="rounded-lg">
+              <DropdownMenuItem onClick={() => navigate('/settings/preferences')} className="rounded-lg">
                 <Settings className="mr-2 h-4 w-4" />
-                Settings
+                Preferences
               </DropdownMenuItem>
               <DropdownMenuItem className="rounded-lg">
                 <HelpCircle className="mr-2 h-4 w-4" />

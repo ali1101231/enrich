@@ -1,73 +1,120 @@
-# Welcome to your Lovable project
+# Koldify Ops Hub Monorepo
 
-## Project info
+Production-style monorepo with:
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+- `frontend`: existing React/Vite UI
+- `apps/web`: Express API service (uploads, batch orchestration, scheduler, admin key management)
+- `apps/worker`: BullMQ async worker (Blitz calls, retry, per-key rate limiting)
+- `packages/shared`: shared types/constants/utils
 
-## How can I edit this code?
+## Folder Layout
 
-There are several ways of editing your application.
+```txt
+apps/
+	web/
+		prisma/
+			schema.prisma
+		src/
+			routes/
+			controllers/
+			services/
+			queues/
+			lib/
+			middleware/
+			prisma/
+			server.ts
 
-**Use Lovable**
+	worker/
+		src/
+			workers/
+			services/
+			lib/
+			processors/
+			index.ts
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+packages/
+	shared/
+		src/
+			types/
+			constants/
+			utils/
 
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+frontend/
+	src/
 ```
 
-**Edit a file directly in GitHub**
+## Core Behavior
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+- Admin manages Blitz API keys and user-to-key assignments.
+- Each API key capacity defaults to `20` users and `5 req/sec`.
+- Auto-assignment picks least-loaded active key.
+- Users never provide their own provider keys.
+- Upload and pasted-input endpoints create chunked jobs (`10 rows/job` default).
+- Batch/job metadata persists in PostgreSQL via Prisma.
+- Worker executes jobs asynchronously via BullMQ.
+- Per-key Bottleneck limit enforces `5 req/sec`.
+- Fair scheduler refills queue round-robin across users.
+- Per-user active job cap prevents one user from starving others.
 
-**Use GitHub Codespaces**
+## Environment
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+Configured in `.env` and `.env.example`.
 
-## What technologies are used for this project?
+Important values included as requested:
 
-This project is built with:
+- `DATABASE_URL=postgresql://postgres:Alimola@110@localhost:5433/Enrich_it`
+- `REDIS_URL=redis://default:pFWQFbf7UGQnGvdwbjLDAFUlDSWs060C@redis-19168.c322.us-east-1-2.ec2.cloud.redislabs.com:19168`
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## Run
 
-## How can I deploy this project?
+```sh
+npm install
+npm run prisma:generate
+npm run dev         # frontend
+npm run dev:web     # web service
+npm run dev:worker  # worker service
+```
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+PowerShell helpers:
 
-## Can I connect a custom domain to my Lovable project?
+- `./scripts/start-web.ps1`
+- `./scripts/start-worker.ps1`
 
-Yes, you can!
+## Infrastructure
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+Local infra for development:
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+```sh
+docker compose up -d
+```
+
+Services:
+
+- PostgreSQL on `localhost:5433`
+- Redis on `localhost:6379`
+
+## Sample Routes
+
+- `POST /api/batches/upload`
+- `POST /api/batches/paste`
+- `GET /api/batches/:batchId/status`
+- `GET /api/runs/history`
+- `POST /api/admin/keys`
+- `PATCH /api/admin/keys/:keyId/active`
+- `POST /api/admin/assignments/manual`
+- `POST /api/admin/assignments/auto`
+
+## Sample Progress Shape
+
+```json
+{
+	"batchId": "batch_cxy123",
+	"totalRows": 250,
+	"queuedRows": 120,
+	"runningRows": 20,
+	"completedRows": 100,
+	"failedRows": 10,
+	"percentageComplete": 44,
+	"estimatedRemainingSeconds": 95
+}
+```

@@ -282,12 +282,6 @@ export default function RunDetailPage() {
                   <p className="font-medium">{format(new Date(run.completedAt), 'MMM d, yyyy HH:mm')}</p>
                 </div>
               )}
-              {run.keyLabel && (
-                <div>
-                  <p className="text-sm text-muted-foreground">Key Used</p>
-                  <p className="font-medium">{run.keyLabel}</p>
-                </div>
-              )}
               {run.error && (
                 <div className="p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
                   <AlertCircle className="h-4 w-4 inline mr-2" />

@@ -109,7 +109,7 @@ export default function SettingsAccount() {
                 <AlertDialogHeader>
                   <AlertDialogTitle>Reset app state?</AlertDialogTitle>
                   <AlertDialogDescription>
-                    This will clear all local data including saved keys and run history. This cannot be undone.
+                    This will clear all local data including your run history. This cannot be undone.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
@@ -143,7 +143,7 @@ export default function SettingsAccount() {
                 <AlertDialogHeader>
                   <AlertDialogTitle>Delete your account?</AlertDialogTitle>
                   <AlertDialogDescription>
-                    This action cannot be undone. All your data, keys, and run history will be permanently deleted.
+                    This action cannot be undone. All your data and run history will be permanently deleted.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>

@@ -1,0 +1,146 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum JobStatus {
+  QUEUED
+  QUEUED_FOR_WORKER
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
+enum BatchStatus {
+  QUEUED
+  RUNNING
+  COMPLETED
+  FAILED
+  PARTIAL
+}
+
+enum BatchSourceType {
+  CSV_UPLOAD
+  PASTED_ROWS
+}
+
+enum JobResultStatus {
+  SUCCESS
+  FAILURE
+}
+
+model User {
+  id             String             @id @default(cuid())
+  email          String             @unique
+  displayName    String?
+  role           String             @default("user")
+  isActive       Boolean            @default(true)
+  lastDequeuedAt DateTime?
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+  assignments    ApiKeyAssignment[]
+  batches        Batch[]
+  jobs           Job[]
+
+  @@map("users")
+}
+
+model ApiKey {
+  id                String             @id @default(cuid())
+  label             String
+  encryptedKey      String
+  isActive          Boolean            @default(true)
+  maxUsers          Int                @default(20)
+  requestsPerSecond Int                @default(5)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  assignments       ApiKeyAssignment[]
+  jobs              Job[]
+
+  @@map("api_keys")
+}
+
+model ApiKeyAssignment {
+  id        String   @id @default(cuid())
+  userId    String
+  apiKeyId  String
+  isManual  Boolean  @default(false)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  apiKey    ApiKey   @relation(fields: [apiKeyId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isActive])
+  @@index([apiKeyId, isActive])
+  @@map("api_key_assignments")
+}
+
+model Batch {
+  id               String         @id @default(cuid())
+  userId           String
+  sourceType       BatchSourceType
+  originalFileName String?
+  totalRows        Int
+  chunkSize        Int
+  status           BatchStatus    @default(QUEUED)
+  startedAt        DateTime?
+  completedAt      DateTime?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  user             User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  jobs             Job[]
+
+  @@index([userId, createdAt])
+  @@index([status, createdAt])
+  @@map("batches")
+}
+
+model Job {
+  id           String      @id @default(cuid())
+  batchId      String
+  userId       String
+  apiKeyId     String?
+  sequence     Int
+  rowCount     Int
+  status       JobStatus   @default(QUEUED)
+  attempts     Int         @default(0)
+  maxAttempts  Int         @default(5)
+  payload      Json
+  queuedAt     DateTime?
+  startedAt    DateTime?
+  finishedAt   DateTime?
+  errorMessage String?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  batch        Batch       @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  user         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  apiKey       ApiKey?     @relation(fields: [apiKeyId], references: [id], onDelete: SetNull)
+  results      JobResult[]
+
+  @@unique([batchId, sequence])
+  @@index([status, createdAt])
+  @@index([userId, status, createdAt])
+  @@index([apiKeyId, status, createdAt])
+  @@map("jobs")
+}
+
+model JobResult {
+  id         String          @id @default(cuid())
+  jobId       String
+  status      JobResultStatus
+  attempt     Int
+  rowIndex    Int?
+  response    Json?
+  error       String?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  job         Job             @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@index([jobId, createdAt])
+  @@map("job_results")
+}

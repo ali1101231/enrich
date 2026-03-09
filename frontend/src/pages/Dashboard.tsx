@@ -8,7 +8,6 @@ import {
   Zap,
   TrendingUp,
   ArrowRight,
-  Key,
   FolderOutput,
   Upload,
   Pin,
@@ -164,7 +163,7 @@ function StatCard({
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const { user, runs, stats, preferences, apifyKeys, blitzKeys } = useApp();
+  const { user, runs, stats, preferences } = useApp();
   
   const activeRuns = runs.filter(r => r.status === 'running' || r.status === 'paused');
   const recentRuns = runs.slice(0, 5);
@@ -173,7 +172,6 @@ export default function Dashboard() {
   const quickActions = [
     { title: 'New Run', icon: Play, href: '/runs', primary: true },
     { title: 'Upload CSV', icon: Upload, href: '/csv/csv-splitter' },
-    { title: 'Add Keys', icon: Key, href: '/settings/keys' },
     { title: 'View Outputs', icon: FolderOutput, href: '/files' },
   ];
 
@@ -222,54 +220,6 @@ export default function Dashboard() {
           icon={Zap}
         />
       </div>
-
-      {/* Keys Health */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base font-semibold">Keys Health</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-wrap gap-3">
-            <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-muted/60 border border-border">
-              <span className={cn(
-                'status-dot',
-                apifyKeys.filter(k => k.enabled && k.status === 'active').length > 0
-                  ? 'status-online'
-                  : 'status-error'
-              )} />
-              <div>
-                <p className="font-medium text-sm">Apify Keys</p>
-                <p className="text-xs text-muted-foreground">
-                  {apifyKeys.filter(k => k.enabled && k.status === 'active').length} active
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-muted/60 border border-border">
-              <span className={cn(
-                'status-dot',
-                blitzKeys.some(k => k.enabled && k.status === 'active')
-                  ? 'status-online'
-                  : 'status-error'
-              )} />
-              <div>
-                <p className="font-medium text-sm">Blitz Key</p>
-                <p className="text-xs text-muted-foreground">
-                  {blitzKeys.some(k => k.enabled && k.status === 'active') ? 'Valid' : 'Not configured'}
-                </p>
-              </div>
-            </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-primary hover:text-primary"
-              onClick={() => navigate('/settings/keys')}
-            >
-              Manage Keys
-              <ArrowRight className="h-3.5 w-3.5 ml-1" />
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
 
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Active & Recent Runs */}

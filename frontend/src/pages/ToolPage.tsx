@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Upload, ChevronRight, Play, AlertCircle, CheckCircle2, Info, Loader2 } from 'lucide-react';
+import { Upload, ChevronRight, Play, CheckCircle2, Loader2 } from 'lucide-react';
 import { cn, autoDetectColumns } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -20,7 +20,7 @@ export default function ToolPage() {
   const { toolId } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { apifyKeys, blitzKeys, createRun } = useApp();
+  const { createRun } = useApp();
 
   const tool = getToolById(toolId || '');
   const [step, setStep] = useState<Step>('upload');
@@ -29,12 +29,6 @@ export default function ToolPage() {
   const [rows, setRows] = useState<Record<string, string>[]>([]);
   const [mapping, setMapping] = useState<Record<string, string>>({});
   const [isRunning, setIsRunning] = useState(false);
-
-  const hasKeys = tool?.provider === 'apify' 
-    ? apifyKeys.some(k => k.enabled && k.status === 'active')
-    : tool?.provider === 'blitz'
-    ? blitzKeys.some(k => k.enabled && k.status === 'active')
-    : true;
 
   const handleFileDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -90,21 +84,6 @@ export default function ToolPage() {
       <div className="p-8 text-center">
         <h2 className="text-2xl font-bold">Tool not found</h2>
         <Button variant="link" onClick={() => navigate('/dashboard')}>Go to Dashboard</Button>
-      </div>
-    );
-  }
-
-  if (!hasKeys && tool.provider !== 'csv') {
-    return (
-      <div className="p-6 lg:p-8 animate-fade-in">
-        <Card className="max-w-lg mx-auto">
-          <CardContent className="p-8 text-center">
-            <AlertCircle className="h-12 w-12 mx-auto text-warning mb-4" />
-            <h2 className="text-xl font-bold">No {tool.provider} keys configured</h2>
-            <p className="text-muted-foreground mt-2 mb-4">Add your API keys to use this tool</p>
-            <Button onClick={() => navigate('/settings/keys')}>Add Keys</Button>
-          </CardContent>
-        </Card>
       </div>
     );
   }
@@ -229,7 +208,7 @@ export default function ToolPage() {
               <div className="p-4 rounded-lg bg-muted/50 space-y-2">
                 <div className="flex justify-between"><span className="text-muted-foreground">File:</span><span className="font-medium">{file?.name}</span></div>
                 <div className="flex justify-between"><span className="text-muted-foreground">Rows:</span><span className="font-medium">{rows.length}+</span></div>
-                <div className="flex justify-between"><span className="text-muted-foreground">Keys:</span><span className="font-medium">Auto-selected from Settings</span></div>
+                <div className="flex justify-between"><span className="text-muted-foreground">Mode:</span><span className="font-medium">Standard</span></div>
               </div>
               <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={() => setStep('map')}>Back</Button>
