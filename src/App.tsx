@@ -41,9 +41,7 @@ const App = () => (
               <Route path="files" element={<Files />} />
               
               {/* Tools */}
-              <Route path="apify/:toolId" element={<ToolPage />} />
-              <Route path="blitz/:toolId" element={<ToolPage />} />
-              <Route path="csv/:toolId" element={<ToolPage />} />
+              <Route path="tools/:toolId" element={<ToolPage />} />
               
               {/* Settings */}
               <Route path="settings" element={<SettingsLayout />}>
