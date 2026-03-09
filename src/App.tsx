@@ -17,6 +17,13 @@ import ToolPage from "@/pages/ToolPage";
 import Login from "@/pages/Login";
 import NotFound from "./pages/NotFound";
 
+// Admin Pages
+import AdminLayout from "@/pages/admin/AdminLayout";
+import AdminDashboard from "@/pages/admin/AdminDashboard";
+import AdminUsers from "@/pages/admin/AdminUsers";
+import AdminKeys from "@/pages/admin/AdminKeys";
+import AdminActivity from "@/pages/admin/AdminActivity";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -50,6 +57,14 @@ const App = () => (
                 <Route path="account" element={<SettingsAccount />} />
                 <Route path="preferences" element={<SettingsPreferences />} />
               </Route>
+            </Route>
+
+            {/* Admin Portal */}
+            <Route path="/admin" element={<AdminLayout />}>
+              <Route index element={<AdminDashboard />} />
+              <Route path="users" element={<AdminUsers />} />
+              <Route path="keys" element={<AdminKeys />} />
+              <Route path="activity" element={<AdminActivity />} />
             </Route>
             
             <Route path="*" element={<NotFound />} />
