@@ -13,6 +13,7 @@ import {
   Users,
   Globe,
   Linkedin,
+  CreditCard,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -40,14 +41,15 @@ const tools: NavItem[] = [
 
 const bottomNavItems: NavItem[] = [
   { title: 'Files', href: '/files', icon: FolderOutput },
-  { title: 'Settings', href: '/settings/keys', icon: Settings },
+  { title: 'Pricing', href: '/pricing', icon: CreditCard },
+  { title: 'Settings', href: '/settings/account', icon: Settings },
 ];
 
 export function AppSidebar() {
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
 
-  const isActive = (href: string) => location.pathname === href;
+  const isActive = (href: string) => location.pathname === href || location.pathname.startsWith(href + '/');
 
   const NavLink = ({ item, showText = true }: { item: NavItem; showText?: boolean }) => (
     <Link
@@ -55,8 +57,8 @@ export function AppSidebar() {
       className={cn(
         'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200',
         'hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
-        isActive(item.href) 
-          ? 'bg-primary/10 text-primary' 
+        isActive(item.href)
+          ? 'bg-primary/10 text-primary'
           : 'text-sidebar-foreground'
       )}
     >
