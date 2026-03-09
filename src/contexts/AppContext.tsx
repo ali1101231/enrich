@@ -65,7 +65,7 @@ interface AppContextType extends AppState {
 }
 
 const defaultPreferences: UserPreferences = {
-  theme: 'dark',
+  theme: 'light',
   notifications: {
     runCompleted: true,
     runFailed: true,
