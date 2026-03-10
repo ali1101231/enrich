@@ -58,7 +58,7 @@ export class FairSchedulerService {
           where: {
             userId: user.id,
             status: {
-              in: [JobStatus.QUEUED_FOR_WORKER, JobStatus.RUNNING],
+              in: [JobStatus.DISPATCHED, JobStatus.RUNNING],
             },
           },
         });
@@ -112,7 +112,7 @@ export class FairSchedulerService {
             status: JobStatus.QUEUED,
           },
           data: {
-            status: JobStatus.QUEUED_FOR_WORKER,
+            status: JobStatus.DISPATCHED,
             apiKeyId: assignment.apiKeyId,
             queuedAt: new Date(),
           },

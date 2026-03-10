@@ -31,7 +31,7 @@ export class BatchProgressService {
     };
 
     for (const job of batch.jobs) {
-      if (job.status === JobStatus.QUEUED || job.status === JobStatus.QUEUED_FOR_WORKER) {
+      if (job.status === JobStatus.QUEUED || job.status === JobStatus.DISPATCHED) {
         totals.queuedRows += job.rowCount;
       } else if (job.status === JobStatus.RUNNING) {
         totals.runningRows += job.rowCount;
@@ -97,7 +97,7 @@ export class BatchProgressService {
       let queuedRows = 0;
 
       for (const job of batch.jobs) {
-        if (job.status === JobStatus.QUEUED || job.status === JobStatus.QUEUED_FOR_WORKER) {
+        if (job.status === JobStatus.QUEUED || job.status === JobStatus.DISPATCHED) {
           queuedRows += job.rowCount;
         } else if (job.status === JobStatus.RUNNING) {
           runningRows += job.rowCount;

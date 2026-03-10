@@ -4,12 +4,14 @@ import { logInfo } from "../lib/logger.js";
 import { prisma } from "../prisma/client.js";
 import { ApiKeyAssignmentService } from "./api-key-assignment.service.js";
 import { JobChunkingService } from "./job-chunking.service.js";
+import { QueueProducerService } from "./queue-producer.service.js";
 import type { ParsedRow } from "./csv-parser.service.js";
 
 export class BatchCreationService {
   constructor(
     private readonly keyAssignmentService = new ApiKeyAssignmentService(),
     private readonly chunkingService = new JobChunkingService(),
+    private readonly queueProducer = new QueueProducerService(),
   ) {}
 
   async createBatch(input: {
@@ -82,6 +84,12 @@ export class BatchCreationService {
       totalRows: input.rows.length,
       totalJobs: chunks.length,
       sourceType: input.sourceType,
+    });
+
+    // Enqueue jobs into BullMQ for immediate processing.
+    // Fire-and-forget: the scheduler serves as a safety net for any that fail to enqueue.
+    this.queueProducer.enqueueBatchJobs(result.batchId).catch(() => {
+      // Errors are logged inside the producer; jobs remain QUEUED for the scheduler.
     });
 
     return {
