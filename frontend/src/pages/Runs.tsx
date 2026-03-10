@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import {
   Play,
   Pause,
@@ -13,6 +14,15 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 20 },
+  visible: (delay: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.5, delay, ease: [0.25, 0.1, 0.25, 1] as const },
+  }),
+};
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
@@ -117,8 +127,8 @@ export default function RunsPage() {
   };
 
   return (
-    <div className="p-6 lg:p-8 space-y-6 animate-fade-in">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div className="p-6 lg:p-8 space-y-6">
+      <motion.div variants={fadeUp} initial="hidden" animate="visible" custom={0} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Runs</h1>
           <p className="text-muted-foreground text-sm">Monitor and manage your job runs</p>
@@ -130,9 +140,9 @@ export default function RunsPage() {
           <Play className="h-4 w-4 mr-2" />
           New Run
         </Button>
-      </div>
+      </motion.div>
 
-      <div className="flex items-center gap-4">
+      <motion.div variants={fadeUp} initial="hidden" animate="visible" custom={0.1} className="flex items-center gap-4">
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
           <Input
@@ -142,8 +152,9 @@ export default function RunsPage() {
             className="pl-9 h-9"
           />
         </div>
-      </div>
+      </motion.div>
 
+      <motion.div variants={fadeUp} initial="hidden" animate="visible" custom={0.2}>
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="h-9">
           <TabsTrigger value="queue" className="gap-2 text-sm">
@@ -211,6 +222,7 @@ export default function RunsPage() {
           </Card>
         </TabsContent>
       </Tabs>
+      </motion.div>
     </div>
   );
 }

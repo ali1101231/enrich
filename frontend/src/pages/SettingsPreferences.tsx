@@ -5,6 +5,16 @@ import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Sun, Moon, Monitor, Bell } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { motion } from 'framer-motion';
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 20 },
+  visible: (delay: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.5, delay, ease: [0.25, 0.1, 0.25, 1] as const },
+  }),
+};
 
 export default function SettingsPreferences() {
   const { preferences, updatePreferences } = useApp();
@@ -18,6 +28,7 @@ export default function SettingsPreferences() {
   return (
     <div className="space-y-8">
       {/* Theme */}
+      <motion.div variants={fadeUp} initial="hidden" animate="visible" custom={0}>
       <Card>
         <CardHeader>
           <CardTitle>Appearance</CardTitle>
@@ -59,8 +70,10 @@ export default function SettingsPreferences() {
           </RadioGroup>
         </CardContent>
       </Card>
+      </motion.div>
 
       {/* Notifications */}
+      <motion.div variants={fadeUp} initial="hidden" animate="visible" custom={0.1}>
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -104,6 +117,7 @@ export default function SettingsPreferences() {
           </div>
         </CardContent>
       </Card>
+      </motion.div>
     </div>
   );
 }
