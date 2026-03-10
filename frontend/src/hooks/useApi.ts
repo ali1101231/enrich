@@ -12,10 +12,12 @@ import {
   type AdminUserItem,
   type AdminKeyItem,
   type AdminBatchItem,
+  type AdminUserDetail,
   type AssignmentItem,
   type RowResult,
   type ResultCounts,
   type ExportItem,
+  type AdminExportItem,
 } from "@/lib/api";
 
 // ---- Auth ----
@@ -148,6 +150,28 @@ export function useUserExports() {
   });
 }
 
+export function useDeleteExport() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (exportId: string) => batchApi.deleteExport(exportId),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["user-exports"] });
+      qc.invalidateQueries({ queryKey: ["batch-exports"] });
+    },
+  });
+}
+
+export function useBulkDeleteExports() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (exportIds: string[]) => batchApi.bulkDeleteExports(exportIds),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["user-exports"] });
+      qc.invalidateQueries({ queryKey: ["batch-exports"] });
+    },
+  });
+}
+
 // ---- Dashboard Stats ----
 export function useDashboardStats() {
   return useQuery<DashboardStats>({
@@ -180,6 +204,37 @@ export function useAdminUsers() {
       return res.items;
     },
     staleTime: 30_000,
+  });
+}
+
+export function useAdminUserDetail(userId: string | undefined) {
+  return useQuery<AdminUserDetail>({
+    queryKey: ["admin", "user-detail", userId],
+    queryFn: () => adminApi.getUserDetail(userId!),
+    enabled: !!userId,
+    staleTime: 15_000,
+  });
+}
+
+export function useAdminUpdateUserRole() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ userId, role }: { userId: string; role: string }) =>
+      adminApi.updateUserRole(userId, role),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin", "users"] });
+      qc.invalidateQueries({ queryKey: ["admin", "user-detail"] });
+    },
+  });
+}
+
+export function useAdminDeleteUser() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (userId: string) => adminApi.deleteUser(userId),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin", "users"] });
+    },
   });
 }
 
@@ -242,6 +297,7 @@ export function useAdminManualAssign() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["admin", "assignments"] });
       qc.invalidateQueries({ queryKey: ["admin", "keys"] });
+      qc.invalidateQueries({ queryKey: ["admin", "user-detail"] });
     },
   });
 }
@@ -253,6 +309,7 @@ export function useAdminAutoAssign() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["admin", "assignments"] });
       qc.invalidateQueries({ queryKey: ["admin", "keys"] });
+      qc.invalidateQueries({ queryKey: ["admin", "user-detail"] });
     },
   });
 }
@@ -264,6 +321,7 @@ export function useAdminDeactivateAssignment() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["admin", "assignments"] });
       qc.invalidateQueries({ queryKey: ["admin", "keys"] });
+      qc.invalidateQueries({ queryKey: ["admin", "user-detail"] });
     },
   });
 }
@@ -275,6 +333,7 @@ export function useAdminDeactivateUserAssignments() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["admin", "assignments"] });
       qc.invalidateQueries({ queryKey: ["admin", "keys"] });
+      qc.invalidateQueries({ queryKey: ["admin", "user-detail"] });
     },
   });
 }
@@ -367,6 +426,41 @@ export function useAdminExportCsv() {
     mutationFn: (batchId: string) => adminApi.exportBatchCsv(batchId),
     onSuccess: (_data, batchId) => {
       qc.invalidateQueries({ queryKey: ["admin", "activity", "batch-exports", batchId] });
+      qc.invalidateQueries({ queryKey: ["admin", "all-exports"] });
+    },
+  });
+}
+
+export function useAdminAllExports() {
+  return useQuery<AdminExportItem[]>({
+    queryKey: ["admin", "all-exports"],
+    queryFn: async () => {
+      const res = await adminApi.listAllExports();
+      return res.items;
+    },
+    staleTime: 10_000,
+    refetchInterval: 15_000,
+  });
+}
+
+export function useAdminDeleteExport() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (exportId: string) => adminApi.deleteExport(exportId),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin", "all-exports"] });
+      qc.invalidateQueries({ queryKey: ["admin", "activity", "batch-exports"] });
+    },
+  });
+}
+
+export function useAdminBulkDeleteExports() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (exportIds: string[]) => adminApi.bulkDeleteExports(exportIds),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin", "all-exports"] });
+      qc.invalidateQueries({ queryKey: ["admin", "activity", "batch-exports"] });
     },
   });
 }

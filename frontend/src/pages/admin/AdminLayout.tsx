@@ -16,6 +16,7 @@ import {
   ChevronDown,
   Sun,
   Moon,
+  FileText,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -43,6 +44,7 @@ const mainNavItems: NavItem[] = [
   { title: 'Users', href: '/admin/users', icon: Users },
   { title: 'API Keys', href: '/admin/keys', icon: Key },
   { title: 'Activity', href: '/admin/activity', icon: Activity },
+  { title: 'Files', href: '/admin/files', icon: FileText },
 ];
 
 const bottomNavItems: NavItem[] = [

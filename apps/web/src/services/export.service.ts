@@ -215,6 +215,84 @@ export class ExportService {
     });
   }
 
+  /** Admin: list ALL exports across all users. */
+  async adminListAllExports() {
+    return prisma.batchExport.findMany({
+      orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        batchId: true,
+        fileName: true,
+        rowCount: true,
+        fileSize: true,
+        createdAt: true,
+        user: {
+          select: {
+            id: true,
+            email: true,
+            displayName: true,
+          },
+        },
+      },
+    });
+  }
+
+  /** Delete an export (user must own it). */
+  async deleteExport(exportId: string, userId: string): Promise<void> {
+    const exp = await prisma.batchExport.findUnique({
+      where: { id: exportId },
+    });
+    if (!exp) throw new Error("Export not found");
+    if (exp.userId !== userId) throw new Error("Access denied");
+
+    // Delete from R2 first, then DB
+    await this.storage.deleteObject(exp.r2Key);
+    await prisma.batchExport.delete({ where: { id: exportId } });
+    logInfo("Export deleted", { exportId, userId });
+  }
+
+  /** Admin: delete any export. */
+  async adminDeleteExport(exportId: string): Promise<void> {
+    const exp = await prisma.batchExport.findUnique({
+      where: { id: exportId },
+    });
+    if (!exp) throw new Error("Export not found");
+
+    await this.storage.deleteObject(exp.r2Key);
+    await prisma.batchExport.delete({ where: { id: exportId } });
+    logInfo("Admin deleted export", { exportId });
+  }
+
+  /** Bulk-delete exports (user must own all). */
+  async bulkDeleteExports(exportIds: string[], userId: string): Promise<number> {
+    const exports = await prisma.batchExport.findMany({
+      where: { id: { in: exportIds }, userId },
+    });
+    for (const exp of exports) {
+      await this.storage.deleteObject(exp.r2Key);
+    }
+    const { count } = await prisma.batchExport.deleteMany({
+      where: { id: { in: exports.map(e => e.id) } },
+    });
+    logInfo("Bulk export delete", { userId, requested: exportIds.length, deleted: count });
+    return count;
+  }
+
+  /** Admin: bulk-delete any exports. */
+  async adminBulkDeleteExports(exportIds: string[]): Promise<number> {
+    const exports = await prisma.batchExport.findMany({
+      where: { id: { in: exportIds } },
+    });
+    for (const exp of exports) {
+      await this.storage.deleteObject(exp.r2Key);
+    }
+    const { count } = await prisma.batchExport.deleteMany({
+      where: { id: { in: exports.map(e => e.id) } },
+    });
+    logInfo("Admin bulk export delete", { requested: exportIds.length, deleted: count });
+    return count;
+  }
+
   async downloadExport(
     exportId: string,
     userId: string,
