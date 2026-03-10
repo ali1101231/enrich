@@ -1,7 +1,7 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Upload, ChevronRight, Play, CheckCircle2, Loader2 } from 'lucide-react';
-import { cn, autoDetectColumns } from '@/lib/utils';
+import { Upload, ChevronRight, Play, CheckCircle2, Loader2, FileText, Type } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -9,12 +9,38 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+import { Textarea } from '@/components/ui/textarea';
 import { getToolById } from '@/lib/mockData';
 import { useToast } from '@/hooks/use-toast';
 import { batchApi, ApiError } from '@/lib/api';
 import { useQueryClient } from '@tanstack/react-query';
+import type { ToolField } from '@/types';
 
-type Step = 'upload' | 'map' | 'configure' | 'run';
+type Step = 'input' | 'map' | 'configure' | 'run';
+type InputMode = 'csv' | 'paste';
+
+/** Derive placeholder text for bulk paste based on the tool's primary required field. */
+function getPastePlaceholder(field: ToolField): string {
+  switch (field.type) {
+    case 'linkedin': return 'https://www.linkedin.com/in/john-doe\nhttps://www.linkedin.com/in/jane-smith\nhttps://www.linkedin.com/in/bob-jones';
+    case 'email':    return 'john@example.com\njane@company.io\nbob@startup.co';
+    case 'phone':    return '+14155551234\n+442071234567\n+33612345678';
+    case 'domain':   return 'example.com\ncompany.io\nstartup.co';
+    case 'url':      return 'https://www.linkedin.com/company/example\nhttps://www.linkedin.com/company/acme';
+    default:         return 'Value 1\nValue 2\nValue 3';
+  }
+}
+
+function getPasteLabel(field: ToolField): string {
+  switch (field.type) {
+    case 'linkedin': return 'LinkedIn URLs';
+    case 'email':    return 'Email addresses';
+    case 'phone':    return 'Phone numbers';
+    case 'domain':   return 'Domains';
+    case 'url':      return 'URLs';
+    default:         return 'Values';
+  }
+}
 
 export default function ToolPage() {
   const { toolId } = useParams();
@@ -23,12 +49,30 @@ export default function ToolPage() {
   const queryClient = useQueryClient();
 
   const tool = getToolById(toolId || '');
-  const [step, setStep] = useState<Step>('upload');
+  const [step, setStep] = useState<Step>('input');
+  const [inputMode, setInputMode] = useState<InputMode>('csv');
   const [file, setFile] = useState<File | null>(null);
   const [headers, setHeaders] = useState<string[]>([]);
   const [rows, setRows] = useState<Record<string, string>[]>([]);
   const [mapping, setMapping] = useState<Record<string, string>>({});
+  const [pasteText, setPasteText] = useState('');
   const [isRunning, setIsRunning] = useState(false);
+
+  // Reset all input state when switching tools
+  useEffect(() => {
+    setStep('input');
+    setInputMode('csv');
+    setFile(null);
+    setHeaders([]);
+    setRows([]);
+    setMapping({});
+    setPasteText('');
+    setIsRunning(false);
+  }, [toolId]);
+
+  // The primary required field determines what bulk paste accepts
+  const pasteField = tool?.requiredFields[0];
+  const canPaste = !!pasteField;
 
   const handleFileDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -58,27 +102,66 @@ export default function ToolPage() {
       });
       setHeaders(h);
       setRows(r);
-      const detected = autoDetectColumns(h, r);
+
+      // Auto-detect: for each required field, find the best matching CSV column
       const initialMapping: Record<string, string> = {};
-      Object.entries(detected).forEach(([col, { field }]) => {
-        initialMapping[col] = field;
-      });
+      const allFields = [...(tool?.requiredFields || []), ...(tool?.optionalFields || [])];
+      for (const field of allFields) {
+        const allAliases = [field.id, ...field.aliases];
+        const match = h.find(header => {
+          const headerLower = header.toLowerCase().replace(/[^a-z0-9]/g, '_');
+          return allAliases.some(alias => headerLower.includes(alias.toLowerCase()));
+        });
+        if (match) initialMapping[field.id] = match;
+      }
       setMapping(initialMapping);
       setStep('map');
     };
     reader.readAsText(f);
   };
 
+  /** Parse pasted text into lines and advance to configure step. */
+  const handlePasteSubmit = () => {
+    if (!pasteField) return;
+    const lines = pasteText
+      .split('\n')
+      .map(l => l.trim())
+      .filter(l => l.length > 0);
+    if (lines.length === 0) {
+      toast({ title: 'No input', description: 'Please paste at least one value', variant: 'destructive' });
+      return;
+    }
+    // Build preview rows using the primary field
+    setHeaders([pasteField.id]);
+    setRows(lines.slice(0, 20).map(l => ({ [pasteField.id]: l })));
+    setMapping({ [pasteField.id]: pasteField.id });
+    setFile(null); // ensure CSV mode is cleared
+    setStep('configure');
+  };
+
   const handleRun = async () => {
-    if (!file || !tool) return;
+    if (!tool) return;
     setIsRunning(true);
     try {
-      const batch = await batchApi.uploadCsv(file, toolId);
+      let batch;
+      if (inputMode === 'paste' && pasteField) {
+        // Build CSV string: header + one value per line
+        const lines = pasteText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+        const csvString = [pasteField.id, ...lines].join('\n');
+        batch = await batchApi.pasteRows(csvString, toolId);
+      } else if (file) {
+        batch = await batchApi.uploadCsv(file, toolId);
+      } else {
+        toast({ title: 'Error', description: 'No input provided', variant: 'destructive' });
+        setIsRunning(false);
+        return;
+      }
       queryClient.invalidateQueries({ queryKey: ['batches'] });
-      toast({ title: 'Run started', description: `Processing ${file.name}` });
+      const desc = inputMode === 'paste' ? `Processing ${rows.length}+ pasted rows` : `Processing ${file?.name}`;
+      toast({ title: 'Run started', description: desc });
       navigate(`/runs/${batch.batchId}`);
     } catch (err) {
-      const msg = err instanceof ApiError ? err.message : 'Upload failed';
+      const msg = err instanceof ApiError ? err.message : 'Failed to start run';
       toast({ title: 'Error', description: msg, variant: 'destructive' });
       setIsRunning(false);
     }
@@ -93,12 +176,19 @@ export default function ToolPage() {
     );
   }
 
-  const steps: { key: Step; label: string }[] = [
-    { key: 'upload', label: 'Upload' },
-    { key: 'map', label: 'Map Columns' },
-    { key: 'configure', label: 'Configure' },
-    { key: 'run', label: 'Run' },
-  ];
+  // Steps differ: paste mode skips column mapping
+  const steps: { key: Step; label: string }[] = inputMode === 'paste'
+    ? [
+        { key: 'input', label: 'Input' },
+        { key: 'configure', label: 'Review' },
+        { key: 'run', label: 'Run' },
+      ]
+    : [
+        { key: 'input', label: 'Upload' },
+        { key: 'map', label: 'Map Columns' },
+        { key: 'configure', label: 'Configure' },
+        { key: 'run', label: 'Run' },
+      ];
   const stepIndex = steps.findIndex(s => s.key === step);
 
   return (
@@ -137,20 +227,77 @@ export default function ToolPage() {
         </div>
 
         {/* Step Content */}
-        {step === 'upload' && (
+        {step === 'input' && (
           <Card>
-            <CardContent className="p-6">
-              <div
-                className="border-2 border-dashed rounded-xl p-12 text-center cursor-pointer hover:border-primary/50 transition-colors"
-                onDragOver={(e) => e.preventDefault()}
-                onDrop={handleFileDrop}
-                onClick={() => document.getElementById('file-input')?.click()}
-              >
-                <Upload className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                <h3 className="font-semibold text-lg">Drop your CSV file here</h3>
-                <p className="text-muted-foreground mt-1">or click to browse</p>
-                <input id="file-input" type="file" accept=".csv" className="hidden" onChange={handleFileSelect} />
-              </div>
+            <CardContent className="p-6 space-y-6">
+              {/* Input Mode Toggle */}
+              {canPaste && (
+                <div className="flex gap-2 p-1 bg-muted rounded-lg w-fit">
+                  <button
+                    type="button"
+                    className={cn(
+                      'flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors',
+                      inputMode === 'csv' ? 'bg-background shadow-sm' : 'text-muted-foreground hover:text-foreground'
+                    )}
+                    onClick={() => { setInputMode('csv'); setStep('input'); }}
+                  >
+                    <FileText className="h-4 w-4" />
+                    Upload CSV
+                  </button>
+                  <button
+                    type="button"
+                    className={cn(
+                      'flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors',
+                      inputMode === 'paste' ? 'bg-background shadow-sm' : 'text-muted-foreground hover:text-foreground'
+                    )}
+                    onClick={() => { setInputMode('paste'); setStep('input'); }}
+                  >
+                    <Type className="h-4 w-4" />
+                    Bulk Paste
+                  </button>
+                </div>
+              )}
+
+              {/* CSV Upload */}
+              {inputMode === 'csv' && (
+                <div
+                  className="border-2 border-dashed rounded-xl p-12 text-center cursor-pointer hover:border-primary/50 transition-colors"
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={handleFileDrop}
+                  onClick={() => document.getElementById('file-input')?.click()}
+                >
+                  <Upload className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                  <h3 className="font-semibold text-lg">Drop your CSV file here</h3>
+                  <p className="text-muted-foreground mt-1">or click to browse</p>
+                  <input id="file-input" type="file" accept=".csv" className="hidden" onChange={handleFileSelect} />
+                </div>
+              )}
+
+              {/* Bulk Paste */}
+              {inputMode === 'paste' && pasteField && (
+                <div className="space-y-3">
+                  <div>
+                    <Label className="text-base font-medium">
+                      Paste {getPasteLabel(pasteField)} <span className="text-muted-foreground font-normal">(one per line)</span>
+                    </Label>
+                  </div>
+                  <Textarea
+                    placeholder={getPastePlaceholder(pasteField)}
+                    value={pasteText}
+                    onChange={(e) => setPasteText(e.target.value)}
+                    rows={10}
+                    className="font-mono text-sm"
+                  />
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm text-muted-foreground">
+                      {pasteText.split('\n').filter(l => l.trim()).length} {getPasteLabel(pasteField).toLowerCase()} entered
+                    </p>
+                    <Button onClick={handlePasteSubmit} disabled={!pasteText.trim()}>
+                      Continue
+                    </Button>
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
         )}
@@ -159,45 +306,79 @@ export default function ToolPage() {
           <Card>
             <CardHeader>
               <CardTitle>Column Mapping</CardTitle>
-              <CardDescription>Map your CSV columns to the required fields</CardDescription>
+              <CardDescription>Select which column from your CSV contains each required field</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
+              {/* Data preview */}
               <ScrollArea className="w-full">
                 <Table>
                   <TableHeader>
                     <TableRow>{headers.map(h => <TableHead key={h}>{h}</TableHead>)}</TableRow>
                   </TableHeader>
                   <TableBody>
-                    {rows.slice(0, 5).map((row, i) => (
+                    {rows.slice(0, 3).map((row, i) => (
                       <TableRow key={i}>{headers.map(h => <TableCell key={h} className="truncate max-w-32">{row[h]}</TableCell>)}</TableRow>
                     ))}
                   </TableBody>
                 </Table>
                 <ScrollBar orientation="horizontal" />
               </ScrollArea>
-              <div className="grid gap-4 sm:grid-cols-2">
-                {headers.map(header => (
-                  <div key={header} className="flex items-center gap-3">
-                    <Label className="w-32 truncate shrink-0">{header}</Label>
-                    <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
-                    <Select value={mapping[header] || ''} onValueChange={(v) => setMapping(prev => ({ ...prev, [header]: v }))}>
-                      <SelectTrigger><SelectValue placeholder="Select field" /></SelectTrigger>
+
+              {/* One selector per required field */}
+              <div className="space-y-4">
+                {tool.requiredFields.map(field => (
+                  <div key={field.id} className="space-y-1.5">
+                    <Label className="text-sm font-medium text-primary">{field.name}</Label>
+                    <Select
+                      value={mapping[field.id] || ''}
+                      onValueChange={(col) => setMapping(prev => ({ ...prev, [field.id]: col }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder={`Select column for ${field.name}`} />
+                      </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="email">Email</SelectItem>
-                        <SelectItem value="linkedin_url">LinkedIn URL</SelectItem>
-                        <SelectItem value="phone">Phone</SelectItem>
-                        <SelectItem value="name">Name</SelectItem>
-                        <SelectItem value="company">Company</SelectItem>
-                        <SelectItem value="domain">Domain</SelectItem>
-                        <SelectItem value="ignore">Ignore</SelectItem>
+                        {headers.map(h => (
+                          <SelectItem key={h} value={h}>{h}</SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
                 ))}
+
+                {tool.optionalFields.length > 0 && (
+                  <>
+                    <div className="text-xs text-muted-foreground uppercase tracking-wider pt-2">Optional</div>
+                    {tool.optionalFields.map(field => (
+                      <div key={field.id} className="space-y-1.5">
+                        <Label className="text-sm font-medium">{field.name}</Label>
+                        <Select
+                          value={mapping[field.id] || 'none'}
+                          onValueChange={(col) => setMapping(prev => ({ ...prev, [field.id]: col === 'none' ? '' : col }))}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder={`Select column for ${field.name}`} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="none">— None —</SelectItem>
+                            {headers.map(h => (
+                              <SelectItem key={h} value={h}>{h}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    ))}
+                  </>
+                )}
               </div>
+
               <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={() => setStep('upload')}>Back</Button>
-                <Button onClick={() => setStep('configure')}>Continue</Button>
+                <Button variant="outline" onClick={() => setStep('input')}>Back</Button>
+                <Button
+                  onClick={() => setStep('configure')}
+                  disabled={tool.requiredFields.some(f => !mapping[f.id])}
+                >
+                  Continue
+                </Button>
               </div>
             </CardContent>
           </Card>
@@ -211,12 +392,21 @@ export default function ToolPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="p-4 rounded-lg bg-muted/50 space-y-2">
-                <div className="flex justify-between"><span className="text-muted-foreground">File:</span><span className="font-medium">{file?.name}</span></div>
-                <div className="flex justify-between"><span className="text-muted-foreground">Rows:</span><span className="font-medium">{rows.length}+</span></div>
-                <div className="flex justify-between"><span className="text-muted-foreground">Mode:</span><span className="font-medium">Standard</span></div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Input:</span>
+                  <span className="font-medium">{inputMode === 'paste' ? 'Bulk paste' : file?.name}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Rows:</span>
+                  <span className="font-medium">{rows.length}{inputMode === 'csv' ? '+' : ''}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Mode:</span>
+                  <span className="font-medium">{inputMode === 'paste' ? `Bulk ${getPasteLabel(pasteField!)}` : 'CSV Upload'}</span>
+                </div>
               </div>
               <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={() => setStep('map')}>Back</Button>
+                <Button variant="outline" onClick={() => setStep(inputMode === 'paste' ? 'input' : 'map')}>Back</Button>
                 <Button className="gradient-koldify text-white" onClick={handleRun} disabled={isRunning}>
                   {isRunning ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Play className="h-4 w-4 mr-2" />}
                   Start Run
