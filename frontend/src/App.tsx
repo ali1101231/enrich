@@ -25,6 +25,9 @@ import AdminUsers from "@/pages/admin/AdminUsers";
 import AdminKeys from "@/pages/admin/AdminKeys";
 import AdminActivity from "@/pages/admin/AdminActivity";
 import AdminRunDetail from "@/pages/admin/AdminRunDetail";
+import AdminUserDetail from "@/pages/admin/AdminUserDetail";
+import AdminSettings from "@/pages/admin/AdminSettings";
+import AdminFiles from "@/pages/admin/AdminFiles";
 
 const queryClient = new QueryClient();
 
@@ -65,9 +68,12 @@ const App = () => (
             <Route path="/admin" element={<RequireAdmin><AdminLayout /></RequireAdmin>}>
               <Route index element={<AdminDashboard />} />
               <Route path="users" element={<AdminUsers />} />
+              <Route path="users/:userId" element={<AdminUserDetail />} />
               <Route path="keys" element={<AdminKeys />} />
               <Route path="activity" element={<AdminActivity />} />
               <Route path="activity/:batchId" element={<AdminRunDetail />} />
+              <Route path="files" element={<AdminFiles />} />
+              <Route path="settings" element={<AdminSettings />} />
             </Route>
             
             <Route path="*" element={<NotFound />} />

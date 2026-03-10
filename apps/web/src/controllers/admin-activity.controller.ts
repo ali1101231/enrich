@@ -1,7 +1,12 @@
 import type { Request, Response } from "express";
+import { z } from "zod";
 import { BatchProgressService } from "../services/batch-progress.service.js";
 import { BatchResultsService } from "../services/batch-results.service.js";
 import { ExportService } from "../services/export.service.js";
+
+const bulkDeleteSchema = z.object({
+  exportIds: z.array(z.string()).min(1).max(100),
+});
 
 export class AdminActivityController {
   constructor(
@@ -64,5 +69,22 @@ export class AdminActivityController {
     const batchId = req.params.batchId;
     const items = await this.exportService.adminListExportsForBatch(batchId);
     res.status(200).json({ items });
+  };
+
+  listAllExports = async (_req: Request, res: Response): Promise<void> => {
+    const items = await this.exportService.adminListAllExports();
+    res.status(200).json({ items });
+  };
+
+  deleteExport = async (req: Request, res: Response): Promise<void> => {
+    const exportId = req.params.exportId;
+    await this.exportService.adminDeleteExport(exportId);
+    res.status(204).end();
+  };
+
+  bulkDeleteExports = async (req: Request, res: Response): Promise<void> => {
+    const { exportIds } = bulkDeleteSchema.parse(req.body);
+    const deleted = await this.exportService.adminBulkDeleteExports(exportIds);
+    res.status(200).json({ deleted });
   };
 }

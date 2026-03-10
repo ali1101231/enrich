@@ -1,10 +1,15 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Search,
   MoreVertical,
   Key,
   X,
   Plus,
+  Shield,
+  ShieldOff,
+  Trash2,
+  Eye,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -23,6 +28,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import {
@@ -33,11 +39,23 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { useAdmin } from '@/contexts/AdminContext';
+import { useAdminUpdateUserRole, useAdminDeleteUser } from '@/hooks/useApi';
 import { formatDistanceToNow } from 'date-fns';
 import type { AdminUserItem } from '@/lib/api';
 
 export default function AdminUsers() {
+  const navigate = useNavigate();
   const {
     users,
     keys,
@@ -47,9 +65,13 @@ export default function AdminUsers() {
     deactivateUserAssignments,
   } = useAdmin();
 
+  const updateRoleMut = useAdminUpdateUserRole();
+  const deleteUserMut = useAdminDeleteUser();
+
   const [search, setSearch] = useState('');
   const [selectedUser, setSelectedUser] = useState<AdminUserItem | null>(null);
   const [keysDialogOpen, setKeysDialogOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<AdminUserItem | null>(null);
 
   const filteredUsers = users.filter((user) => {
     const matchesSearch =
@@ -102,7 +124,7 @@ export default function AdminUsers() {
                 const userAssignments = getUserAssignments(user.id);
 
                 return (
-                  <TableRow key={user.id}>
+                  <TableRow key={user.id} className="cursor-pointer hover:bg-muted/50" onClick={() => navigate(`/admin/users/${user.id}`)}>
                     <TableCell>
                       <div>
                         <p className="font-medium">{user.displayName ?? user.email}</p>
@@ -134,13 +156,23 @@ export default function AdminUsers() {
                     <TableCell>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon">
+                          <Button variant="ghost" size="icon" onClick={(e) => e.stopPropagation()}>
                             <MoreVertical className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem
-                            onClick={() => {
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate(`/admin/users/${user.id}`);
+                            }}
+                          >
+                            <Eye className="h-4 w-4 mr-2" />
+                            View Details
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={(e) => {
+                              e.stopPropagation();
                               setSelectedUser(user);
                               setKeysDialogOpen(true);
                             }}
@@ -148,15 +180,50 @@ export default function AdminUsers() {
                             <Key className="h-4 w-4 mr-2" />
                             Manage Keys
                           </DropdownMenuItem>
+                          {user.role === "user" ? (
+                            <DropdownMenuItem
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                updateRoleMut.mutate({ userId: user.id, role: "admin" });
+                              }}
+                            >
+                              <Shield className="h-4 w-4 mr-2" />
+                              Make Admin
+                            </DropdownMenuItem>
+                          ) : (
+                            <DropdownMenuItem
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                updateRoleMut.mutate({ userId: user.id, role: "user" });
+                              }}
+                            >
+                              <ShieldOff className="h-4 w-4 mr-2" />
+                              Remove Admin
+                            </DropdownMenuItem>
+                          )}
                           {userAssignments.length > 0 && (
                             <DropdownMenuItem
-                              onClick={() => deactivateUserAssignments(user.id)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                deactivateUserAssignments(user.id);
+                              }}
                               className="text-destructive focus:text-destructive"
                             >
                               <X className="h-4 w-4 mr-2" />
                               Remove All Keys
                             </DropdownMenuItem>
                           )}
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setDeleteTarget(user);
+                            }}
+                            className="text-destructive focus:text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Delete User
+                          </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>
@@ -226,6 +293,32 @@ export default function AdminUsers() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Delete User Confirmation */}
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete user?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete <span className="font-semibold">{deleteTarget?.displayName ?? deleteTarget?.email}</span> and all their data (batches, jobs, exports). This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                if (deleteTarget) {
+                  deleteUserMut.mutate(deleteTarget.id);
+                  setDeleteTarget(null);
+                }
+              }}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

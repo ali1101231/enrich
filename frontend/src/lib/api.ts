@@ -125,9 +125,70 @@ export interface AdminBatchItem {
   createdAt: string;
 }
 
+export interface AdminUserDetail {
+  user: AdminUserItem;
+  stats: {
+    totalBatches: number;
+    completedBatches: number;
+    activeBatches: number;
+    failedBatches: number;
+    totalRowsProcessed: number;
+    totalExports: number;
+  };
+  assignments: Array<{
+    id: string;
+    apiKeyId: string;
+    isManual: boolean;
+    createdAt: string;
+    apiKey: {
+      id: string;
+      label: string;
+      isActive: boolean;
+      requestsPerSecond: number;
+    };
+  }>;
+  recentBatches: Array<{
+    id: string;
+    toolId: string | null;
+    sourceType: string;
+    originalFileName: string | null;
+    totalRows: number;
+    status: string;
+    createdAt: string;
+  }>;
+}
+
+export interface AdminExportItem {
+  id: string;
+  batchId: string;
+  fileName: string;
+  rowCount: number;
+  fileSize: number;
+  createdAt: string;
+  user: {
+    id: string;
+    email: string;
+    displayName: string | null;
+  };
+}
+
 export const adminApi = {
   listUsers() {
     return request<{ items: AdminUserItem[] }>("/admin/users");
+  },
+  getUserDetail(userId: string) {
+    return request<AdminUserDetail>(`/admin/users/${encodeURIComponent(userId)}`);
+  },
+  updateUserRole(userId: string, role: string) {
+    return request<{ message: string }>(`/admin/users/${encodeURIComponent(userId)}/role`, {
+      method: "PATCH",
+      body: JSON.stringify({ role }),
+    });
+  },
+  deleteUser(userId: string) {
+    return request<{ message: string }>(`/admin/users/${encodeURIComponent(userId)}`, {
+      method: "DELETE",
+    });
   },
   listKeys() {
     return request<{ items: AdminKeyItem[] }>("/admin/keys");
@@ -201,6 +262,20 @@ export const adminApi = {
   },
   listBatchExports(batchId: string) {
     return request<{ items: ExportItem[] }>(`/admin/activity/batches/${encodeURIComponent(batchId)}/exports`);
+  },
+  deleteExport(exportId: string) {
+    return request<void>(`/admin/activity/exports/${encodeURIComponent(exportId)}`, {
+      method: "DELETE",
+    });
+  },
+  bulkDeleteExports(exportIds: string[]) {
+    return request<{ deleted: number }>("/admin/activity/exports/bulk-delete", {
+      method: "POST",
+      body: JSON.stringify({ exportIds }),
+    });
+  },
+  listAllExports() {
+    return request<{ items: AdminExportItem[] }>("/admin/activity/exports");
   },
 };
 
@@ -353,5 +428,16 @@ export const batchApi = {
   },
   listUserExports() {
     return request<{ items: (ExportItem & { batchId: string })[] }>("/exports");
+  },
+  deleteExport(exportId: string) {
+    return request<void>(`/exports/${encodeURIComponent(exportId)}`, {
+      method: "DELETE",
+    });
+  },
+  bulkDeleteExports(exportIds: string[]) {
+    return request<{ deleted: number }>("/exports/bulk-delete", {
+      method: "POST",
+      body: JSON.stringify({ exportIds }),
+    });
   },
 };

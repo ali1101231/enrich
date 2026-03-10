@@ -1,6 +1,11 @@
 import type { Request, Response } from "express";
+import { z } from "zod";
 import { ExportService } from "../services/export.service.js";
 import { verifyToken } from "../lib/jwt.js";
+
+const bulkDeleteSchema = z.object({
+  exportIds: z.array(z.string()).min(1).max(100),
+});
 
 export class ExportController {
   constructor(private readonly exportService = new ExportService()) {}
@@ -23,6 +28,20 @@ export class ExportController {
     const userId = req.authUser!.id;
     const items = await this.exportService.listUserExports(userId);
     res.status(200).json({ items });
+  };
+
+  deleteExport = async (req: Request, res: Response): Promise<void> => {
+    const userId = req.authUser!.id;
+    const exportId = req.params.exportId;
+    await this.exportService.deleteExport(exportId, userId);
+    res.status(204).end();
+  };
+
+  bulkDeleteExports = async (req: Request, res: Response): Promise<void> => {
+    const userId = req.authUser!.id;
+    const { exportIds } = bulkDeleteSchema.parse(req.body);
+    const deleted = await this.exportService.bulkDeleteExports(exportIds, userId);
+    res.status(200).json({ deleted });
   };
 
   /**

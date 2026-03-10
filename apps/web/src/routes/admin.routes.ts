@@ -14,6 +14,9 @@ const activityController = new AdminActivityController();
 
 router.use(requireAdmin);
 router.get("/users", asyncHandler(userController.listUsers));
+router.get("/users/:userId", asyncHandler(userController.getUserDetail));
+router.patch("/users/:userId/role", asyncHandler(userController.updateUserRole));
+router.delete("/users/:userId", asyncHandler(userController.deleteUser));
 router.post("/keys", asyncHandler(keyController.createKey));
 router.get("/keys", asyncHandler(keyController.listKeys));
 router.patch("/keys/:keyId/active", asyncHandler(keyController.setActive));
@@ -33,5 +36,8 @@ router.get("/activity/batches/:batchId/results", asyncHandler(activityController
 router.get("/activity/batches/:batchId/results/counts", asyncHandler(activityController.getResultCounts));
 router.post("/activity/batches/:batchId/export", asyncHandler(activityController.exportBatchCsv));
 router.get("/activity/batches/:batchId/exports", asyncHandler(activityController.listExports));
+router.get("/activity/exports", asyncHandler(activityController.listAllExports));
+router.delete("/activity/exports/:exportId", asyncHandler(activityController.deleteExport));
+router.post("/activity/exports/bulk-delete", asyncHandler(activityController.bulkDeleteExports));
 
 export { router as adminRoutes };

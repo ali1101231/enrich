@@ -33,6 +33,12 @@ router.use("/admin", adminRoutes);
 // User exports listing (all exports for current user)
 router.get("/exports", requireAuth, asyncHandler(exportController.listUserExports));
 
+// Delete user's own export
+router.delete("/exports/:exportId", requireAuth, asyncHandler(exportController.deleteExport));
+
+// Bulk delete user's own exports
+router.post("/exports/bulk-delete", requireAuth, asyncHandler(exportController.bulkDeleteExports));
+
 // Export download (by exportId) — handles its own auth (supports query-param token for direct links)
 router.get("/exports/:exportId/download", asyncHandler(exportController.downloadExport));
 

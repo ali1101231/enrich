@@ -1,4 +1,4 @@
-import { S3Client, PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
+import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { env } from "../lib/env.js";
 import { logInfo, logError } from "../lib/logger.js";
 
@@ -52,6 +52,16 @@ export class StorageService {
       chunks.push(chunk);
     }
     return Buffer.concat(chunks);
+  }
+
+  async deleteObject(key: string): Promise<void> {
+    await s3.send(
+      new DeleteObjectCommand({
+        Bucket: this.bucket,
+        Key: key,
+      }),
+    );
+    logInfo("File deleted from R2", { key, bucket: this.bucket });
   }
 
   getPublicUrl(key: string): string | null {
