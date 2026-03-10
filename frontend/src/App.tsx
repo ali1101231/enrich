@@ -28,6 +28,7 @@ import AdminRunDetail from "@/pages/admin/AdminRunDetail";
 import AdminUserDetail from "@/pages/admin/AdminUserDetail";
 import AdminSettings from "@/pages/admin/AdminSettings";
 import AdminFiles from "@/pages/admin/AdminFiles";
+import AdminPackages from "@/pages/admin/AdminPackages";
 
 const queryClient = new QueryClient();
 
@@ -70,6 +71,7 @@ const App = () => (
               <Route path="users" element={<AdminUsers />} />
               <Route path="users/:userId" element={<AdminUserDetail />} />
               <Route path="keys" element={<AdminKeys />} />
+              <Route path="packages" element={<AdminPackages />} />
               <Route path="activity" element={<AdminActivity />} />
               <Route path="activity/:batchId" element={<AdminRunDetail />} />
               <Route path="files" element={<AdminFiles />} />

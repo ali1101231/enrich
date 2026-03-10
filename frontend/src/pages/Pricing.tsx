@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Check, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { usePackages } from '@/hooks/useApi';
+import type { PackageItem } from '@/lib/api';
 
 // ============================================================================
 // ANIMATION VARIANTS
@@ -21,15 +23,15 @@ const fadeUpVariants = {
 };
 
 // ============================================================================
-// PLAN DATA
+// FALLBACK PLAN DATA (used when DB has no packages)
 // ============================================================================
 
-const plans = [
+const fallbackPlans = [
   {
     name: 'Starter',
     monthlyPrice: 24,
     yearlyPrice: 19,
-    credits: '100K',
+    credits: 100000,
     subtitle: 'Essential tools for small teams and startups.',
     features: [
       'Up to 5 team members',
@@ -38,13 +40,14 @@ const plans = [
       '1GB storage limit',
     ],
     buttonText: 'Start free trial',
-    highlight: false,
+    isHighlighted: false,
+    badge: null as string | null,
   },
   {
     name: 'Business',
     monthlyPrice: 79,
     yearlyPrice: 63,
-    credits: '200K',
+    credits: 200000,
     subtitle: 'Advanced features for growing companies.',
     features: [
       'Up to 20 team members',
@@ -54,14 +57,14 @@ const plans = [
       'Custom integrations',
     ],
     buttonText: 'Get Started',
-    highlight: true,
+    isHighlighted: true,
     badge: 'MOST POPULAR',
   },
   {
     name: 'Enterprise',
     monthlyPrice: 249,
     yearlyPrice: 199,
-    credits: '500K',
+    credits: 500000,
     subtitle: 'Full customization for large organizations.',
     features: [
       'Unlimited team members',
@@ -72,9 +75,16 @@ const plans = [
       'SLA guarantees',
     ],
     buttonText: 'Contact Sales',
-    highlight: false,
+    isHighlighted: false,
+    badge: null as string | null,
   },
 ];
+
+function formatCredits(n: number): string {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(n % 1_000_000 === 0 ? 0 : 1)}M`;
+  if (n >= 1_000) return `${(n / 1_000).toFixed(n % 1_000 === 0 ? 0 : 1)}K`;
+  return String(n);
+}
 
 // ============================================================================
 // SWEEP BUTTON
@@ -118,6 +128,24 @@ function SweepButton({
 
 export default function Pricing() {
   const [billing, setBilling] = useState<'monthly' | 'yearly'>('monthly');
+  const { data: dbPackages } = usePackages();
+
+  const plans = useMemo(() => {
+    if (dbPackages && dbPackages.length > 0) {
+      return dbPackages.map((p) => ({
+        name: p.name,
+        monthlyPrice: p.monthlyPrice,
+        yearlyPrice: p.yearlyPrice,
+        credits: p.credits,
+        subtitle: p.subtitle ?? '',
+        features: Array.isArray(p.features) ? p.features : [],
+        buttonText: p.buttonText,
+        isHighlighted: p.isHighlighted,
+        badge: p.badge,
+      }));
+    }
+    return fallbackPlans;
+  }, [dbPackages]);
 
   return (
     <div className="p-6 lg:p-8 animate-fade-in">
@@ -213,7 +241,7 @@ export default function Pricing() {
             custom={0.5 + index * 0.1}
             className={cn(
               'bg-card text-card-foreground rounded-3xl p-8 relative overflow-hidden flex flex-col transition-all duration-500 border',
-              plan.highlight
+              plan.isHighlighted
                 ? 'border-primary/50 shadow-glow ring-1 ring-primary/20'
                 : 'border-border'
             )}
@@ -264,7 +292,7 @@ export default function Pricing() {
               {/* Subtitle + credits */}
               <p className="text-sm text-muted-foreground mb-4">{plan.subtitle}</p>
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-6">
-                <span className="font-semibold text-primary">{plan.credits}</span> credits included
+                <span className="font-semibold text-primary">{formatCredits(plan.credits)}</span> credits included
               </p>
 
               {/* Features */}
@@ -278,7 +306,7 @@ export default function Pricing() {
               </div>
 
               {/* CTA */}
-              <SweepButton isHighlighted={plan.highlight}>
+              <SweepButton isHighlighted={plan.isHighlighted}>
                 {plan.buttonText}
               </SweepButton>
             </div>

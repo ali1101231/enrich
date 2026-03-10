@@ -7,9 +7,11 @@ import { requireAuth } from "../middleware/auth-context.js";
 import { redis } from "../lib/redis.js";
 import { asyncHandler } from "../middleware/error-handler.js";
 import { ExportController } from "../controllers/export.controller.js";
+import { AdminPackageController } from "../controllers/admin-package.controller.js";
 
 const router = Router();
 const exportController = new ExportController();
+const packageController = new AdminPackageController();
 
 router.get("/health", async (_req, res) => {
   const checks: Record<string, string> = {};
@@ -26,6 +28,10 @@ router.get("/health", async (_req, res) => {
 });
 
 router.use("/auth", authRoutes);
+
+// Public: active packages for pricing page
+router.get("/packages", asyncHandler(packageController.listActive));
+
 router.use("/batches", requireAuth, batchesRoutes);
 router.use("/runs", requireAuth, runsRoutes);
 router.use("/admin", adminRoutes);
