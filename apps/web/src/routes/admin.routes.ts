@@ -18,5 +18,7 @@ router.patch("/keys/:keyId/active", asyncHandler(keyController.setActive));
 router.post("/assignments/manual", asyncHandler(assignmentController.manualAssign));
 router.post("/assignments/auto", asyncHandler(assignmentController.autoAssign));
 router.get("/assignments", asyncHandler(assignmentController.listAssignments));
+router.patch("/assignments/:assignmentId/deactivate", asyncHandler(assignmentController.deactivateAssignment));
+router.delete("/users/:userId/assignments", asyncHandler(assignmentController.deactivateUserAssignments));
 
 export { router as adminRoutes };

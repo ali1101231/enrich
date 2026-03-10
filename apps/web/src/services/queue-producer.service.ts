@@ -7,9 +7,10 @@ import { prisma } from "../prisma/client.js";
 
 export class QueueProducerService {
   /**
-   * Enqueue all QUEUED jobs for a given batch into BullMQ.
-   * Each job transitions QUEUED → DISPATCHED atomically before being added to the queue.
-   * Jobs that fail to enqueue remain in QUEUED for the scheduler to pick up later.
+   * Enqueue QUEUED jobs for a batch into BullMQ, respecting the per-user active job limit.
+   * Only dispatches up to (PER_USER_ACTIVE_JOB_LIMIT - currentlyActive) jobs so that
+   * a single large batch does not flood the queue and starve other users.
+   * Remaining QUEUED jobs are picked up later by the fair scheduler.
    */
   async enqueueBatchJobs(batchId: string): Promise<number> {
     const jobs = await prisma.job.findMany({
@@ -29,8 +30,9 @@ export class QueueProducerService {
       return 0;
     }
 
-    // Try to find an active API key assignment for the user
     const userId = jobs[0].userId;
+
+    // Try to find an active API key assignment for the user
     const assignment = await prisma.apiKeyAssignment.findFirst({
       where: {
         userId,
@@ -41,9 +43,38 @@ export class QueueProducerService {
       select: { apiKeyId: true },
     });
 
+    if (!assignment) {
+      logWarn("No active API key assignment — leaving jobs QUEUED for scheduler", {
+        batchId,
+        userId,
+        total: jobs.length,
+      });
+      return 0;
+    }
+
+    // Respect per-user active job limit to prevent one large batch from blocking others
+    const activeForUser = await prisma.job.count({
+      where: {
+        userId,
+        status: { in: [JobStatus.DISPATCHED, JobStatus.RUNNING] },
+      },
+    });
+
+    const budget = Math.max(0, env.PER_USER_ACTIVE_JOB_LIMIT - activeForUser);
+    if (budget === 0) {
+      logInfo("User at active job limit — leaving jobs QUEUED for scheduler", {
+        batchId,
+        userId,
+        activeForUser,
+        limit: env.PER_USER_ACTIVE_JOB_LIMIT,
+      });
+      return 0;
+    }
+
+    const eligible = jobs.slice(0, budget);
     let enqueued = 0;
 
-    for (const job of jobs) {
+    for (const job of eligible) {
       try {
         // Retry-safe: only transition if still in QUEUED
         const transition = await prisma.job.updateMany({
@@ -53,7 +84,7 @@ export class QueueProducerService {
           },
           data: {
             status: JobStatus.DISPATCHED,
-            apiKeyId: assignment?.apiKeyId ?? null,
+            apiKeyId: assignment.apiKeyId,
             queuedAt: new Date(),
           },
         });
@@ -100,14 +131,20 @@ export class QueueProducerService {
     }
 
     if (enqueued > 0) {
-      logInfo("Batch jobs enqueued", { batchId, enqueued, total: jobs.length });
+      // Update lastDequeuedAt for fair round-robin ordering
+      await prisma.user.update({
+        where: { id: userId },
+        data: { lastDequeuedAt: new Date() },
+      });
+
+      logInfo("Batch jobs enqueued", { batchId, enqueued, budget, total: jobs.length });
     }
 
     if (enqueued < jobs.length) {
-      logWarn("Some batch jobs were not enqueued", {
+      logInfo("Remaining batch jobs deferred to scheduler", {
         batchId,
         enqueued,
-        skipped: jobs.length - enqueued,
+        deferred: jobs.length - enqueued,
       });
     }
 

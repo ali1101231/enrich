@@ -13,7 +13,7 @@ const envSchema = z.object({
   CHUNK_SIZE_DEFAULT: z.coerce.number().int().positive().default(10),
   SCHEDULER_POLL_MS: z.coerce.number().int().positive().default(1000),
   SCHEDULER_MAX_ENQUEUE: z.coerce.number().int().positive().default(50),
-  PER_USER_ACTIVE_JOB_LIMIT: z.coerce.number().int().positive().default(3),
+  PER_USER_ACTIVE_JOB_LIMIT: z.coerce.number().int().positive().default(2),
   BULLMQ_PREFIX: z.string().default("koldify"),
   JOB_MAX_ATTEMPTS: z.coerce.number().int().positive().default(5),
   JOB_BACKOFF_MS: z.coerce.number().int().positive().default(2000),
