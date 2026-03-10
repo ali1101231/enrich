@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AppProvider } from "@/contexts/AppContext";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { RedirectIfAuthenticated, RequireAdmin } from "@/components/auth/AuthGuards";
 import Dashboard from "@/pages/Dashboard";
 import Runs from "@/pages/Runs";
 import RunDetail from "@/pages/RunDetail";
@@ -35,11 +36,11 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             {/* Auth */}
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Login />} />
-            <Route path="/forgot-password" element={<Login />} />
+            <Route path="/login" element={<RedirectIfAuthenticated><Login /></RedirectIfAuthenticated>} />
+            <Route path="/signup" element={<RedirectIfAuthenticated><Login /></RedirectIfAuthenticated>} />
+            <Route path="/forgot-password" element={<RedirectIfAuthenticated><Login /></RedirectIfAuthenticated>} />
             
-            {/* App */}
+            {/* App (protected by AppLayout) */}
             <Route path="/" element={<AppLayout />}>
               <Route index element={<Navigate to="/dashboard" replace />} />
               <Route path="dashboard" element={<Dashboard />} />
@@ -59,8 +60,8 @@ const App = () => (
               </Route>
             </Route>
 
-            {/* Admin Portal */}
-            <Route path="/admin" element={<AdminLayout />}>
+            {/* Admin Portal (admin-only) */}
+            <Route path="/admin" element={<RequireAdmin><AdminLayout /></RequireAdmin>}>
               <Route index element={<AdminDashboard />} />
               <Route path="users" element={<AdminUsers />} />
               <Route path="keys" element={<AdminKeys />} />

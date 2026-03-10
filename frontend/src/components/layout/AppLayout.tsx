@@ -4,7 +4,15 @@ import { TopBar } from './TopBar';
 import { useApp } from '@/contexts/AppContext';
 
 export function AppLayout() {
-  const { isAuthenticated } = useApp();
+  const { isAuthenticated, isLoading } = useApp();
+
+  if (isLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      </div>
+    );
+  }
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;

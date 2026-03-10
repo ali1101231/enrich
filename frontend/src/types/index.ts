@@ -40,6 +40,7 @@ export interface User {
   email: string;
   name: string;
   avatar?: string;
+  role?: 'user' | 'admin';
   plan: 'free' | 'pro' | 'enterprise';
   createdAt: string;
 }
