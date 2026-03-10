@@ -130,7 +130,20 @@ export function useExportCsv() {
     mutationFn: (batchId: string) => batchApi.exportCsv(batchId),
     onSuccess: (_data, batchId) => {
       qc.invalidateQueries({ queryKey: ["batch-exports", batchId] });
+      qc.invalidateQueries({ queryKey: ["user-exports"] });
     },
+  });
+}
+
+export function useUserExports() {
+  return useQuery({
+    queryKey: ["user-exports"],
+    queryFn: async () => {
+      const res = await batchApi.listUserExports();
+      return res.items;
+    },
+    staleTime: 10_000,
+    refetchInterval: 15_000,
   });
 }
 

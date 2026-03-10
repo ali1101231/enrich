@@ -30,6 +30,9 @@ router.use("/batches", requireAuth, batchesRoutes);
 router.use("/runs", requireAuth, runsRoutes);
 router.use("/admin", adminRoutes);
 
+// User exports listing (all exports for current user)
+router.get("/exports", requireAuth, asyncHandler(exportController.listUserExports));
+
 // Export download (by exportId) — handles its own auth (supports query-param token for direct links)
 router.get("/exports/:exportId/download", asyncHandler(exportController.downloadExport));
 

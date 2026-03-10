@@ -4,37 +4,19 @@ import { Search, Download, FileText, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { useBatches, useExportCsv } from '@/hooks/useApi';
-import { batchApi, type BatchItem } from '@/lib/api';
+import { useUserExports, useExportCsv } from '@/hooks/useApi';
+import { batchApi } from '@/lib/api';
 import { formatDistanceToNow } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
 
 export default function FilesPage() {
   const navigate = useNavigate();
-  const { data: batches = [] } = useBatches();
+  const { data: exports = [] } = useUserExports();
   const [searchQuery, setSearchQuery] = useState('');
-  const exportMutation = useExportCsv();
-  const [exportingBatchId, setExportingBatchId] = useState<string | null>(null);
 
-  // Show completed batches as downloadable outputs
-  const completedBatches = batches.filter(b => b.status === 'COMPLETED' || b.status === 'PARTIAL');
-  const filtered = completedBatches.filter(b =>
-    (b.originalFileName ?? '').toLowerCase().includes(searchQuery.toLowerCase())
+  const filtered = exports.filter(exp =>
+    exp.fileName.toLowerCase().includes(searchQuery.toLowerCase())
   );
-
-  const handleExport = async (e: React.MouseEvent, batchId: string) => {
-    e.stopPropagation();
-    setExportingBatchId(batchId);
-    try {
-      const result = await exportMutation.mutateAsync(batchId);
-      // Trigger download immediately
-      const token = localStorage.getItem("koldify-token");
-      const url = `${batchApi.downloadExportUrl(result.exportId)}${token ? `?token=${encodeURIComponent(token)}` : ''}`;
-      window.open(url, '_blank');
-    } finally {
-      setExportingBatchId(null);
-    }
-  };
 
   return (
     <div className="p-6 lg:p-8 space-y-6 animate-fade-in">
@@ -66,7 +48,7 @@ export default function FilesPage() {
               </div>
               <h3 className="font-semibold text-base">No files found</h3>
               <p className="text-muted-foreground text-sm mt-1">
-                {completedBatches.length === 0
+                {exports.length === 0
                   ? "Complete a run to see output files here"
                   : "Try adjusting your search"
                 }
@@ -74,41 +56,41 @@ export default function FilesPage() {
             </div>
           ) : (
             <div className="divide-y">
-              {filtered.map(batch => (
-                <div
-                  key={batch.id}
-                  className="flex items-center gap-4 px-4 py-3 hover:bg-muted/30 transition-colors group cursor-pointer"
-                  onClick={() => navigate(`/runs/${batch.id}`)}
-                >
-                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 shrink-0">
-                    <FileText className="h-4 w-4 text-primary" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm truncate group-hover:text-primary transition-colors">
-                      {batch.originalFileName ?? 'Batch output'}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {batch.completedRows.toLocaleString()} rows • {formatDistanceToNow(new Date(batch.createdAt), { addSuffix: true })}
-                    </p>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    disabled={exportingBatchId === batch.id}
-                    onClick={(e) => handleExport(e, batch.id)}
-                    className="shrink-0"
+              {filtered.map(exp => {
+                const token = localStorage.getItem("koldify-token");
+                const downloadUrl = `${batchApi.downloadExportUrl(exp.id)}${token ? `?token=${encodeURIComponent(token)}` : ''}`;
+                return (
+                  <div
+                    key={exp.id}
+                    className="flex items-center gap-4 px-4 py-3 hover:bg-muted/30 transition-colors group cursor-pointer"
+                    onClick={() => navigate(`/runs/${exp.batchId}`)}
                   >
-                    {exportingBatchId === batch.id ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Download className="h-4 w-4" />
-                    )}
-                  </Button>
-                  <Badge variant="secondary" className="text-[11px] text-success">
-                    Completed
-                  </Badge>
-                </div>
-              ))}
+                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 shrink-0">
+                      <FileText className="h-4 w-4 text-primary" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm truncate group-hover:text-primary transition-colors">
+                        {exp.fileName}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {exp.rowCount.toLocaleString()} rows • {formatDistanceToNow(new Date(exp.createdAt), { addSuffix: true })}
+                      </p>
+                    </div>
+                    <a
+                      href={downloadUrl}
+                      onClick={(e) => e.stopPropagation()}
+                      className="shrink-0"
+                    >
+                      <Button variant="ghost" size="sm">
+                        <Download className="h-4 w-4" />
+                      </Button>
+                    </a>
+                    <Badge variant="secondary" className="text-[11px] text-success">
+                      Ready
+                    </Badge>
+                  </div>
+                );
+              })}
             </div>
           )}
         </CardContent>
