@@ -300,4 +300,7 @@ export const batchApi = {
   downloadExportUrl(exportId: string) {
     return `${API_BASE}/exports/${encodeURIComponent(exportId)}/download`;
   },
+  listUserExports() {
+    return request<{ items: (ExportItem & { batchId: string })[] }>("/exports");
+  },
 };

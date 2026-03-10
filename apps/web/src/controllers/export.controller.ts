@@ -19,6 +19,12 @@ export class ExportController {
     res.status(200).json({ items });
   };
 
+  listUserExports = async (req: Request, res: Response): Promise<void> => {
+    const userId = req.authUser!.id;
+    const items = await this.exportService.listUserExports(userId);
+    res.status(200).json({ items });
+  };
+
   /**
    * Download supports both Bearer header and ?token= query param
    * to allow direct browser links (e.g. <a href="...">) without JS fetch.

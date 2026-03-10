@@ -113,6 +113,21 @@ export class ExportService {
     });
   }
 
+  async listUserExports(userId: string) {
+    return prisma.batchExport.findMany({
+      where: { userId },
+      orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        batchId: true,
+        fileName: true,
+        rowCount: true,
+        fileSize: true,
+        createdAt: true,
+      },
+    });
+  }
+
   async downloadExport(
     exportId: string,
     userId: string,

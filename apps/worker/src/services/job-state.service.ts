@@ -1,5 +1,6 @@
 import type { InputJsonValue } from "@prisma/client/runtime/library";
 import { prisma } from "../lib/prisma.js";
+import { AutoExportService } from "./auto-export.service.js";
 
 const JOB_STATUS = {
   DISPATCHED: "DISPATCHED",
@@ -24,6 +25,8 @@ const JOB_RESULT_STATUS = {
 } as const;
 
 export class JobStateService {
+  private readonly autoExport = new AutoExportService();
+
   async markRunning(jobId: string): Promise<boolean> {
     const updated = await prisma.job.updateMany({
       where: {
@@ -186,5 +189,10 @@ export class JobStateService {
         completedAt,
       },
     });
+
+    // Auto-export results when batch reaches terminal state
+    if (status === BATCH_STATUS.COMPLETED || status === BATCH_STATUS.PARTIAL) {
+      this.autoExport.exportIfReady(job.batchId).catch(() => {});
+    }
   }
 }
