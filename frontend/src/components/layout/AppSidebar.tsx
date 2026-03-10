@@ -8,12 +8,12 @@ import {
   Settings,
   ChevronLeft,
   ChevronRight,
-  UserSearch,
   Building2,
-  Users,
   Globe,
   Linkedin,
   CreditCard,
+  Mail,
+  Phone,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -32,11 +32,10 @@ const mainNavItems: NavItem[] = [
 ];
 
 const tools: NavItem[] = [
-  { title: 'People Finder', href: '/tools/people-finder', icon: UserSearch },
-  { title: 'Company Finder', href: '/tools/company-finder', icon: Building2 },
-  { title: 'Employee Finder', href: '/tools/employee-finder', icon: Users },
-  { title: 'LinkedIn → Domain', href: '/tools/linkedin-to-domain', icon: Linkedin },
-  { title: 'Domain → Company', href: '/tools/domain-to-company', icon: Globe },
+  { title: 'Email Enricher', href: '/tools/blitz-email-enricher', icon: Mail },
+  { title: 'Phone Finder', href: '/tools/blitz-phone-enricher', icon: Phone },
+  { title: 'Company Enricher', href: '/tools/blitz-company-enricher', icon: Building2 },
+  { title: 'Domain → LinkedIn', href: '/tools/blitz-domain-to-linkedin', icon: Linkedin },
 ];
 
 const bottomNavItems: NavItem[] = [

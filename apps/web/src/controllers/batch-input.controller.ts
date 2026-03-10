@@ -8,6 +8,7 @@ import type { Request, Response } from "express";
 const pastedBodySchema = z.object({
   rows: z.string().min(1),
   chunkSize: z.number().int().positive().optional(),
+  toolId: z.string().optional(),
 });
 
 export class BatchInputController {
@@ -32,6 +33,7 @@ export class BatchInputController {
 
     const userId = req.authUser?.id ?? "demo-user";
     const chunkSize = req.body?.chunkSize ? Number(req.body.chunkSize) : undefined;
+    const toolId = typeof req.body?.toolId === "string" ? req.body.toolId : undefined;
 
     // Create batch first to get the batchId for the R2 key
     const batch = await this.batchCreation.createBatch({
@@ -40,6 +42,7 @@ export class BatchInputController {
       rows,
       originalFileName: file.originalname,
       chunkSize,
+      toolId,
     });
 
     // Upload original file to R2 (non-blocking for response, but we await it)
@@ -73,6 +76,7 @@ export class BatchInputController {
       sourceType: this.batchCreation.mapSourceType("PASTED_ROWS"),
       rows,
       chunkSize: parsed.chunkSize,
+      toolId: parsed.toolId,
     });
 
     res.status(201).json(batch);

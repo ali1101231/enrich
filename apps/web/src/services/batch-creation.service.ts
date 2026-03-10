@@ -20,6 +20,7 @@ export class BatchCreationService {
     rows: ParsedRow[];
     originalFileName?: string;
     chunkSize?: number;
+    toolId?: string;
   }): Promise<{ batchId: string; totalRows: number; totalJobs: number }> {
     if (input.rows.length === 0) {
       throw new Error("Input rows are empty");
@@ -49,6 +50,7 @@ export class BatchCreationService {
       const batch = await tx.batch.create({
         data: {
           userId: input.userId,
+          toolId: input.toolId ?? null,
           sourceType: input.sourceType,
           originalFileName: input.originalFileName,
           totalRows: input.rows.length,

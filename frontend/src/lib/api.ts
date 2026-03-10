@@ -248,18 +248,21 @@ export interface ExportCreateResponse {
 }
 
 export const batchApi = {
-  uploadCsv(file: File, chunkSize?: number) {
+  uploadCsv(file: File, toolId?: string, chunkSize?: number) {
     const formData = new FormData();
     formData.append("file", file);
+    if (toolId) {
+      formData.append("toolId", toolId);
+    }
     if (chunkSize) {
       formData.append("chunkSize", String(chunkSize));
     }
     return requestFormData<BatchCreateResponse>("/batches/upload", formData);
   },
-  pasteRows(rows: string, chunkSize?: number) {
+  pasteRows(rows: string, toolId?: string, chunkSize?: number) {
     return request<BatchCreateResponse>("/batches/paste", {
       method: "POST",
-      body: JSON.stringify({ rows, chunkSize }),
+      body: JSON.stringify({ rows, toolId, chunkSize }),
     });
   },
   list(limit?: number) {
