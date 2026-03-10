@@ -2,6 +2,7 @@ import { z } from "zod";
 import { CsvParserService } from "../services/csv-parser.service.js";
 import { BatchCreationService } from "../services/batch-creation.service.js";
 import { StorageService } from "../services/storage.service.js";
+import { CreditService, CreditError } from "../services/credit.service.js";
 import { logError } from "../lib/logger.js";
 import type { Request, Response } from "express";
 
@@ -16,6 +17,7 @@ export class BatchInputController {
     private readonly csvParser = new CsvParserService(),
     private readonly batchCreation = new BatchCreationService(),
     private readonly storage = new StorageService(),
+    private readonly creditService = new CreditService(),
   ) {}
 
   uploadCsv = async (req: Request, res: Response): Promise<void> => {
@@ -34,6 +36,17 @@ export class BatchInputController {
     const userId = req.authUser?.id ?? "demo-user";
     const chunkSize = req.body?.chunkSize ? Number(req.body.chunkSize) : undefined;
     const toolId = typeof req.body?.toolId === "string" ? req.body.toolId : undefined;
+
+    // Deduct credits: 1 credit per row
+    try {
+      await this.creditService.deduct(userId, rows.length);
+    } catch (err) {
+      if (err instanceof CreditError) {
+        res.status(err.statusCode).json({ error: err.message });
+        return;
+      }
+      throw err;
+    }
 
     // Create batch first to get the batchId for the R2 key
     const batch = await this.batchCreation.createBatch({
@@ -70,6 +83,17 @@ export class BatchInputController {
     }
 
     const userId = req.authUser?.id ?? "demo-user";
+
+    // Deduct credits: 1 credit per row
+    try {
+      await this.creditService.deduct(userId, rows.length);
+    } catch (err) {
+      if (err instanceof CreditError) {
+        res.status(err.statusCode).json({ error: err.message });
+        return;
+      }
+      throw err;
+    }
 
     const batch = await this.batchCreation.createBatch({
       userId,

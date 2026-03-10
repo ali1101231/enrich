@@ -54,6 +54,7 @@ export interface AuthUser {
   email: string;
   displayName: string | null;
   role: string;
+  credits: number;
 }
 
 export interface AuthResponse {
@@ -96,6 +97,7 @@ export interface AdminUserItem {
   displayName: string | null;
   role: string;
   isActive: boolean;
+  credits: number;
   createdAt: string;
 }
 
@@ -206,6 +208,12 @@ export const adminApi = {
   deleteUser(userId: string) {
     return request<{ message: string }>(`/admin/users/${encodeURIComponent(userId)}`, {
       method: "DELETE",
+    });
+  },
+  updateUserCredits(userId: string, credits: number) {
+    return request<{ message: string; credits: number }>(`/admin/users/${encodeURIComponent(userId)}/credits`, {
+      method: "PATCH",
+      body: JSON.stringify({ credits }),
     });
   },
   listKeys() {
@@ -323,6 +331,19 @@ export const adminApi = {
 export const packagesApi = {
   list() {
     return request<{ items: PackageItem[] }>("/packages");
+  },
+};
+
+// ---- Credits ----
+export const creditsApi = {
+  getBalance() {
+    return request<{ credits: number }>("/credits");
+  },
+  purchase(packageId: string) {
+    return request<{ message: string; creditsAdded: number; credits: number }>("/packages/purchase", {
+      method: "POST",
+      body: JSON.stringify({ packageId }),
+    });
   },
 };
 

@@ -43,6 +43,7 @@ export interface User {
   role?: 'user' | 'admin';
   plan: 'free' | 'pro' | 'enterprise';
   createdAt: string;
+  credits?: number;
 }
 
 // ============ Key Types ============

@@ -14,6 +14,7 @@ import {
   Upload,
   Pin,
   Activity,
+  Coins,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -22,7 +23,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { useApp } from '@/contexts/AppContext';
 import { mockTools } from '@/lib/mockData';
-import { useBatches } from '@/hooks/useApi';
+import { useBatches, useCredits } from '@/hooks/useApi';
 import type { BatchItem } from '@/lib/api';
 
 const fadeUp = {
@@ -158,6 +159,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const { user, preferences } = useApp();
   const { data: batches = [], isLoading } = useBatches();
+  const { data: credits } = useCredits();
 
   const activeRuns = batches.filter(b => b.status === 'RUNNING' || b.status === 'QUEUED');
   const recentBatches = batches.slice(0, 5);
@@ -201,8 +203,9 @@ export default function Dashboard() {
       </motion.div>
 
       {/* Stats Grid */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
         {[
+          { title: 'Credits', value: credits !== undefined ? credits.toLocaleString() : '...', subtitle: 'Available balance', icon: Coins },
           { title: 'Active Runs', value: activeRuns.length, subtitle: 'Currently processing', icon: Activity },
           { title: 'Success Rate', value: `${successRate}%`, subtitle: 'All time', icon: TrendingUp },
           { title: 'Total Runs', value: batches.length, subtitle: 'All batches', icon: Clock },
