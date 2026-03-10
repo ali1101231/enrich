@@ -5,6 +5,10 @@ export interface BlitzEndpointConfig {
   path: string;
   /** Aliases for the required input field */
   requiredAliases: string[];
+  /** Optional format validator for the resolved input value */
+  formatValidator?: (value: string) => boolean;
+  /** Human-readable hint when format validation fails */
+  formatHint?: string;
   /** Build the request body from a CSV row */
   buildPayload: (row: Record<string, string>) => Record<string, string>;
   /** Merge original row + Blitz response into the final result */
@@ -84,6 +88,59 @@ function checkField(
   return `Missing required input. Expected one of: ${aliases.join(", ")}`;
 }
 
+// ---- URL format validators ----
+
+const LINKEDIN_PERSON_RE = /linkedin\.com\/in\//i;
+const LINKEDIN_COMPANY_RE = /linkedin\.com\/company\//i;
+
+function isLinkedInPersonUrl(value: string): boolean {
+  return LINKEDIN_PERSON_RE.test(value);
+}
+
+function isLinkedInCompanyUrl(value: string): boolean {
+  return LINKEDIN_COMPANY_RE.test(value);
+}
+
+/**
+ * Resolve a field value and validate its format for the given tool.
+ * Returns null if valid, or a human-readable skip reason.
+ */
+function checkFieldFormat(
+  row: Record<string, string>,
+  aliases: string[],
+  formatValidator?: (value: string) => boolean,
+  formatHint?: string,
+): string | null {
+  // First check if the field exists at all
+  const missing = checkField(row, aliases);
+  if (missing) return missing;
+
+  // Field exists — resolve its value and validate format
+  if (formatValidator) {
+    const value = resolveFieldValue(row, aliases);
+    if (value && !formatValidator(value)) {
+      return formatHint ?? "Invalid input format";
+    }
+  }
+  return null;
+}
+
+/** Resolve the field value without throwing (for validation use) */
+function resolveFieldValue(
+  row: Record<string, string>,
+  aliases: string[],
+): string | null {
+  for (const alias of aliases) {
+    const key = Object.keys(row).find(
+      (k) => k.toLowerCase().trim() === alias.toLowerCase(),
+    );
+    if (key && row[key]?.trim()) {
+      return row[key].trim();
+    }
+  }
+  return null;
+}
+
 // ---- Response helpers ----
 
 function flattenObject(
@@ -109,6 +166,8 @@ function flattenObject(
 const emailEnricher: BlitzEndpointConfig = {
   path: "/v2/enrichment/email",
   requiredAliases: PERSON_LINKEDIN_ALIASES,
+  formatValidator: isLinkedInPersonUrl,
+  formatHint: "Invalid LinkedIn profile URL. Expected a URL containing linkedin.com/in/ (e.g. https://linkedin.com/in/johndoe)",
   buildPayload: (row) => ({
     person_linkedin_url: resolveField(row, PERSON_LINKEDIN_ALIASES),
   }),
@@ -125,6 +184,8 @@ const emailEnricher: BlitzEndpointConfig = {
 const phoneEnricher: BlitzEndpointConfig = {
   path: "/v2/enrichment/phone",
   requiredAliases: PERSON_LINKEDIN_ALIASES,
+  formatValidator: isLinkedInPersonUrl,
+  formatHint: "Invalid LinkedIn profile URL. Expected a URL containing linkedin.com/in/ (e.g. https://linkedin.com/in/johndoe)",
   buildPayload: (row) => ({
     person_linkedin_url: resolveField(row, PERSON_LINKEDIN_ALIASES),
   }),
@@ -138,6 +199,8 @@ const phoneEnricher: BlitzEndpointConfig = {
 const companyEnricher: BlitzEndpointConfig = {
   path: "/v2/enrichment/company",
   requiredAliases: COMPANY_LINKEDIN_ALIASES,
+  formatValidator: isLinkedInCompanyUrl,
+  formatHint: "Invalid LinkedIn company URL. Expected a URL containing linkedin.com/company/ (e.g. https://linkedin.com/company/acme)",
   buildPayload: (row) => ({
     company_linkedin_url: resolveField(row, COMPANY_LINKEDIN_ALIASES),
   }),
@@ -199,5 +262,5 @@ export function isSupportedBlitzTool(toolId: string): boolean {
 export function validateRow(toolId: string, row: Record<string, string>): string | null {
   const config = ENDPOINT_REGISTRY[toolId];
   if (!config) return null;
-  return checkField(row, config.requiredAliases);
+  return checkFieldFormat(row, config.requiredAliases, config.formatValidator, config.formatHint);
 }
