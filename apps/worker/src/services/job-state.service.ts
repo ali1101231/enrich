@@ -2,7 +2,7 @@ import type { InputJsonValue } from "@prisma/client/runtime/library";
 import { prisma } from "../lib/prisma.js";
 
 const JOB_STATUS = {
-  QUEUED_FOR_WORKER: "QUEUED_FOR_WORKER",
+  DISPATCHED: "DISPATCHED",
   RUNNING: "RUNNING",
   COMPLETED: "COMPLETED",
   FAILED: "FAILED",
@@ -28,7 +28,7 @@ export class JobStateService {
     const updated = await prisma.job.updateMany({
       where: {
         id: jobId,
-        status: JOB_STATUS.QUEUED_FOR_WORKER,
+        status: JOB_STATUS.DISPATCHED,
       },
       data: {
         status: JOB_STATUS.RUNNING,
@@ -68,7 +68,7 @@ export class JobStateService {
         status: JOB_STATUS.RUNNING,
       },
       data: {
-        status: JOB_STATUS.QUEUED_FOR_WORKER,
+        status: JOB_STATUS.DISPATCHED,
         errorMessage,
       },
     });
@@ -95,7 +95,7 @@ export class JobStateService {
       where: {
         id: jobId,
         status: {
-          in: [JOB_STATUS.RUNNING, JOB_STATUS.QUEUED_FOR_WORKER],
+          in: [JOB_STATUS.RUNNING, JOB_STATUS.DISPATCHED],
         },
       },
       data: {

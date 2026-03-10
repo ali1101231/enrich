@@ -14,6 +14,11 @@ export function startBlitzWorker(): Worker<JobPayload> {
   const worker = new Worker<JobPayload>(
     PROCESSING_QUEUE_NAME,
     async (job) => {
+      logInfo("Job picked up from queue", {
+        jobId: job.data.jobId,
+        bullJobId: job.id,
+        attempt: job.attemptsMade + 1,
+      });
       await processor.process(job);
     },
     {
@@ -23,9 +28,14 @@ export function startBlitzWorker(): Worker<JobPayload> {
     },
   );
 
+  worker.on("active", (job) => {
+    logInfo("Job active", { jobId: job.data.jobId, bullJobId: job.id });
+  });
+
   worker.on("completed", (job) => {
     logInfo("Job completed", {
       jobId: job.data.jobId,
+      bullJobId: job.id,
       attemptsMade: job.attemptsMade + 1,
     });
   });
@@ -51,6 +61,7 @@ export function startBlitzWorker(): Worker<JobPayload> {
       await stateService.markFailed(job.data.jobId, message);
       logError("Job permanently failed", {
         jobId: job.data.jobId,
+        bullJobId: job.id,
         attempt,
         maxAttempts,
         message,
@@ -59,12 +70,24 @@ export function startBlitzWorker(): Worker<JobPayload> {
     }
 
     await stateService.markRetriable(job.data.jobId, message);
-    logWarn("Job failed and will retry", {
+    logWarn("Job failed — will retry", {
       jobId: job.data.jobId,
+      bullJobId: job.id,
       attempt,
       maxAttempts,
       message,
     });
+  });
+
+  worker.on("error", (err) => {
+    logError("BullMQ worker error", {
+      message: err instanceof Error ? err.message : "unknown",
+    });
+  });
+
+  logInfo("BullMQ worker registered", {
+    queue: PROCESSING_QUEUE_NAME,
+    concurrency: env.WORKER_CONCURRENCY,
   });
 
   return worker;

@@ -9,7 +9,7 @@ datasource db {
 
 enum JobStatus {
   QUEUED
-  QUEUED_FOR_WORKER
+  DISPATCHED
   RUNNING
   COMPLETED
   FAILED
