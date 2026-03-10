@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Download, FileText, Filter } from 'lucide-react';
+import { Search, Download, FileText, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { useBatches } from '@/hooks/useApi';
-import type { BatchItem } from '@/lib/api';
+import { useBatches, useExportCsv } from '@/hooks/useApi';
+import { batchApi, type BatchItem } from '@/lib/api';
 import { formatDistanceToNow } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
 
@@ -13,12 +13,28 @@ export default function FilesPage() {
   const navigate = useNavigate();
   const { data: batches = [] } = useBatches();
   const [searchQuery, setSearchQuery] = useState('');
+  const exportMutation = useExportCsv();
+  const [exportingBatchId, setExportingBatchId] = useState<string | null>(null);
 
   // Show completed batches as downloadable outputs
   const completedBatches = batches.filter(b => b.status === 'COMPLETED' || b.status === 'PARTIAL');
   const filtered = completedBatches.filter(b =>
     (b.originalFileName ?? '').toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const handleExport = async (e: React.MouseEvent, batchId: string) => {
+    e.stopPropagation();
+    setExportingBatchId(batchId);
+    try {
+      const result = await exportMutation.mutateAsync(batchId);
+      // Trigger download immediately
+      const token = localStorage.getItem("koldify-token");
+      const url = `${batchApi.downloadExportUrl(result.exportId)}${token ? `?token=${encodeURIComponent(token)}` : ''}`;
+      window.open(url, '_blank');
+    } finally {
+      setExportingBatchId(null);
+    }
+  };
 
   return (
     <div className="p-6 lg:p-8 space-y-6 animate-fade-in">
@@ -75,6 +91,19 @@ export default function FilesPage() {
                       {batch.completedRows.toLocaleString()} rows • {formatDistanceToNow(new Date(batch.createdAt), { addSuffix: true })}
                     </p>
                   </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    disabled={exportingBatchId === batch.id}
+                    onClick={(e) => handleExport(e, batch.id)}
+                    className="shrink-0"
+                  >
+                    {exportingBatchId === batch.id ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Download className="h-4 w-4" />
+                    )}
+                  </Button>
                   <Badge variant="secondary" className="text-[11px] text-success">
                     Completed
                   </Badge>

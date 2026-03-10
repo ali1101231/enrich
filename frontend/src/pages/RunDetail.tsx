@@ -9,6 +9,7 @@ import {
   XCircle,
   Download,
   Activity,
+  Loader2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -17,7 +18,8 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useBatchDetail, useBatchProgress, useBatchJobs } from '@/hooks/useApi';
+import { useBatchDetail, useBatchProgress, useBatchJobs, useBatchExports, useExportCsv, useBatchResultCounts } from '@/hooks/useApi';
+import { batchApi } from '@/lib/api';
 import { format } from 'date-fns';
 
 type UIStatus = 'running' | 'paused' | 'completed' | 'failed' | 'pending' | 'cancelled';
@@ -45,6 +47,9 @@ export default function RunDetailPage() {
   const { data: batch, isLoading: batchLoading } = useBatchDetail(id!);
   const { data: progress } = useBatchProgress(id!);
   const { data: jobsData } = useBatchJobs(id!);
+  const { data: exports = [] } = useBatchExports(id!);
+  const { data: resultCounts } = useBatchResultCounts(id!);
+  const exportMutation = useExportCsv();
 
   if (batchLoading) {
     return (
@@ -238,13 +243,45 @@ export default function RunDetailPage() {
               <CardTitle className="text-lg">Outputs</CardTitle>
             </CardHeader>
             <CardContent>
-              {uiStatus === 'completed' ? (
+              {(uiStatus === 'completed' || uiStatus === 'failed') ? (
                 <div className="space-y-2">
-                  <Button className="w-full" disabled>
-                    <Download className="h-4 w-4 mr-2" />
-                    Download Output CSV
+                  <Button
+                    className="w-full"
+                    disabled={exportMutation.isPending}
+                    onClick={() => exportMutation.mutate(id!)}
+                  >
+                    {exportMutation.isPending ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <Download className="h-4 w-4 mr-2" />
+                    )}
+                    {exportMutation.isPending ? 'Exporting...' : 'Export Results CSV'}
                   </Button>
-                  <p className="text-xs text-muted-foreground text-center">Download coming soon</p>
+                  {resultCounts && (
+                    <p className="text-xs text-muted-foreground text-center">
+                      {resultCounts.success.toLocaleString()} succeeded, {resultCounts.failure.toLocaleString()} failed
+                    </p>
+                  )}
+                  {exports.length > 0 && (
+                    <div className="mt-3 space-y-1">
+                      {exports.map(exp => {
+                        const token = localStorage.getItem("koldify-token");
+                        const downloadUrl = `${batchApi.downloadExportUrl(exp.id)}${token ? `?token=${encodeURIComponent(token)}` : ''}`;
+                        return (
+                          <a
+                            key={exp.id}
+                            href={downloadUrl}
+                            className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-muted/40 text-sm"
+                          >
+                            <span className="truncate">{exp.fileName}</span>
+                            <span className="text-xs text-muted-foreground shrink-0 ml-2">
+                              {exp.rowCount} rows
+                            </span>
+                          </a>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               ) : (
                 <p className="text-sm text-muted-foreground text-center py-4">
