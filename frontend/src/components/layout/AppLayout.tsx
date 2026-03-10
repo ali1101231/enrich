@@ -4,7 +4,7 @@ import { TopBar } from './TopBar';
 import { useApp } from '@/contexts/AppContext';
 
 export function AppLayout() {
-  const { isAuthenticated, isLoading } = useApp();
+  const { isAuthenticated, isLoading, user } = useApp();
 
   if (isLoading) {
     return (
@@ -16,6 +16,11 @@ export function AppLayout() {
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
+  }
+
+  // Admin users should never see the user portal
+  if (user?.role === 'admin') {
+    return <Navigate to="/admin" replace />;
   }
 
   return (
