@@ -147,6 +147,57 @@ export class BatchProgressService {
     });
   }
 
+  async listAllBatches(limit = 100) {
+    const batches = await prisma.batch.findMany({
+      include: {
+        user: {
+          select: { id: true, email: true, displayName: true },
+        },
+        jobs: {
+          select: { status: true, rowCount: true },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+      take: limit,
+    });
+
+    return batches.map((batch) => {
+      let completedRows = 0;
+      let failedRows = 0;
+      let runningRows = 0;
+      let queuedRows = 0;
+
+      for (const job of batch.jobs) {
+        if (job.status === JobStatus.QUEUED || job.status === JobStatus.DISPATCHED) {
+          queuedRows += job.rowCount;
+        } else if (job.status === JobStatus.RUNNING) {
+          runningRows += job.rowCount;
+        } else if (job.status === JobStatus.COMPLETED) {
+          completedRows += job.rowCount;
+        } else if (job.status === JobStatus.FAILED) {
+          failedRows += job.rowCount;
+        }
+      }
+
+      return {
+        id: batch.id,
+        userId: batch.userId,
+        userEmail: batch.user.email,
+        userDisplayName: batch.user.displayName,
+        toolId: batch.toolId,
+        sourceType: batch.sourceType,
+        originalFileName: batch.originalFileName,
+        totalRows: batch.totalRows,
+        status: batch.status,
+        completedRows,
+        failedRows,
+        runningRows,
+        queuedRows,
+        createdAt: batch.createdAt.toISOString(),
+      };
+    });
+  }
+
   async listJobsForBatch(batchId: string) {
     const jobs = await prisma.job.findMany({
       where: { batchId },

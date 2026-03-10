@@ -108,6 +108,23 @@ export interface AssignmentItem {
   createdAt: string;
 }
 
+export interface AdminBatchItem {
+  id: string;
+  userId: string;
+  userEmail: string;
+  userDisplayName: string | null;
+  toolId: string | null;
+  sourceType: string;
+  originalFileName: string | null;
+  totalRows: number;
+  status: string;
+  completedRows: number;
+  failedRows: number;
+  runningRows: number;
+  queuedRows: number;
+  createdAt: string;
+}
+
 export const adminApi = {
   listUsers() {
     return request<{ items: AdminUserItem[] }>("/admin/users");
@@ -158,6 +175,32 @@ export const adminApi = {
     return request<{ deactivated: number }>(`/admin/users/${encodeURIComponent(userId)}/assignments`, {
       method: "DELETE",
     });
+  },
+
+  // ---- Admin Activity ----
+  listAllBatches(limit?: number) {
+    const qs = limit ? `?limit=${limit}` : "";
+    return request<{ items: AdminBatchItem[] }>(`/admin/activity/batches${qs}`);
+  },
+  getBatchById(batchId: string) {
+    return request<BatchItem>(`/admin/activity/batches/${encodeURIComponent(batchId)}`);
+  },
+  getBatchProgress(batchId: string) {
+    return request<BatchProgress>(`/admin/activity/batches/${encodeURIComponent(batchId)}/status`);
+  },
+  listBatchJobs(batchId: string) {
+    return request<{ items: Array<{ id: string; sequence: number; rowCount: number; status: string; attempts: number }> }>(`/admin/activity/batches/${encodeURIComponent(batchId)}/jobs`);
+  },
+  getBatchResultCounts(batchId: string) {
+    return request<ResultCounts>(`/admin/activity/batches/${encodeURIComponent(batchId)}/results/counts`);
+  },
+  exportBatchCsv(batchId: string) {
+    return request<ExportCreateResponse>(`/admin/activity/batches/${encodeURIComponent(batchId)}/export`, {
+      method: "POST",
+    });
+  },
+  listBatchExports(batchId: string) {
+    return request<{ items: ExportItem[] }>(`/admin/activity/batches/${encodeURIComponent(batchId)}/exports`);
   },
 };
 
