@@ -13,6 +13,7 @@ import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { useApp } from '@/contexts/AppContext';
 import { getToolById } from '@/lib/mockData';
 import { useToast } from '@/hooks/use-toast';
+import { batchApi, ApiError } from '@/lib/api';
 
 type Step = 'upload' | 'map' | 'configure' | 'run';
 
@@ -20,7 +21,7 @@ export default function ToolPage() {
   const { toolId } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { createRun } = useApp();
+  const { addBatchAsRun } = useApp();
 
   const tool = getToolById(toolId || '');
   const [step, setStep] = useState<Step>('upload');
@@ -69,14 +70,26 @@ export default function ToolPage() {
     reader.readAsText(f);
   };
 
-  const handleRun = () => {
+  const handleRun = async () => {
     if (!file || !tool) return;
     setIsRunning(true);
-    setTimeout(() => {
-      const run = createRun(tool.id, file.name, { mapping });
+    try {
+      const batch = await batchApi.uploadCsv(file);
+      addBatchAsRun({
+        batchId: batch.batchId,
+        toolId: tool.id,
+        toolName: tool.name,
+        toolProvider: tool.provider,
+        fileName: file.name,
+        totalRows: batch.totalRows,
+      });
       toast({ title: 'Run started', description: `Processing ${file.name}` });
-      navigate(`/runs/${run.id}`);
-    }, 1000);
+      navigate(`/runs/${batch.batchId}`);
+    } catch (err) {
+      const msg = err instanceof ApiError ? err.message : 'Upload failed';
+      toast({ title: 'Error', description: msg, variant: 'destructive' });
+      setIsRunning(false);
+    }
   };
 
   if (!tool) {

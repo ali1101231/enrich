@@ -49,6 +49,7 @@ interface AppContextType extends AppState {
   
   // Runs
   createRun: (toolId: string, fileName: string, config: Record<string, unknown>) => Run;
+  addBatchAsRun: (params: { batchId: string; toolId: string; toolName: string; toolProvider: 'apify' | 'blitz' | 'csv'; fileName: string; totalRows: number }) => void;
   pauseRun: (id: string) => void;
   resumeRun: (id: string) => void;
   stopRun: (id: string) => void;
@@ -343,6 +344,33 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return newRun;
   };
 
+  const addBatchAsRun = (params: {
+    batchId: string;
+    toolId: string;
+    toolName: string;
+    toolProvider: 'apify' | 'blitz' | 'csv';
+    fileName: string;
+    totalRows: number;
+  }) => {
+    const newRun: Run = {
+      id: params.batchId,
+      toolId: params.toolId,
+      toolName: params.toolName,
+      toolProvider: params.toolProvider,
+      inputFileName: params.fileName,
+      status: 'pending',
+      progress: 0,
+      rowsProcessed: 0,
+      totalRows: params.totalRows,
+      stage: 'preparing',
+      startedAt: new Date().toISOString(),
+    };
+    setState(prev => ({
+      ...prev,
+      runs: [newRun, ...prev.runs],
+    }));
+  };
+
   const pauseRun = (id: string) => {
     setState(prev => ({
       ...prev,
@@ -461,6 +489,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       updateBlitzKey,
       deleteBlitzKey,
       createRun,
+      addBatchAsRun,
       pauseRun,
       resumeRun,
       stopRun,

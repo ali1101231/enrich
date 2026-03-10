@@ -1,7 +1,8 @@
 import { z } from "zod";
 import { CsvParserService } from "../services/csv-parser.service.js";
 import { BatchCreationService } from "../services/batch-creation.service.js";
-import { FairSchedulerService } from "../services/fair-scheduler.service.js";
+import { StorageService } from "../services/storage.service.js";
+import { logError } from "../lib/logger.js";
 import type { Request, Response } from "express";
 
 const pastedBodySchema = z.object({
@@ -13,27 +14,46 @@ export class BatchInputController {
   constructor(
     private readonly csvParser = new CsvParserService(),
     private readonly batchCreation = new BatchCreationService(),
-    private readonly scheduler = new FairSchedulerService(),
+    private readonly storage = new StorageService(),
   ) {}
 
   uploadCsv = async (req: Request, res: Response): Promise<void> => {
     const file = req.file;
     if (!file) {
-      throw new Error("CSV file is required");
+      res.status(400).json({ error: "CSV file is required" });
+      return;
     }
 
     const rows = this.csvParser.parseUploadedCsv(file.buffer);
-    const userId = req.authUser?.id ?? "demo-user";
+    if (rows.length === 0) {
+      res.status(400).json({ error: "CSV file contains no data rows" });
+      return;
+    }
 
+    const userId = req.authUser?.id ?? "demo-user";
+    const chunkSize = req.body?.chunkSize ? Number(req.body.chunkSize) : undefined;
+
+    // Create batch first to get the batchId for the R2 key
     const batch = await this.batchCreation.createBatch({
       userId,
       sourceType: this.batchCreation.mapSourceType("CSV_UPLOAD"),
       rows,
       originalFileName: file.originalname,
-      chunkSize: req.body?.chunkSize ? Number(req.body.chunkSize) : undefined,
+      chunkSize,
     });
 
-    await this.scheduler.refillQueue();
+    // Upload original file to R2 (non-blocking for response, but we await it)
+    try {
+      const r2Key = this.storage.buildUploadKey(userId, batch.batchId, file.originalname);
+      await this.storage.uploadBuffer(r2Key, file.buffer, "text/csv");
+      await this.batchCreation.setR2Key(batch.batchId, r2Key);
+    } catch (err) {
+      // R2 upload failure is non-fatal; batch and jobs are already created
+      logError("R2 upload failed for batch", {
+        batchId: batch.batchId,
+        message: err instanceof Error ? err.message : "unknown",
+      });
+    }
 
     res.status(201).json(batch);
   };
@@ -41,6 +61,11 @@ export class BatchInputController {
   pastedRows = async (req: Request, res: Response): Promise<void> => {
     const parsed = pastedBodySchema.parse(req.body);
     const rows = this.csvParser.parsePastedRows(parsed.rows);
+    if (rows.length === 0) {
+      res.status(400).json({ error: "No valid rows found in pasted input" });
+      return;
+    }
+
     const userId = req.authUser?.id ?? "demo-user";
 
     const batch = await this.batchCreation.createBatch({
@@ -49,8 +74,6 @@ export class BatchInputController {
       rows,
       chunkSize: parsed.chunkSize,
     });
-
-    await this.scheduler.refillQueue();
 
     res.status(201).json(batch);
   };

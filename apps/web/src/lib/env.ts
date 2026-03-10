@@ -20,6 +20,12 @@ const envSchema = z.object({
   JWT_SECRET: z.string().min(1),
   BLITZ_API_BASE_URL: z.string().url(),
   BLITZ_API_TIMEOUT_MS: z.coerce.number().int().positive().default(15000),
+  R2_ACCOUNT_ID: z.string().min(1),
+  R2_ACCESS_KEY_ID: z.string().min(1),
+  R2_SECRET_ACCESS_KEY: z.string().min(1),
+  R2_BUCKET_NAME: z.string().min(1),
+  R2_ENDPOINT: z.string().url(),
+  R2_PUBLIC_BASE_URL: z.string().url().optional(),
 });
 
 const parsed = envSchema.safeParse(process.env);
