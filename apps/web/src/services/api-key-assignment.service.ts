@@ -6,6 +6,7 @@ type ApiKeyListItem = {
   label: string;
   isActive: boolean;
   maxUsers: number;
+  requestsPerSecond: number;
   createdAt: Date;
   _count: {
     assignments: number;
@@ -43,7 +44,7 @@ export class ApiKeyAssignmentService {
         label: input.label,
         encryptedKey: input.rawKey,
         maxUsers: MAX_USERS_PER_API_KEY,
-        requestsPerSecond: 5,
+        requestsPerSecond: 3,
       },
       select: {
         id: true,
@@ -53,7 +54,7 @@ export class ApiKeyAssignmentService {
   }
 
   async listApiKeys(): Promise<
-    Array<{ id: string; label: string; isActive: boolean; activeUsers: number; maxUsers: number; createdAt: Date }>
+    Array<{ id: string; label: string; isActive: boolean; activeUsers: number; maxUsers: number; requestsPerSecond: number; createdAt: Date }>
   > {
     const keys = (await prisma.apiKey.findMany({
       include: {
@@ -77,6 +78,7 @@ export class ApiKeyAssignmentService {
       label: item.label,
       isActive: item.isActive,
       maxUsers: item.maxUsers,
+      requestsPerSecond: item.requestsPerSecond,
       activeUsers: item._count.assignments,
       createdAt: item.createdAt,
     }));
@@ -86,6 +88,13 @@ export class ApiKeyAssignmentService {
     await prisma.apiKey.update({
       where: { id: apiKeyId },
       data: { isActive },
+    });
+  }
+
+  async updateRequestsPerSecond(apiKeyId: string, requestsPerSecond: number): Promise<void> {
+    await prisma.apiKey.update({
+      where: { id: apiKeyId },
+      data: { requestsPerSecond },
     });
   }
 

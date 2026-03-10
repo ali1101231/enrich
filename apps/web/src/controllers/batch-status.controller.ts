@@ -39,7 +39,7 @@ export class BatchStatusController {
 
   getResults = async (req: Request, res: Response): Promise<void> => {
     const batchId = req.params.batchId;
-    const status = req.query.status as "SUCCESS" | "FAILURE" | undefined;
+    const status = req.query.status as "SUCCESS" | "FAILURE" | "SKIPPED" | undefined;
     const limit = req.query.limit ? Number(req.query.limit) : 200;
     const offset = req.query.offset ? Number(req.query.offset) : 0;
     const results = await this.resultsService.getResults(batchId, { status, limit, offset });

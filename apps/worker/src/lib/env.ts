@@ -10,7 +10,7 @@ const envSchema = z.object({
   DATABASE_URL: z.string().min(1),
   REDIS_URL: z.string().min(1),
   BULLMQ_PREFIX: z.string().default("koldify"),
-  WORKER_CONCURRENCY: z.coerce.number().int().positive().default(10),
+  WORKER_CONCURRENCY: z.coerce.number().int().positive().default(3),
   JOB_MAX_ATTEMPTS: z.coerce.number().int().positive().default(5),
   BLITZ_API_BASE_URL: z.string().url(),
   BLITZ_API_TIMEOUT_MS: z.coerce.number().int().positive().default(15000),

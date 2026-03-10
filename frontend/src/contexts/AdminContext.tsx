@@ -5,6 +5,7 @@ import {
   useAdminAssignments,
   useAdminCreateKey,
   useAdminSetKeyActive,
+  useAdminUpdateKeyRateLimit,
   useAdminManualAssign,
   useAdminAutoAssign,
   useAdminDeactivateAssignment,
@@ -20,6 +21,7 @@ interface AdminContextType {
   // Key management
   addKey: (label: string, rawKey: string) => Promise<void>;
   setKeyActive: (keyId: string, isActive: boolean) => Promise<void>;
+  updateKeyRateLimit: (keyId: string, requestsPerSecond: number) => Promise<void>;
   // Assignment management
   manualAssign: (userId: string, apiKeyId: string) => Promise<void>;
   autoAssign: (userId: string) => Promise<void>;
@@ -43,6 +45,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
 
   const createKeyMutation = useAdminCreateKey();
   const setKeyActiveMutation = useAdminSetKeyActive();
+  const updateKeyRateLimitMutation = useAdminUpdateKeyRateLimit();
   const manualAssignMutation = useAdminManualAssign();
   const autoAssignMutation = useAdminAutoAssign();
   const deactivateAssignmentMutation = useAdminDeactivateAssignment();
@@ -63,6 +66,10 @@ export function AdminProvider({ children }: { children: ReactNode }) {
 
   const setKeyActive = async (keyId: string, isActive: boolean) => {
     await setKeyActiveMutation.mutateAsync({ keyId, isActive });
+  };
+
+  const updateKeyRateLimit = async (keyId: string, requestsPerSecond: number) => {
+    await updateKeyRateLimitMutation.mutateAsync({ keyId, requestsPerSecond });
   };
 
   const manualAssign = async (userId: string, apiKeyId: string) => {
@@ -89,6 +96,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
       isLoading,
       addKey,
       setKeyActive,
+      updateKeyRateLimit,
       manualAssign,
       autoAssign,
       deactivateAssignment,

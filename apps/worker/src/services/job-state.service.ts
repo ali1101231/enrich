@@ -22,6 +22,7 @@ type BatchStatusValue = (typeof BATCH_STATUS)[keyof typeof BATCH_STATUS];
 const JOB_RESULT_STATUS = {
   SUCCESS: "SUCCESS",
   FAILURE: "FAILURE",
+  SKIPPED: "SKIPPED",
 } as const;
 
 export class JobStateService {
@@ -145,6 +146,29 @@ export class JobStateService {
     });
   }
 
+  async persistRowSkipped(
+    jobId: string,
+    attempt: number,
+    rowIndex: number,
+    reason: string,
+    originalRow: Record<string, string>,
+  ): Promise<void> {
+    await prisma.jobResult.create({
+      data: {
+        jobId,
+        status: JOB_RESULT_STATUS.SKIPPED,
+        attempt,
+        rowIndex,
+        error: reason,
+        response: {
+          ...originalRow,
+          _skipped: "true",
+          _skip_reason: reason,
+        } as InputJsonValue,
+      },
+    });
+  }
+
   private async refreshBatchStateByJob(jobId: string): Promise<void> {
     const job = await prisma.job.findUnique({
       where: { id: jobId },
@@ -190,8 +214,8 @@ export class JobStateService {
       },
     });
 
-    // Auto-export results when batch reaches terminal state
-    if (status === BATCH_STATUS.COMPLETED || status === BATCH_STATUS.PARTIAL) {
+    // Auto-export results when batch reaches any terminal state
+    if (status === BATCH_STATUS.COMPLETED || status === BATCH_STATUS.PARTIAL || status === BATCH_STATUS.FAILED) {
       this.autoExport.exportIfReady(job.batchId).catch(() => {});
     }
   }

@@ -15,6 +15,7 @@ router.get("/users", asyncHandler(userController.listUsers));
 router.post("/keys", asyncHandler(keyController.createKey));
 router.get("/keys", asyncHandler(keyController.listKeys));
 router.patch("/keys/:keyId/active", asyncHandler(keyController.setActive));
+router.patch("/keys/:keyId/rate-limit", asyncHandler(keyController.updateRateLimit));
 router.post("/assignments/manual", asyncHandler(assignmentController.manualAssign));
 router.post("/assignments/auto", asyncHandler(assignmentController.autoAssign));
 router.get("/assignments", asyncHandler(assignmentController.listAssignments));

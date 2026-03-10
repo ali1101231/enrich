@@ -11,8 +11,13 @@ export class FairSchedulerService {
   /**
    * Fair round-robin scheduler: picks one QUEUED job per eligible user per pass,
    * cycling through users sorted by `lastDequeuedAt` (least-recently-served first).
-   * Enforces per-user active job cap, skips users without active key assignments,
-   * and uses atomic DB transitions to prevent double-dispatching.
+   *
+   * Enforces:
+   * - per-user active job cap (PER_USER_ACTIVE_JOB_LIMIT)
+   * - per-API-key active job cap (PER_KEY_ACTIVE_JOB_LIMIT) — prevents overloading shared keys
+   * - skips users without active key assignments
+   * - atomic DB transitions to prevent double-dispatching
+   *
    * Idempotent — safe to call concurrently from multiple instances.
    */
   async refillQueue(): Promise<number> {
@@ -57,6 +62,9 @@ export class FairSchedulerService {
       return 0;
     }
 
+    // Track per-key active counts for this scheduler pass (cache to avoid repeated queries)
+    const keyActiveCountCache = new Map<string, number>();
+
     let enqueued = 0;
     let keepScanning = true;
 
@@ -79,6 +87,11 @@ export class FairSchedulerService {
         });
 
         if (activeForUser >= env.PER_USER_ACTIVE_JOB_LIMIT) {
+          logInfo("scheduler.job_skipped_due_to_user_cap", {
+            userId: user.id,
+            activeForUser,
+            limit: env.PER_USER_ACTIVE_JOB_LIMIT,
+          });
           continue;
         }
 
@@ -100,6 +113,33 @@ export class FairSchedulerService {
         });
 
         if (!assignment) {
+          logInfo("scheduler.job_skipped_due_to_missing_key", {
+            userId: user.id,
+          });
+          continue;
+        }
+
+        // Per-API-key active job cap: prevent overloading a shared key
+        let activeForKey = keyActiveCountCache.get(assignment.apiKeyId);
+        if (activeForKey === undefined) {
+          activeForKey = await prisma.job.count({
+            where: {
+              apiKeyId: assignment.apiKeyId,
+              status: {
+                in: [JobStatus.DISPATCHED, JobStatus.RUNNING],
+              },
+            },
+          });
+          keyActiveCountCache.set(assignment.apiKeyId, activeForKey);
+        }
+
+        if (activeForKey >= env.PER_KEY_ACTIVE_JOB_LIMIT) {
+          logInfo("scheduler.job_skipped_due_to_key_cap", {
+            userId: user.id,
+            apiKeyId: assignment.apiKeyId,
+            activeForKey,
+            limit: env.PER_KEY_ACTIVE_JOB_LIMIT,
+          });
           continue;
         }
 
@@ -114,6 +154,7 @@ export class FairSchedulerService {
           select: {
             id: true,
             maxAttempts: true,
+            batchId: true,
           },
         });
 
@@ -173,15 +214,27 @@ export class FairSchedulerService {
           data: { lastDequeuedAt: new Date() },
         });
 
+        // Update the cached per-key count
+        keyActiveCountCache.set(assignment.apiKeyId, (keyActiveCountCache.get(assignment.apiKeyId) ?? 0) + 1);
+
         enqueued += 1;
         progressed = true;
+
+        logInfo("scheduler.job_dispatched", {
+          jobId: nextJob.id,
+          batchId: nextJob.batchId,
+          userId: user.id,
+          apiKeyId: assignment.apiKeyId,
+          activeForKey: (keyActiveCountCache.get(assignment.apiKeyId) ?? 0),
+          activeForUser: activeForUser + 1,
+        });
       }
 
       keepScanning = progressed;
     }
 
     if (enqueued > 0) {
-      logInfo("Scheduler queued jobs", { enqueued });
+      logInfo("scheduler.pass_complete", { enqueued });
     }
 
     return enqueued;

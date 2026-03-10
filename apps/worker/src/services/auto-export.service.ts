@@ -30,7 +30,7 @@ export class AutoExportService {
       if (!batch) return;
 
       const results = await prisma.jobResult.findMany({
-        where: { job: { batchId }, status: "SUCCESS" },
+        where: { job: { batchId }, status: { in: ["SUCCESS", "SKIPPED"] } },
         select: { response: true, job: { select: { sequence: true } }, rowIndex: true },
         orderBy: [{ job: { sequence: "asc" } }, { rowIndex: "asc" }],
       });
@@ -46,6 +46,12 @@ export class AutoExportService {
         : "batch";
       const safeBase = baseName.replace(/[^a-zA-Z0-9._-]/g, "_");
       const fileName = `${safeBase}_results.csv`;
+
+      // Count only SUCCESS for the export rowCount
+      const successCount = results.filter((r) => {
+        const resp = r.response as Record<string, unknown> | null;
+        return !resp?._skipped;
+      }).length;
       const r2Key = `exports/${batch.userId}/${batchId}/${fileName}`;
 
       await s3.send(

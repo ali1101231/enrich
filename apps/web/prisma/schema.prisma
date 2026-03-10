@@ -31,6 +31,7 @@ enum BatchSourceType {
 enum JobResultStatus {
   SUCCESS
   FAILURE
+  SKIPPED
 }
 
 model User {
@@ -57,7 +58,7 @@ model ApiKey {
   encryptedKey      String
   isActive          Boolean            @default(true)
   maxUsers          Int                @default(20)
-  requestsPerSecond Int                @default(5)
+  requestsPerSecond Int                @default(3)
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
   assignments       ApiKeyAssignment[]

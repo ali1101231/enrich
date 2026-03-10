@@ -88,6 +88,9 @@ export function startBlitzWorker(): Worker<JobPayload> {
   logInfo("BullMQ worker registered", {
     queue: PROCESSING_QUEUE_NAME,
     concurrency: env.WORKER_CONCURRENCY,
+    maxAttempts: env.JOB_MAX_ATTEMPTS,
+    blitzApiBaseUrl: env.BLITZ_API_BASE_URL,
+    blitzTimeoutMs: env.BLITZ_API_TIMEOUT_MS,
   });
 
   return worker;

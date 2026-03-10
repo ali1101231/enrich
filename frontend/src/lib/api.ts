@@ -86,6 +86,7 @@ export interface AdminKeyItem {
   isActive: boolean;
   activeUsers: number;
   maxUsers: number;
+  requestsPerSecond: number;
   createdAt: string;
 }
 
@@ -124,6 +125,12 @@ export const adminApi = {
     return request<void>(`/admin/keys/${encodeURIComponent(keyId)}/active`, {
       method: "PATCH",
       body: JSON.stringify({ isActive }),
+    });
+  },
+  updateKeyRateLimit(keyId: string, requestsPerSecond: number) {
+    return request<void>(`/admin/keys/${encodeURIComponent(keyId)}/rate-limit`, {
+      method: "PATCH",
+      body: JSON.stringify({ requestsPerSecond }),
     });
   },
   listAssignments(userId?: string) {
@@ -230,6 +237,7 @@ export interface RowResult {
 export interface ResultCounts {
   success: number;
   failure: number;
+  skipped: number;
   total: number;
 }
 

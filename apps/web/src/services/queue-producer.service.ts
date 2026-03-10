@@ -7,10 +7,13 @@ import { prisma } from "../prisma/client.js";
 
 export class QueueProducerService {
   /**
-   * Enqueue QUEUED jobs for a batch into BullMQ, respecting the per-user active job limit.
-   * Only dispatches up to (PER_USER_ACTIVE_JOB_LIMIT - currentlyActive) jobs so that
-   * a single large batch does not flood the queue and starve other users.
-   * Remaining QUEUED jobs are picked up later by the fair scheduler.
+   * Enqueue QUEUED jobs for a batch into BullMQ, respecting both:
+   * - per-user active job limit (PER_USER_ACTIVE_JOB_LIMIT)
+   * - per-API-key active job limit (PER_KEY_ACTIVE_JOB_LIMIT)
+   *
+   * Only dispatches jobs within both budgets so that neither a single user
+   * nor a shared API key gets overloaded. Remaining QUEUED jobs are picked
+   * up later by the fair scheduler.
    */
   async enqueueBatchJobs(batchId: string): Promise<number> {
     const jobs = await prisma.job.findMany({
@@ -52,7 +55,7 @@ export class QueueProducerService {
       return 0;
     }
 
-    // Respect per-user active job limit to prevent one large batch from blocking others
+    // Respect per-user active job limit
     const activeForUser = await prisma.job.count({
       where: {
         userId,
@@ -60,8 +63,8 @@ export class QueueProducerService {
       },
     });
 
-    const budget = Math.max(0, env.PER_USER_ACTIVE_JOB_LIMIT - activeForUser);
-    if (budget === 0) {
+    const userBudget = Math.max(0, env.PER_USER_ACTIVE_JOB_LIMIT - activeForUser);
+    if (userBudget === 0) {
       logInfo("User at active job limit — leaving jobs QUEUED for scheduler", {
         batchId,
         userId,
@@ -71,6 +74,27 @@ export class QueueProducerService {
       return 0;
     }
 
+    // Respect per-API-key active job limit — prevents overloading a shared key
+    const activeForKey = await prisma.job.count({
+      where: {
+        apiKeyId: assignment.apiKeyId,
+        status: { in: [JobStatus.DISPATCHED, JobStatus.RUNNING] },
+      },
+    });
+
+    const keyBudget = Math.max(0, env.PER_KEY_ACTIVE_JOB_LIMIT - activeForKey);
+    if (keyBudget === 0) {
+      logInfo("API key at active job limit — leaving jobs QUEUED for scheduler", {
+        batchId,
+        userId,
+        apiKeyId: assignment.apiKeyId,
+        activeForKey,
+        limit: env.PER_KEY_ACTIVE_JOB_LIMIT,
+      });
+      return 0;
+    }
+
+    const budget = Math.min(userBudget, keyBudget);
     const eligible = jobs.slice(0, budget);
     let enqueued = 0;
 

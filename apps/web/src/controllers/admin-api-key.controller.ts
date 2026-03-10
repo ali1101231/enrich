@@ -11,6 +11,10 @@ const activeSchema = z.object({
   isActive: z.boolean(),
 });
 
+const rateLimitSchema = z.object({
+  requestsPerSecond: z.number().int().min(1).max(20),
+});
+
 export class AdminApiKeyController {
   constructor(private readonly service = new ApiKeyAssignmentService()) {}
 
@@ -28,6 +32,12 @@ export class AdminApiKeyController {
   setActive = async (req: Request, res: Response): Promise<void> => {
     const body = activeSchema.parse(req.body);
     await this.service.setApiKeyActiveStatus(req.params.keyId, body.isActive);
+    res.status(204).send();
+  };
+
+  updateRateLimit = async (req: Request, res: Response): Promise<void> => {
+    const body = rateLimitSchema.parse(req.body);
+    await this.service.updateRequestsPerSecond(req.params.keyId, body.requestsPerSecond);
     res.status(204).send();
   };
 }
