@@ -19,6 +19,10 @@ type AssignmentListItem = {
   isActive: boolean;
   apiKey: {
     label: string;
+    isActive: boolean;
+  };
+  user: {
+    email: string;
   };
 };
 
@@ -86,10 +90,12 @@ export class ApiKeyAssignmentService {
     Array<{
       id: string;
       userId: string;
+      userEmail: string;
       apiKeyId: string;
       isManual: boolean;
       isActive: boolean;
       apiKeyLabel: string;
+      apiKeyActive: boolean;
     }>
   > {
     const assignments = (await prisma.apiKeyAssignment.findMany({
@@ -100,6 +106,12 @@ export class ApiKeyAssignmentService {
         apiKey: {
           select: {
             label: true,
+            isActive: true,
+          },
+        },
+        user: {
+          select: {
+            email: true,
           },
         },
       },
@@ -111,10 +123,12 @@ export class ApiKeyAssignmentService {
     return assignments.map((assignment: AssignmentListItem) => ({
       id: assignment.id,
       userId: assignment.userId,
+      userEmail: assignment.user.email,
       apiKeyId: assignment.apiKeyId,
       isManual: assignment.isManual,
       isActive: assignment.isActive,
       apiKeyLabel: assignment.apiKey.label,
+      apiKeyActive: assignment.apiKey.isActive,
     }));
   }
 
@@ -186,6 +200,24 @@ export class ApiKeyAssignmentService {
 
     await this.assignUser(userId, chosen.id, false);
     return { apiKeyId: chosen.id };
+  }
+
+  async deactivateAssignment(assignmentId: string): Promise<void> {
+    const updated = await prisma.apiKeyAssignment.updateMany({
+      where: { id: assignmentId, isActive: true },
+      data: { isActive: false },
+    });
+    if (updated.count === 0) {
+      throw new Error("Assignment not found or already inactive");
+    }
+  }
+
+  async deactivateUserAssignments(userId: string): Promise<number> {
+    const result = await prisma.apiKeyAssignment.updateMany({
+      where: { userId, isActive: true },
+      data: { isActive: false },
+    });
+    return result.count;
   }
 
   private async ensureUser(userId: string): Promise<void> {

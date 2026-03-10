@@ -31,4 +31,16 @@ export class AdminAssignmentController {
     const assignments = await this.service.listAssignments(userId);
     res.status(200).json({ items: assignments });
   };
+
+  deactivateAssignment = async (req: Request, res: Response): Promise<void> => {
+    const assignmentId = req.params.assignmentId;
+    await this.service.deactivateAssignment(assignmentId);
+    res.status(204).send();
+  };
+
+  deactivateUserAssignments = async (req: Request, res: Response): Promise<void> => {
+    const userId = req.params.userId;
+    const count = await this.service.deactivateUserAssignments(userId);
+    res.status(200).json({ deactivated: count });
+  };
 }
