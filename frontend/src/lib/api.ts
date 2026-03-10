@@ -165,10 +165,24 @@ export interface RunHistoryItem {
   failedRows: number;
 }
 
+export interface DashboardStats {
+  totalBatches: number;
+  activeBatches: number;
+  completedBatches: number;
+  failedBatches: number;
+  totalRowsProcessed: number;
+  totalRowsFailed: number;
+  totalExports: number;
+  batchesToday: number;
+}
+
 export const runsApi = {
   history(limit?: number) {
     const qs = limit ? `?limit=${limit}` : "";
     return request<{ items: RunHistoryItem[] }>(`/runs/history${qs}`);
+  },
+  stats() {
+    return request<DashboardStats>("/runs/stats");
   },
 };
 
@@ -204,6 +218,35 @@ export interface BatchProgress {
   estimatedRemainingSeconds: number;
 }
 
+export interface RowResult {
+  jobId: string;
+  rowIndex: number | null;
+  status: string;
+  response: Record<string, unknown> | null;
+  error: string | null;
+  createdAt: string;
+}
+
+export interface ResultCounts {
+  success: number;
+  failure: number;
+  total: number;
+}
+
+export interface ExportItem {
+  id: string;
+  fileName: string;
+  rowCount: number;
+  fileSize: number;
+  createdAt: string;
+}
+
+export interface ExportCreateResponse {
+  exportId: string;
+  fileName: string;
+  rowCount: number;
+}
+
 export const batchApi = {
   uploadCsv(file: File, chunkSize?: number) {
     const formData = new FormData();
@@ -231,5 +274,27 @@ export const batchApi = {
   },
   listJobs(batchId: string) {
     return request<{ items: Array<{ id: string; sequence: number; rowCount: number; status: string; attempts: number }> }>(`/batches/${encodeURIComponent(batchId)}/jobs`);
+  },
+  getResults(batchId: string, opts?: { status?: string; limit?: number; offset?: number }) {
+    const params = new URLSearchParams();
+    if (opts?.status) params.set("status", opts.status);
+    if (opts?.limit) params.set("limit", String(opts.limit));
+    if (opts?.offset) params.set("offset", String(opts.offset));
+    const qs = params.toString() ? `?${params.toString()}` : "";
+    return request<{ items: RowResult[]; total: number }>(`/batches/${encodeURIComponent(batchId)}/results${qs}`);
+  },
+  getResultCounts(batchId: string) {
+    return request<ResultCounts>(`/batches/${encodeURIComponent(batchId)}/results/counts`);
+  },
+  exportCsv(batchId: string) {
+    return request<ExportCreateResponse>(`/batches/${encodeURIComponent(batchId)}/export`, {
+      method: "POST",
+    });
+  },
+  listExports(batchId: string) {
+    return request<{ items: ExportItem[] }>(`/batches/${encodeURIComponent(batchId)}/exports`);
+  },
+  downloadExportUrl(exportId: string) {
+    return `${API_BASE}/exports/${encodeURIComponent(exportId)}/download`;
   },
 };

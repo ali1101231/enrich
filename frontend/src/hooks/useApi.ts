@@ -8,9 +8,13 @@ import {
   type BatchItem,
   type BatchProgress,
   type RunHistoryItem,
+  type DashboardStats,
   type AdminUserItem,
   type AdminKeyItem,
   type AssignmentItem,
+  type RowResult,
+  type ResultCounts,
+  type ExportItem,
 } from "@/lib/api";
 
 // ---- Auth ----
@@ -57,7 +61,13 @@ export function useBatchDetail(batchId: string | undefined) {
     queryKey: ["batch", batchId],
     queryFn: () => batchApi.getById(batchId!),
     enabled: !!batchId,
-    staleTime: 10_000,
+    staleTime: 5_000,
+    refetchInterval: (query) => {
+      const data = query.state.data;
+      if (!data) return 5000;
+      if (data.status === "COMPLETED" || data.status === "FAILED" || data.status === "PARTIAL") return false;
+      return 5000;
+    },
   });
 }
 
@@ -66,8 +76,71 @@ export function useBatchJobs(batchId: string | undefined) {
     queryKey: ["batch-jobs", batchId],
     queryFn: () => batchApi.listJobs(batchId!),
     enabled: !!batchId,
+    staleTime: 5_000,
+    refetchInterval: (query) => {
+      const data = query.state.data;
+      if (!data) return 5000;
+      const allDone = data.items.every(
+        (j: { status: string }) => j.status === "COMPLETED" || j.status === "FAILED",
+      );
+      return allDone ? false : 5000;
+    },
+  });
+}
+
+// ---- Batch Results ----
+export function useBatchResults(
+  batchId: string | undefined,
+  opts?: { status?: string; limit?: number; offset?: number },
+) {
+  return useQuery({
+    queryKey: ["batch-results", batchId, opts],
+    queryFn: () => batchApi.getResults(batchId!, opts),
+    enabled: !!batchId,
+    staleTime: 10_000,
+  });
+}
+
+export function useBatchResultCounts(batchId: string | undefined) {
+  return useQuery<ResultCounts>({
+    queryKey: ["batch-result-counts", batchId],
+    queryFn: () => batchApi.getResultCounts(batchId!),
+    enabled: !!batchId,
     staleTime: 10_000,
     refetchInterval: 15_000,
+  });
+}
+
+// ---- Exports ----
+export function useBatchExports(batchId: string | undefined) {
+  return useQuery<ExportItem[]>({
+    queryKey: ["batch-exports", batchId],
+    queryFn: async () => {
+      const res = await batchApi.listExports(batchId!);
+      return res.items;
+    },
+    enabled: !!batchId,
+    staleTime: 10_000,
+  });
+}
+
+export function useExportCsv() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (batchId: string) => batchApi.exportCsv(batchId),
+    onSuccess: (_data, batchId) => {
+      qc.invalidateQueries({ queryKey: ["batch-exports", batchId] });
+    },
+  });
+}
+
+// ---- Dashboard Stats ----
+export function useDashboardStats() {
+  return useQuery<DashboardStats>({
+    queryKey: ["dashboard", "stats"],
+    queryFn: () => runsApi.stats(),
+    staleTime: 30_000,
+    refetchInterval: 60_000,
   });
 }
 

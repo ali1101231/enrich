@@ -46,6 +46,7 @@ model User {
   assignments    ApiKeyAssignment[]
   batches        Batch[]
   jobs           Job[]
+  exports        BatchExport[]
 
   @@map("users")
 }
@@ -96,6 +97,7 @@ model Batch {
   updatedAt        DateTime       @updatedAt
   user             User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   jobs             Job[]
+  exports          BatchExport[]
 
   @@index([userId, createdAt])
   @@index([status, createdAt])
@@ -146,4 +148,21 @@ model JobResult {
 
   @@index([jobId, createdAt])
   @@map("job_results")
+}
+
+model BatchExport {
+  id        String   @id @default(cuid())
+  batchId   String
+  userId    String
+  r2Key     String
+  fileName  String
+  rowCount  Int
+  fileSize  Int
+  createdAt DateTime @default(now())
+  batch     Batch    @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([batchId])
+  @@index([userId, createdAt])
+  @@map("exports")
 }
