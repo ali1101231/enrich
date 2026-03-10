@@ -11,10 +11,6 @@ import {
   Settings,
   HelpCircle,
   ChevronDown,
-  Wifi,
-  Check,
-  X,
-  Clock,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -42,25 +38,19 @@ import {
 import { useApp } from '@/contexts/AppContext';
 import { mockTools } from '@/lib/mockData';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { formatDistanceToNow } from 'date-fns';
 
 export function TopBar() {
   const navigate = useNavigate();
   const { 
     user, 
-    notifications, 
     preferences,
     logout, 
     updatePreferences,
-    markNotificationRead,
-    markAllNotificationsRead,
   } = useApp();
   
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
-  const visibleNotifications = notifications.filter((n) => n.type !== 'key-warning');
-  const unreadCount = visibleNotifications.filter((n) => !n.read).length;
   const isDark = preferences.theme === 'dark';
 
   const toggleTheme = () => {
@@ -82,7 +72,7 @@ export function TopBar() {
   const handleToolSelect = (toolId: string) => {
     const tool = mockTools.find(t => t.id === toolId);
     if (tool) {
-      navigate(`/${tool.provider}/${tool.id}`);
+      navigate(`/tools/${tool.id}`);
       setSearchOpen(false);
       setSearchQuery('');
     }
@@ -153,74 +143,16 @@ export function TopBar() {
                 className="relative h-9 w-9 text-muted-foreground hover:text-foreground rounded-lg"
               >
                 <Bell className="h-4 w-4" />
-                {unreadCount > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full gradient-koldify text-[9px] font-bold text-white">
-                    {unreadCount}
-                  </span>
-                )}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-80 p-0 rounded-xl" align="end">
               <div className="flex items-center justify-between p-4 border-b">
                 <h4 className="font-semibold text-sm">Notifications</h4>
-                {unreadCount > 0 && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-xs text-muted-foreground h-7"
-                    onClick={markAllNotificationsRead}
-                  >
-                    Mark all read
-                  </Button>
-                )}
               </div>
-              <ScrollArea className="h-80">
-                {visibleNotifications.length === 0 ? (
-                  <div className="p-8 text-center text-muted-foreground">
-                    <Bell className="h-8 w-8 mx-auto mb-2 opacity-30" />
-                    <p className="text-sm">No notifications</p>
-                  </div>
-                ) : (
-                  <div className="divide-y">
-                    {visibleNotifications.map((notif) => (
-                      <button
-                        key={notif.id}
-                        className={cn(
-                          'w-full p-4 text-left hover:bg-muted/50 transition-colors',
-                          !notif.read && 'bg-primary/5'
-                        )}
-                        onClick={() => {
-                          markNotificationRead(notif.id);
-                          if (notif.runId) navigate(`/runs/${notif.runId}`);
-                        }}
-                      >
-                        <div className="flex items-start gap-3">
-                          <div className={cn(
-                            'mt-0.5 flex h-8 w-8 items-center justify-center rounded-lg',
-                            notif.type === 'run-completed' && 'bg-success/10 text-success',
-                            notif.type === 'run-failed' && 'bg-destructive/10 text-destructive',
-                            notif.type === 'run-paused' && 'bg-blue-500/10 text-blue-500',
-                          )}>
-                            {notif.type === 'run-completed' && <Check className="h-4 w-4" />}
-                            {notif.type === 'run-failed' && <X className="h-4 w-4" />}
-                            {notif.type === 'run-paused' && <Clock className="h-4 w-4" />}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="font-medium text-sm">{notif.title}</p>
-                            <p className="text-xs text-muted-foreground truncate">{notif.message}</p>
-                            <p className="text-xs text-muted-foreground mt-1">
-                              {formatDistanceToNow(new Date(notif.timestamp), { addSuffix: true })}
-                            </p>
-                          </div>
-                          {!notif.read && (
-                            <div className="h-2 w-2 rounded-full gradient-koldify" />
-                          )}
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </ScrollArea>
+              <div className="p-8 text-center text-muted-foreground">
+                <Bell className="h-8 w-8 mx-auto mb-2 opacity-30" />
+                <p className="text-sm">No notifications</p>
+              </div>
             </PopoverContent>
           </Popover>
 
@@ -229,16 +161,16 @@ export function TopBar() {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="flex items-center gap-2 px-2 h-9 rounded-lg">
                 <div className="flex h-7 w-7 items-center justify-center rounded-lg gradient-koldify text-white font-semibold text-xs">
-                  {user?.name?.charAt(0) || 'U'}
+                  {user?.name?.charAt(0) || user?.email?.charAt(0) || 'U'}
                 </div>
-                <span className="hidden lg:block text-sm font-medium">{user?.name}</span>
+                <span className="hidden lg:block text-sm font-medium">{user?.name || user?.email}</span>
                 <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56 rounded-xl">
               <DropdownMenuLabel>
                 <div className="flex flex-col">
-                  <span className="font-medium">{user?.name}</span>
+                  <span className="font-medium">{user?.name || user?.email}</span>
                   <span className="text-xs text-muted-foreground font-normal">{user?.email}</span>
                 </div>
               </DropdownMenuLabel>

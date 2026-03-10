@@ -2,22 +2,18 @@ import {
   Users,
   Key,
   TrendingUp,
-  CreditCard,
   Activity,
-  ArrowUpRight,
-  ArrowDownRight,
+  Link2,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
+import { Badge } from '@/components/ui/badge';
 import { useAdmin } from '@/contexts/AdminContext';
 import { useApp } from '@/contexts/AppContext';
 import { formatDistanceToNow } from 'date-fns';
 
 export default function AdminDashboard() {
-  const { users, keys, activity, stats } = useAdmin();
+  const { users, keys, assignments, stats } = useAdmin();
   const { user } = useApp();
-
-  const creditUsagePercent = (stats.totalCreditsUsed / stats.totalCreditsAvailable) * 100;
 
   return (
     <div className="p-6 lg:p-8 animate-fade-in">
@@ -56,111 +52,85 @@ export default function AdminDashboard() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Credits Used</CardTitle>
-            <CreditCard className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">Assignments</CardTitle>
+            <Link2 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {(stats.totalCreditsUsed / 1000).toFixed(0)}K
-            </div>
-            <p className="text-xs text-muted-foreground">
-              of {(stats.totalCreditsAvailable / 1000).toFixed(0)}K total
-            </p>
+            <div className="text-2xl font-bold">{stats.totalAssignments}</div>
+            <p className="text-xs text-muted-foreground">active key→user links</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Credit Usage</CardTitle>
+            <CardTitle className="text-sm font-medium">Platform Status</CardTitle>
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{creditUsagePercent.toFixed(1)}%</div>
-            <Progress value={creditUsagePercent} className="h-2 mt-2" />
+            <div className="text-2xl font-bold text-success">Healthy</div>
+            <p className="text-xs text-muted-foreground">All systems operational</p>
           </CardContent>
         </Card>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        {/* Recent Activity */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Activity className="h-5 w-5" />
-              Recent Activity
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {activity.slice(0, 5).map((act) => (
-                <div key={act.id} className="flex items-start gap-3">
-                  <div className={`w-2 h-2 mt-2 rounded-full ${
-                    act.action === 'run_completed' ? 'bg-success' :
-                    act.action === 'run_failed' ? 'bg-destructive' :
-                    act.action === 'run_started' ? 'bg-primary' : 'bg-muted-foreground'
-                  }`} />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{act.userName}</p>
-                    <p className="text-xs text-muted-foreground">{act.details}</p>
-                  </div>
-                  <div className="text-right shrink-0">
-                    {act.creditsUsed > 0 && (
-                      <p className="text-xs font-medium text-primary">
-                        -{act.creditsUsed.toLocaleString()}
-                      </p>
-                    )}
-                    <p className="text-xs text-muted-foreground">
-                      {formatDistanceToNow(new Date(act.timestamp), { addSuffix: true })}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Top Users by Usage */}
+        {/* Recent Users */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Users className="h-5 w-5" />
-              Top Users by Credits
+              Users
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {[...users]
-                .sort((a, b) => b.creditsUsed - a.creditsUsed)
-                .slice(0, 5)
-                .map((user) => {
-                  const usagePercent = (user.creditsUsed / user.creditsTotal) * 100;
-                  return (
-                    <div key={user.id} className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm font-medium">{user.name}</p>
-                          <p className="text-xs text-muted-foreground">{user.email}</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-sm font-medium">
-                            {(user.creditsUsed / 1000).toFixed(0)}K / {(user.creditsTotal / 1000).toFixed(0)}K
-                          </p>
-                          <p className={`text-xs flex items-center justify-end ${
-                            usagePercent > 90 ? 'text-destructive' : 'text-muted-foreground'
-                          }`}>
-                            {usagePercent > 90 ? (
-                              <ArrowUpRight className="h-3 w-3 mr-1" />
-                            ) : (
-                              <ArrowDownRight className="h-3 w-3 mr-1" />
-                            )}
-                            {usagePercent.toFixed(0)}% used
-                          </p>
-                        </div>
-                      </div>
-                      <Progress value={usagePercent} className="h-1.5" />
-                    </div>
-                  );
-                })}
+              {users.slice(0, 5).map((u) => (
+                <div key={u.id} className="flex items-center justify-between">
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium truncate">{u.displayName ?? u.email}</p>
+                    <p className="text-xs text-muted-foreground">{u.email}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="text-[10px]">{u.role}</Badge>
+                    <Badge variant={u.isActive ? 'secondary' : 'destructive'} className="text-[10px]">
+                      {u.isActive ? 'active' : 'inactive'}
+                    </Badge>
+                  </div>
+                </div>
+              ))}
+              {users.length === 0 && (
+                <p className="text-sm text-muted-foreground text-center py-4">No users found</p>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Keys Overview */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Key className="h-5 w-5" />
+              API Keys
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {keys.slice(0, 5).map((key) => (
+                <div key={key.id} className="flex items-center justify-between">
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium truncate">{key.label}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {key.activeUsers}/{key.maxUsers} users • {formatDistanceToNow(new Date(key.createdAt), { addSuffix: true })}
+                    </p>
+                  </div>
+                  <Badge variant={key.isActive ? 'secondary' : 'destructive'} className="text-[10px]">
+                    {key.isActive ? 'active' : 'inactive'}
+                  </Badge>
+                </div>
+              ))}
+              {keys.length === 0 && (
+                <p className="text-sm text-muted-foreground text-center py-4">No keys found</p>
+              )}
             </div>
           </CardContent>
         </Card>

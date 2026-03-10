@@ -7,12 +7,13 @@ import {
   Clock,
   Zap,
   TrendingUp,
+  TrendingDown,
   ArrowRight,
   FolderOutput,
   Upload,
   Pin,
   Activity,
-  TrendingDown,
+
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -21,17 +22,28 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { useApp } from '@/contexts/AppContext';
 import { mockTools } from '@/lib/mockData';
-import { Run } from '@/types';
+import { useBatches } from '@/hooks/useApi';
+import type { BatchItem } from '@/lib/api';
 
-function formatDuration(seconds: number): string {
-  const mins = Math.floor(seconds / 60);
-  const secs = seconds % 60;
-  return `${mins}m ${secs}s`;
+function batchStatusLabel(status: string): string {
+  const map: Record<string, string> = {
+    QUEUED: 'Pending', RUNNING: 'Running', COMPLETED: 'Completed',
+    FAILED: 'Failed', PARTIAL: 'Partial',
+  };
+  return map[status] ?? status;
 }
 
-function RunCard({ run }: { run: Run }) {
+function batchStatusKey(status: string): 'running' | 'paused' | 'completed' | 'failed' | 'pending' | 'cancelled' {
+  const map: Record<string, 'running' | 'completed' | 'failed' | 'pending'> = {
+    QUEUED: 'pending', RUNNING: 'running', COMPLETED: 'completed',
+    FAILED: 'failed', PARTIAL: 'failed',
+  };
+  return map[status] ?? 'pending';
+}
+
+function BatchRunCard({ batch }: { batch: BatchItem }) {
   const navigate = useNavigate();
-  const { pauseRun, resumeRun } = useApp();
+  const statusKey = batchStatusKey(batch.status);
 
   const statusConfig = {
     running: { icon: Play, color: 'text-primary', bg: 'bg-primary/10', label: 'Running' },
@@ -42,13 +54,15 @@ function RunCard({ run }: { run: Run }) {
     cancelled: { icon: XCircle, color: 'text-muted-foreground', bg: 'bg-muted', label: 'Cancelled' },
   };
 
-  const config = statusConfig[run.status];
+  const config = statusConfig[statusKey];
   const StatusIcon = config.icon;
+  const processedRows = batch.completedRows + batch.failedRows;
+  const progress = batch.totalRows > 0 ? Math.round((processedRows / batch.totalRows) * 100) : 0;
 
   return (
     <Card 
       className="group cursor-pointer hover:border-primary/30 hover:shadow-lg transition-all duration-300"
-      onClick={() => navigate(`/runs/${run.id}`)}
+      onClick={() => navigate(`/runs/${batch.id}`)}
     >
       <CardContent className="p-4">
         <div className="flex items-start justify-between gap-3">
@@ -57,8 +71,8 @@ function RunCard({ run }: { run: Run }) {
               <StatusIcon className={cn('h-5 w-5', config.color)} />
             </div>
             <div className="min-w-0">
-              <p className="font-semibold truncate">{run.toolName}</p>
-              <p className="text-sm text-muted-foreground truncate">{run.inputFileName}</p>
+              <p className="font-semibold truncate">{batch.sourceType === 'CSV_UPLOAD' ? 'CSV Upload' : 'Pasted Rows'}</p>
+              <p className="text-sm text-muted-foreground truncate">{batch.originalFileName ?? 'Batch'}</p>
             </div>
           </div>
           <Badge variant="secondary" className={cn('shrink-0 text-[11px]', config.color)}>
@@ -66,45 +80,15 @@ function RunCard({ run }: { run: Run }) {
           </Badge>
         </div>
 
-        {(run.status === 'running' || run.status === 'paused') && (
+        {(statusKey === 'running' || statusKey === 'pending') && (
           <div className="mt-4 space-y-2">
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">
-                {run.rowsProcessed.toLocaleString()} / {run.totalRows.toLocaleString()} rows
+                {processedRows.toLocaleString()} / {batch.totalRows.toLocaleString()} rows
               </span>
-              <span className="font-medium text-primary">{run.progress}%</span>
+              <span className="font-medium text-primary">{progress}%</span>
             </div>
-            <Progress value={run.progress} className="h-1.5" />
-            {run.eta && (
-              <p className="text-xs text-muted-foreground">ETA: {run.eta}</p>
-            )}
-          </div>
-        )}
-
-        {run.status === 'running' && (
-          <div className="mt-3 flex gap-2" onClick={e => e.stopPropagation()}>
-            <Button
-              size="sm"
-              variant="outline"
-              className="flex-1 h-8 text-xs"
-              onClick={() => pauseRun(run.id)}
-            >
-              <Pause className="h-3.5 w-3.5 mr-1" />
-              Pause
-            </Button>
-          </div>
-        )}
-
-        {run.status === 'paused' && (
-          <div className="mt-3 flex gap-2" onClick={e => e.stopPropagation()}>
-            <Button
-              size="sm"
-              className="flex-1 h-8 text-xs gradient-koldify text-white"
-              onClick={() => resumeRun(run.id)}
-            >
-              <Play className="h-3.5 w-3.5 mr-1" />
-              Resume
-            </Button>
+            <Progress value={progress} className="h-1.5" />
           </div>
         )}
       </CardContent>
@@ -163,11 +147,20 @@ function StatCard({
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const { user, runs, stats, preferences } = useApp();
-  
-  const activeRuns = runs.filter(r => r.status === 'running' || r.status === 'paused');
-  const recentRuns = runs.slice(0, 5);
+  const { user, preferences } = useApp();
+  const { data: batches = [], isLoading } = useBatches();
+
+  const activeRuns = batches.filter(b => b.status === 'RUNNING' || b.status === 'QUEUED');
+  const recentBatches = batches.slice(0, 5);
   const pinnedTools = mockTools.filter(t => preferences.pinnedTools.includes(t.id));
+
+  const completedCount = batches.filter(b => b.status === 'COMPLETED').length;
+  const failedCount = batches.filter(b => b.status === 'FAILED').length;
+  const successRate = completedCount + failedCount > 0
+    ? Math.round((completedCount / (completedCount + failedCount)) * 100)
+    : 100;
+  const today = new Date().toDateString();
+  const totalToday = batches.filter(b => new Date(b.createdAt).toDateString() === today).length;
 
   const quickActions = [
     { title: 'New Run', icon: Play, href: '/runs', primary: true },
@@ -180,7 +173,7 @@ export default function Dashboard() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Welcome back, {user?.name?.split(' ')[0]}</h1>
+          <h1 className="text-2xl font-bold tracking-tight">Welcome back, {user?.name?.split(' ')[0] || user?.email?.split('@')[0]}</h1>
           <p className="text-muted-foreground text-sm mt-0.5">Here's what's happening with your runs</p>
         </div>
         <Button 
@@ -196,27 +189,26 @@ export default function Dashboard() {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
           title="Active Runs"
-          value={stats.activeRuns}
+          value={activeRuns.length}
           subtitle="Currently processing"
           icon={Activity}
         />
         <StatCard
           title="Success Rate"
-          value={`${stats.successRate}%`}
-          subtitle="Last 7 days"
+          value={`${successRate}%`}
+          subtitle="All time"
           icon={TrendingUp}
-          trend={3.2}
         />
         <StatCard
-          title="Avg Runtime"
-          value={formatDuration(stats.avgRuntime)}
-          subtitle="Per job"
+          title="Total Runs"
+          value={batches.length}
+          subtitle="All batches"
           icon={Clock}
         />
         <StatCard
           title="Total Today"
-          value={stats.totalRunsToday}
-          subtitle="Runs completed"
+          value={totalToday}
+          subtitle="Runs started"
           icon={Zap}
         />
       </div>
@@ -237,8 +229,8 @@ export default function Dashboard() {
                 </Link>
               </div>
               <div className="grid gap-3 sm:grid-cols-2">
-                {activeRuns.slice(0, 4).map(run => (
-                  <RunCard key={run.id} run={run} />
+                {activeRuns.slice(0, 4).map(batch => (
+                  <BatchRunCard key={batch.id} batch={batch} />
                 ))}
               </div>
             </div>
@@ -258,7 +250,8 @@ export default function Dashboard() {
             <Card>
               <CardContent className="p-0">
                 <div className="divide-y">
-                  {recentRuns.map(run => {
+                  {recentBatches.map(batch => {
+                    const statusKey = batchStatusKey(batch.status);
                     const statusConfig = {
                       running: { color: 'text-primary' },
                       paused: { color: 'text-blue-500' },
@@ -267,28 +260,29 @@ export default function Dashboard() {
                       pending: { color: 'text-muted-foreground' },
                       cancelled: { color: 'text-muted-foreground' },
                     };
+                    const processed = batch.completedRows + batch.failedRows;
                     
                     return (
                       <Link
-                        key={run.id}
-                        to={`/runs/${run.id}`}
+                        key={batch.id}
+                        to={`/runs/${batch.id}`}
                         className="flex items-center justify-between px-4 py-3.5 hover:bg-muted/40 transition-colors group"
                       >
                         <div className="flex items-center gap-3 min-w-0">
                           <div className="min-w-0">
-                            <p className="font-medium text-sm truncate group-hover:text-primary transition-colors">{run.toolName}</p>
-                            <p className="text-xs text-muted-foreground truncate">{run.inputFileName}</p>
+                            <p className="font-medium text-sm truncate group-hover:text-primary transition-colors">{batch.originalFileName ?? 'Batch'}</p>
+                            <p className="text-xs text-muted-foreground truncate">{batch.sourceType === 'CSV_UPLOAD' ? 'CSV Upload' : 'Pasted Rows'}</p>
                           </div>
                         </div>
                         <div className="flex items-center gap-4">
                           <span className="text-xs text-muted-foreground hidden sm:block">
-                            {run.rowsProcessed.toLocaleString()} rows
+                            {processed.toLocaleString()} / {batch.totalRows.toLocaleString()} rows
                           </span>
                           <Badge 
                             variant="secondary" 
-                            className={cn('text-[11px]', statusConfig[run.status].color)}
+                            className={cn('text-[11px]', statusConfig[statusKey].color)}
                           >
-                            {run.status}
+                            {batchStatusLabel(batch.status)}
                           </Badge>
                         </div>
                       </Link>
@@ -343,7 +337,7 @@ export default function Dashboard() {
                   <Card 
                     key={tool.id}
                     className="cursor-pointer hover:border-primary/30 transition-all duration-200"
-                    onClick={() => navigate(`/${tool.provider}/${tool.id}`)}
+                    onClick={() => navigate(`/tools/${tool.id}`)}
                   >
                     <CardContent className="p-3.5">
                       <div className="flex items-center gap-3">

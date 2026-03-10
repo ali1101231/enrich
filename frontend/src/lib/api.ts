@@ -80,12 +80,39 @@ export const authApi = {
 };
 
 // ---- Admin ----
+export interface AdminKeyItem {
+  id: string;
+  label: string;
+  isActive: boolean;
+  activeUsers: number;
+  maxUsers: number;
+  createdAt: string;
+}
+
+export interface AdminUserItem {
+  id: string;
+  email: string;
+  displayName: string | null;
+  role: string;
+  isActive: boolean;
+  createdAt: string;
+}
+
+export interface AssignmentItem {
+  id: string;
+  userId: string;
+  apiKeyId: string;
+  isManual: boolean;
+  isActive: boolean;
+  createdAt: string;
+}
+
 export const adminApi = {
   listUsers() {
-    return request<{ items: AuthUser[] }>("/admin/users");
+    return request<{ items: AdminUserItem[] }>("/admin/users");
   },
   listKeys() {
-    return request<{ items: Array<{ id: string; label: string; isActive: boolean; activeUsers: number; maxUsers: number }> }>("/admin/keys");
+    return request<{ items: AdminKeyItem[] }>("/admin/keys");
   },
   createKey(label: string, rawKey: string) {
     return request<{ id: string }>("/admin/keys", {
@@ -98,6 +125,50 @@ export const adminApi = {
       method: "PATCH",
       body: JSON.stringify({ isActive }),
     });
+  },
+  listAssignments(userId?: string) {
+    const qs = userId ? `?userId=${encodeURIComponent(userId)}` : "";
+    return request<{ items: AssignmentItem[] }>(`/admin/assignments${qs}`);
+  },
+  manualAssign(userId: string, apiKeyId: string) {
+    return request<void>("/admin/assignments/manual", {
+      method: "POST",
+      body: JSON.stringify({ userId, apiKeyId }),
+    });
+  },
+  autoAssign(userId: string) {
+    return request<AssignmentItem>("/admin/assignments/auto", {
+      method: "POST",
+      body: JSON.stringify({ userId }),
+    });
+  },
+  deactivateAssignment(assignmentId: string) {
+    return request<void>(`/admin/assignments/${encodeURIComponent(assignmentId)}/deactivate`, {
+      method: "PATCH",
+    });
+  },
+  deactivateUserAssignments(userId: string) {
+    return request<{ deactivated: number }>(`/admin/users/${encodeURIComponent(userId)}/assignments`, {
+      method: "DELETE",
+    });
+  },
+};
+
+// ---- Runs / History ----
+export interface RunHistoryItem {
+  batchId: string;
+  createdAt: string;
+  sourceType: string;
+  totalRows: number;
+  status: string;
+  completedRows: number;
+  failedRows: number;
+}
+
+export const runsApi = {
+  history(limit?: number) {
+    const qs = limit ? `?limit=${limit}` : "";
+    return request<{ items: RunHistoryItem[] }>(`/runs/history${qs}`);
   },
 };
 

@@ -6,6 +6,7 @@ type ApiKeyListItem = {
   label: string;
   isActive: boolean;
   maxUsers: number;
+  createdAt: Date;
   _count: {
     assignments: number;
   };
@@ -17,6 +18,7 @@ type AssignmentListItem = {
   apiKeyId: string;
   isManual: boolean;
   isActive: boolean;
+  createdAt: Date;
   apiKey: {
     label: string;
     isActive: boolean;
@@ -51,7 +53,7 @@ export class ApiKeyAssignmentService {
   }
 
   async listApiKeys(): Promise<
-    Array<{ id: string; label: string; isActive: boolean; activeUsers: number; maxUsers: number }>
+    Array<{ id: string; label: string; isActive: boolean; activeUsers: number; maxUsers: number; createdAt: Date }>
   > {
     const keys = (await prisma.apiKey.findMany({
       include: {
@@ -76,6 +78,7 @@ export class ApiKeyAssignmentService {
       isActive: item.isActive,
       maxUsers: item.maxUsers,
       activeUsers: item._count.assignments,
+      createdAt: item.createdAt,
     }));
   }
 
@@ -94,6 +97,7 @@ export class ApiKeyAssignmentService {
       apiKeyId: string;
       isManual: boolean;
       isActive: boolean;
+      createdAt: Date;
       apiKeyLabel: string;
       apiKeyActive: boolean;
     }>
@@ -127,6 +131,7 @@ export class ApiKeyAssignmentService {
       apiKeyId: assignment.apiKeyId,
       isManual: assignment.isManual,
       isActive: assignment.isActive,
+      createdAt: assignment.createdAt,
       apiKeyLabel: assignment.apiKey.label,
       apiKeyActive: assignment.apiKey.isActive,
     }));
