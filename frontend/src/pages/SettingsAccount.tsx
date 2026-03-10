@@ -18,6 +18,16 @@ import {
 } from '@/components/ui/alert-dialog';
 import { User, Mail, Calendar, CreditCard, Trash2, AlertTriangle } from 'lucide-react';
 import { format } from 'date-fns';
+import { motion } from 'framer-motion';
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 20 },
+  visible: (delay: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.5, delay, ease: [0.25, 0.1, 0.25, 1] as const },
+  }),
+};
 
 export default function SettingsAccount() {
   const { user, logout } = useApp();
@@ -25,6 +35,7 @@ export default function SettingsAccount() {
   return (
     <div className="space-y-8">
       {/* Profile */}
+      <motion.div variants={fadeUp} initial="hidden" animate="visible" custom={0}>
       <Card>
         <CardHeader>
           <CardTitle>Profile</CardTitle>
@@ -57,8 +68,10 @@ export default function SettingsAccount() {
           <Button>Save Changes</Button>
         </CardContent>
       </Card>
+      </motion.div>
 
       {/* Plan */}
+      <motion.div variants={fadeUp} initial="hidden" animate="visible" custom={0.1}>
       <Card>
         <CardHeader>
           <CardTitle>Plan & Billing</CardTitle>
@@ -83,8 +96,10 @@ export default function SettingsAccount() {
           <Button variant="outline">Manage Subscription</Button>
         </CardContent>
       </Card>
+      </motion.div>
 
       {/* Danger Zone */}
+      <motion.div variants={fadeUp} initial="hidden" animate="visible" custom={0.2}>
       <Card className="border-destructive/50">
         <CardHeader>
           <CardTitle className="text-destructive flex items-center gap-2">
@@ -157,6 +172,7 @@ export default function SettingsAccount() {
           </div>
         </CardContent>
       </Card>
+      </motion.div>
     </div>
   );
 }

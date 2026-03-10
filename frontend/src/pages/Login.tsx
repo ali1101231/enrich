@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Sparkles, Loader2 } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
+import { motion } from 'framer-motion';
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -84,7 +85,11 @@ export default function LoginPage() {
       </div>
 
       {/* Main container */}
-      <div className={`relative w-full max-w-[850px] h-[550px] bg-white/10 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/30 overflow-hidden transition-none ${isRightPanelActive ? 'auth-right-active' : ''}`}>
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
+        className={`relative w-full max-w-[850px] h-[550px] bg-white/10 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/30 overflow-hidden transition-none ${isRightPanelActive ? 'auth-right-active' : ''}`}>
         
         {/* Sign Up Form */}
         <div className={`absolute w-1/2 h-full flex items-center justify-center transition-all duration-700 ease-[cubic-bezier(0.68,-0.55,0.265,1.55)] left-1/2 max-md:relative max-md:w-full max-md:left-0 ${
@@ -250,7 +255,7 @@ export default function LoginPage() {
             </div>
           </div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }

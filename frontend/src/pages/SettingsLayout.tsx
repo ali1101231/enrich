@@ -1,6 +1,16 @@
 import { Outlet, NavLink } from 'react-router-dom';
 import { User, Sliders } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { motion } from 'framer-motion';
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 20 },
+  visible: (delay: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.5, delay, ease: [0.25, 0.1, 0.25, 1] as const },
+  }),
+};
 
 const settingsNav = [
   { title: 'Account', href: '/settings/account', icon: User },
@@ -9,13 +19,13 @@ const settingsNav = [
 
 export default function SettingsLayout() {
   return (
-    <div className="p-6 lg:p-8 animate-fade-in">
-      <div className="mb-8">
+    <div className="p-6 lg:p-8">
+      <motion.div className="mb-8" variants={fadeUp} initial="hidden" animate="visible" custom={0}>
         <h1 className="text-3xl font-bold">Settings</h1>
         <p className="text-muted-foreground">Manage your account preferences</p>
-      </div>
+      </motion.div>
 
-      <div className="flex flex-col lg:flex-row gap-8">
+      <motion.div className="flex flex-col lg:flex-row gap-8" variants={fadeUp} initial="hidden" animate="visible" custom={0.1}>
         {/* Sidebar Nav */}
         <nav className="lg:w-56 shrink-0">
           <div className="flex lg:flex-col gap-2">
@@ -43,7 +53,7 @@ export default function SettingsLayout() {
         <div className="flex-1 max-w-3xl">
           <Outlet />
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }

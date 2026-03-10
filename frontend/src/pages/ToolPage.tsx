@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Upload, ChevronRight, Play, CheckCircle2, Loader2, FileText, Type } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -192,12 +193,17 @@ export default function ToolPage() {
   const stepIndex = steps.findIndex(s => s.key === step);
 
   return (
-    <div className="p-6 lg:p-8 animate-fade-in">
+    <div className="p-6 lg:p-8">
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Header */}
-        <div className="flex items-center gap-4">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
-            <Play className="h-6 w-6 text-primary" />
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
+          className="flex items-center gap-4"
+        >
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl gradient-koldify shadow-glow-sm">
+            <Play className="h-6 w-6 text-white" />
           </div>
           <div>
             <div className="flex items-center gap-2">
@@ -206,15 +212,20 @@ export default function ToolPage() {
             </div>
             <p className="text-muted-foreground">{tool.description}</p>
           </div>
-        </div>
+        </motion.div>
 
         {/* Steps */}
-        <div className="flex items-center gap-2">
+        <motion.div
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1, ease: [0.25, 0.1, 0.25, 1] }}
+          className="flex items-center gap-2"
+        >
           {steps.map((s, i) => (
             <div key={s.key} className="flex items-center">
               <div className={cn(
-                'flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium',
-                i <= stepIndex ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
+                'flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium transition-all duration-300',
+                i < stepIndex ? 'gradient-koldify text-white shadow-glow-sm' : i === stepIndex ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
               )}>
                 {i < stepIndex ? <CheckCircle2 className="h-4 w-4" /> : i + 1}
               </div>
@@ -224,10 +235,12 @@ export default function ToolPage() {
               {i < steps.length - 1 && <ChevronRight className="h-4 w-4 mx-2 text-muted-foreground" />}
             </div>
           ))}
-        </div>
+        </motion.div>
 
         {/* Step Content */}
+        <AnimatePresence mode="wait">
         {step === 'input' && (
+          <motion.div key="input" initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.35 }}>
           <Card>
             <CardContent className="p-6 space-y-6">
               {/* Input Mode Toggle */}
@@ -261,12 +274,14 @@ export default function ToolPage() {
               {/* CSV Upload */}
               {inputMode === 'csv' && (
                 <div
-                  className="border-2 border-dashed rounded-xl p-12 text-center cursor-pointer hover:border-primary/50 transition-colors"
+                  className="border-2 border-dashed rounded-2xl p-12 text-center cursor-pointer hover:border-primary/50 hover:bg-primary/5 transition-all duration-300 group"
                   onDragOver={(e) => e.preventDefault()}
                   onDrop={handleFileDrop}
                   onClick={() => document.getElementById('file-input')?.click()}
                 >
-                  <Upload className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                  <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 group-hover:bg-primary/20 mx-auto mb-4 transition-colors">
+                    <Upload className="h-8 w-8 text-primary" />
+                  </div>
                   <h3 className="font-semibold text-lg">Drop your CSV file here</h3>
                   <p className="text-muted-foreground mt-1">or click to browse</p>
                   <input id="file-input" type="file" accept=".csv" className="hidden" onChange={handleFileSelect} />
@@ -300,9 +315,11 @@ export default function ToolPage() {
               )}
             </CardContent>
           </Card>
+          </motion.div>
         )}
 
         {step === 'map' && (
+          <motion.div key="map" initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.35 }}>
           <Card>
             <CardHeader>
               <CardTitle>Column Mapping</CardTitle>
@@ -382,9 +399,11 @@ export default function ToolPage() {
               </div>
             </CardContent>
           </Card>
+          </motion.div>
         )}
 
         {step === 'configure' && (
+          <motion.div key="configure" initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.35 }}>
           <Card>
             <CardHeader>
               <CardTitle>Configure Run</CardTitle>
@@ -414,7 +433,9 @@ export default function ToolPage() {
               </div>
             </CardContent>
           </Card>
+          </motion.div>
         )}
+        </AnimatePresence>
       </div>
     </div>
   );

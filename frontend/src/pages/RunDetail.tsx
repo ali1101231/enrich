@@ -1,4 +1,5 @@
 import { useParams, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import {
   ArrowLeft,
   Play,
@@ -21,6 +22,15 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useBatchDetail, useBatchProgress, useBatchJobs, useBatchExports, useExportCsv, useBatchResultCounts } from '@/hooks/useApi';
 import { batchApi } from '@/lib/api';
 import { format } from 'date-fns';
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 20 },
+  visible: (delay: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.5, delay, ease: [0.25, 0.1, 0.25, 1] as const },
+  }),
+};
 
 type UIStatus = 'running' | 'paused' | 'completed' | 'failed' | 'partial' | 'pending' | 'cancelled';
 
@@ -80,9 +90,9 @@ export default function RunDetailPage() {
   const label = batch.originalFileName ?? (batch.sourceType === 'CSV_UPLOAD' ? 'CSV Upload' : 'Pasted Rows');
 
   return (
-    <div className="p-6 lg:p-8 space-y-6 animate-fade-in">
+    <div className="p-6 lg:p-8 space-y-6">
       {/* Header */}
-      <div className="flex items-start gap-4">
+      <motion.div variants={fadeUp} initial="hidden" animate="visible" custom={0} className="flex items-start gap-4">
         <Button
           variant="ghost"
           size="icon"
@@ -101,10 +111,11 @@ export default function RunDetailPage() {
           </div>
           <p className="text-muted-foreground mt-1">{batch.sourceType === 'CSV_UPLOAD' ? 'CSV Upload' : 'Pasted Rows'}</p>
         </div>
-      </div>
+      </motion.div>
 
       {/* Progress Section */}
       {(uiStatus === 'running' || uiStatus === 'pending') && (
+        <motion.div variants={fadeUp} initial="hidden" animate="visible" custom={0.1}>
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-4">
@@ -115,7 +126,7 @@ export default function RunDetailPage() {
                 </p>
               </div>
               <div className="text-right">
-                <p className="text-2xl font-bold">{percent}%</p>
+                <p className="text-2xl font-bold gradient-koldify-text">{percent}%</p>
                 {progress?.estimatedRemainingSeconds != null && progress.estimatedRemainingSeconds > 0 && (
                   <p className="text-sm text-muted-foreground">~{Math.ceil(progress.estimatedRemainingSeconds / 60)}m remaining</p>
                 )}
@@ -124,9 +135,10 @@ export default function RunDetailPage() {
             <Progress value={percent} className="h-3" />
           </CardContent>
         </Card>
+        </motion.div>
       )}
 
-      <div className="grid gap-6 lg:grid-cols-3">
+      <motion.div variants={fadeUp} initial="hidden" animate="visible" custom={0.2} className="grid gap-6 lg:grid-cols-3">
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-6">
           {/* Metrics */}
@@ -320,7 +332,7 @@ export default function RunDetailPage() {
             </CardContent>
           </Card>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }

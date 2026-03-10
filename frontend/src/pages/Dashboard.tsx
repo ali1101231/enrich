@@ -1,4 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import {
   Play,
   Pause,
@@ -13,7 +14,6 @@ import {
   Upload,
   Pin,
   Activity,
-
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -24,6 +24,15 @@ import { useApp } from '@/contexts/AppContext';
 import { mockTools } from '@/lib/mockData';
 import { useBatches } from '@/hooks/useApi';
 import type { BatchItem } from '@/lib/api';
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 20 },
+  visible: (delay: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.5, delay, ease: [0.25, 0.1, 0.25, 1] as const },
+  }),
+};
 
 function batchStatusLabel(status: string): string {
   const map: Record<string, string> = {
@@ -169,9 +178,15 @@ export default function Dashboard() {
   ];
 
   return (
-    <div className="p-6 lg:p-8 space-y-8 animate-fade-in">
+    <div className="p-6 lg:p-8 space-y-8">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <motion.div
+        variants={fadeUp}
+        initial="hidden"
+        animate="visible"
+        custom={0}
+        className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+      >
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Welcome back, {user?.name?.split(' ')[0] || user?.email?.split('@')[0]}</h1>
           <p className="text-muted-foreground text-sm mt-0.5">Here's what's happening with your runs</p>
@@ -183,37 +198,23 @@ export default function Dashboard() {
           <Play className="h-4 w-4 mr-2" />
           Start New Run
         </Button>
-      </div>
+      </motion.div>
 
       {/* Stats Grid */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard
-          title="Active Runs"
-          value={activeRuns.length}
-          subtitle="Currently processing"
-          icon={Activity}
-        />
-        <StatCard
-          title="Success Rate"
-          value={`${successRate}%`}
-          subtitle="All time"
-          icon={TrendingUp}
-        />
-        <StatCard
-          title="Total Runs"
-          value={batches.length}
-          subtitle="All batches"
-          icon={Clock}
-        />
-        <StatCard
-          title="Total Today"
-          value={totalToday}
-          subtitle="Runs started"
-          icon={Zap}
-        />
+        {[
+          { title: 'Active Runs', value: activeRuns.length, subtitle: 'Currently processing', icon: Activity },
+          { title: 'Success Rate', value: `${successRate}%`, subtitle: 'All time', icon: TrendingUp },
+          { title: 'Total Runs', value: batches.length, subtitle: 'All batches', icon: Clock },
+          { title: 'Total Today', value: totalToday, subtitle: 'Runs started', icon: Zap },
+        ].map((stat, i) => (
+          <motion.div key={stat.title} variants={fadeUp} initial="hidden" animate="visible" custom={0.1 + i * 0.08}>
+            <StatCard {...stat} />
+          </motion.div>
+        ))}
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
+      <motion.div variants={fadeUp} initial="hidden" animate="visible" custom={0.45} className="grid gap-6 lg:grid-cols-3">
         {/* Active & Recent Runs */}
         <div className="lg:col-span-2 space-y-6">
           {/* Active Runs */}
@@ -359,7 +360,7 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }
