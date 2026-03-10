@@ -14,11 +14,14 @@ import {
   Mail,
   Calendar,
   User as UserIcon,
+  Coins,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Table,
   TableBody,
@@ -52,6 +55,7 @@ import {
   useAdminKeys,
   useAdminManualAssign,
   useAdminDeactivateAssignment,
+  useAdminUpdateUserCredits,
 } from '@/hooks/useApi';
 import { formatDistanceToNow, format } from 'date-fns';
 
@@ -72,9 +76,12 @@ export default function AdminUserDetail() {
   const deleteUserMut = useAdminDeleteUser();
   const manualAssignMut = useAdminManualAssign();
   const deactivateAssignmentMut = useAdminDeactivateAssignment();
+  const updateCreditsMut = useAdminUpdateUserCredits();
 
   const [keysDialogOpen, setKeysDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [creditsDialogOpen, setCreditsDialogOpen] = useState(false);
+  const [creditsInput, setCreditsInput] = useState('');
 
   if (isLoading || !data) {
     return (
@@ -149,10 +156,30 @@ export default function AdminUserDetail() {
           <Trash2 className="h-4 w-4 mr-2" />
           Delete User
         </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => {
+            setCreditsInput(String(user.credits ?? 0));
+            setCreditsDialogOpen(true);
+          }}
+        >
+          <Coins className="h-4 w-4 mr-2" />
+          Edit Credits
+        </Button>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-4">
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 text-muted-foreground text-xs mb-1">
+              <Coins className="h-3.5 w-3.5" />
+              Credits
+            </div>
+            <p className="text-2xl font-bold text-amber-500">{(user.credits ?? 0).toLocaleString()}</p>
+          </CardContent>
+        </Card>
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2 text-muted-foreground text-xs mb-1">
@@ -461,6 +488,44 @@ export default function AdminUserDetail() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Edit Credits Dialog */}
+      <Dialog open={creditsDialogOpen} onOpenChange={setCreditsDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Credits</DialogTitle>
+            <DialogDescription>
+              Set the credit balance for {user.displayName ?? user.email}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4 space-y-3">
+            <Label htmlFor="credits-input">Credits</Label>
+            <Input
+              id="credits-input"
+              type="number"
+              min={0}
+              value={creditsInput}
+              onChange={(e) => setCreditsInput(e.target.value)}
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCreditsDialogOpen(false)}>Cancel</Button>
+            <Button
+              onClick={() => {
+                const val = parseInt(creditsInput, 10);
+                if (!isNaN(val) && val >= 0) {
+                  updateCreditsMut.mutate({ userId: user.id, credits: val }, {
+                    onSuccess: () => setCreditsDialogOpen(false),
+                  });
+                }
+              }}
+              disabled={updateCreditsMut.isPending}
+            >
+              Save
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

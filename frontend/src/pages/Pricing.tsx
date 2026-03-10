@@ -2,8 +2,9 @@ import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Check, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { usePackages } from '@/hooks/useApi';
+import { usePackages, usePurchasePackage, useCredits } from '@/hooks/useApi';
 import type { PackageItem } from '@/lib/api';
+import { useToast } from '@/hooks/use-toast';
 
 // ============================================================================
 // ANIMATION VARIANTS
@@ -93,17 +94,24 @@ function formatCredits(n: number): string {
 function SweepButton({
   children,
   isHighlighted,
+  onClick,
+  disabled,
 }: {
   children: React.ReactNode;
   isHighlighted?: boolean;
+  onClick?: () => void;
+  disabled?: boolean;
 }) {
   return (
     <button
+      onClick={onClick}
+      disabled={disabled}
       className={cn(
         'relative w-full font-bold py-4 rounded-2xl text-sm transition-all duration-300 transform active:scale-[0.98] overflow-hidden group',
         isHighlighted
           ? 'gradient-koldify text-white shadow-glow'
-          : 'bg-secondary text-secondary-foreground'
+          : 'bg-secondary text-secondary-foreground',
+        disabled && 'opacity-50 cursor-not-allowed',
       )}
     >
       <span className="relative z-10 flex items-center justify-center gap-2 transition-colors duration-500 group-hover:text-white">
@@ -129,10 +137,14 @@ function SweepButton({
 export default function Pricing() {
   const [billing, setBilling] = useState<'monthly' | 'yearly'>('monthly');
   const { data: dbPackages } = usePackages();
+  const { data: credits } = useCredits();
+  const purchaseMutation = usePurchasePackage();
+  const { toast } = useToast();
 
   const plans = useMemo(() => {
     if (dbPackages && dbPackages.length > 0) {
       return dbPackages.map((p) => ({
+        id: p.id,
         name: p.name,
         monthlyPrice: p.monthlyPrice,
         yearlyPrice: p.yearlyPrice,
@@ -144,8 +156,27 @@ export default function Pricing() {
         badge: p.badge,
       }));
     }
-    return fallbackPlans;
+    return fallbackPlans.map((p) => ({ ...p, id: null as string | null }));
   }, [dbPackages]);
+
+  const handlePurchase = (planId: string | null) => {
+    if (!planId) return;
+    purchaseMutation.mutate(planId, {
+      onSuccess: (data) => {
+        toast({
+          title: 'Credits Added!',
+          description: data.message,
+        });
+      },
+      onError: (err) => {
+        toast({
+          title: 'Purchase Failed',
+          description: err instanceof Error ? err.message : 'Something went wrong',
+          variant: 'destructive',
+        });
+      },
+    });
+  };
 
   return (
     <div className="p-6 lg:p-8 animate-fade-in">
@@ -170,6 +201,17 @@ export default function Pricing() {
         >
           All plans include core features. Scale as you grow.
         </motion.p>
+        {credits !== undefined && (
+          <motion.div
+            variants={fadeUpVariants}
+            initial="hidden"
+            animate="visible"
+            custom={0.35}
+            className="mt-4 inline-flex items-center gap-2 bg-amber-500/10 text-amber-600 dark:text-amber-400 px-4 py-2 rounded-full text-sm font-semibold"
+          >
+            Your balance: {credits.toLocaleString()} credits
+          </motion.div>
+        )}
       </div>
 
       {/* Billing Toggle */}
@@ -306,8 +348,12 @@ export default function Pricing() {
               </div>
 
               {/* CTA */}
-              <SweepButton isHighlighted={plan.isHighlighted}>
-                {plan.buttonText}
+              <SweepButton
+                isHighlighted={plan.isHighlighted}
+                onClick={() => handlePurchase(plan.id)}
+                disabled={!plan.id || purchaseMutation.isPending}
+              >
+                {purchaseMutation.isPending ? 'Processing...' : plan.buttonText}
               </SweepButton>
             </div>
           </motion.div>

@@ -46,6 +46,7 @@ function authUserToUser(u: AuthUser): User {
     role: u.role === 'admin' ? 'admin' : 'user',
     plan: 'free',
     createdAt: new Date().toISOString(),
+    credits: u.credits ?? 0,
   };
 }
 

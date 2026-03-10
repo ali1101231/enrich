@@ -18,6 +18,7 @@ router.use(requireAdmin);
 router.get("/users", asyncHandler(userController.listUsers));
 router.get("/users/:userId", asyncHandler(userController.getUserDetail));
 router.patch("/users/:userId/role", asyncHandler(userController.updateUserRole));
+router.patch("/users/:userId/credits", asyncHandler(userController.updateCredits));
 router.delete("/users/:userId", asyncHandler(userController.deleteUser));
 router.post("/keys", asyncHandler(keyController.createKey));
 router.get("/keys", asyncHandler(keyController.listKeys));

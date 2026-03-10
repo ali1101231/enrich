@@ -3,7 +3,7 @@ import { hashPassword, verifyPassword } from "../lib/password.js";
 import { signToken } from "../lib/jwt.js";
 
 interface AuthResult {
-  user: { id: string; email: string; displayName: string | null; role: string };
+  user: { id: string; email: string; displayName: string | null; role: string; credits: number };
   token: string;
 }
 
@@ -30,7 +30,7 @@ export class AuthService {
 
     const token = signToken({ userId: user.id, role: user.role });
     return {
-      user: { id: user.id, email: user.email, displayName: user.displayName, role: user.role },
+      user: { id: user.id, email: user.email, displayName: user.displayName, role: user.role, credits: (user as any).credits ?? 0 },
       token,
     };
   }
@@ -53,22 +53,22 @@ export class AuthService {
 
     const token = signToken({ userId: row.id, role: row.role });
     return {
-      user: { id: row.id, email: row.email, displayName: row.displayName, role: row.role },
+      user: { id: row.id, email: row.email, displayName: row.displayName, role: row.role, credits: (row as any).credits ?? 0 },
       token,
     };
   }
 
-  async getMe(userId: string): Promise<{ id: string; email: string; displayName: string | null; role: string }> {
+  async getMe(userId: string): Promise<{ id: string; email: string; displayName: string | null; role: string; credits: number }> {
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { id: true, email: true, displayName: true, role: true, isActive: true },
+      select: { id: true, email: true, displayName: true, role: true, isActive: true, credits: true },
     });
 
     if (!user || !user.isActive) {
       throw new AuthError("User not found", 404);
     }
 
-    return { id: user.id, email: user.email, displayName: user.displayName, role: user.role };
+    return { id: user.id, email: user.email, displayName: user.displayName, role: user.role, credits: user.credits };
   }
 }
 

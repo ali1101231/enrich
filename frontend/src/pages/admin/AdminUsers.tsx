@@ -10,6 +10,7 @@ import {
   ShieldOff,
   Trash2,
   Eye,
+  Coins,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -114,6 +115,7 @@ export default function AdminUsers() {
                 <TableHead>User</TableHead>
                 <TableHead>Role</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead>Credits</TableHead>
                 <TableHead>Keys</TableHead>
                 <TableHead>Joined</TableHead>
                 <TableHead className="w-[50px]"></TableHead>
@@ -142,6 +144,12 @@ export default function AdminUsers() {
                       )}>
                         {user.isActive ? 'active' : 'inactive'}
                       </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1.5">
+                        <Coins className="h-3.5 w-3.5 text-amber-500" />
+                        <span className="text-sm font-medium">{user.credits.toLocaleString()}</span>
+                      </div>
                     </TableCell>
                     <TableCell>
                       <Badge variant="secondary" className="text-xs">

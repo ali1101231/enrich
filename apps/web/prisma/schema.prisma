@@ -41,6 +41,7 @@ model User {
   displayName    String?
   role           String             @default("user")
   isActive       Boolean            @default(true)
+  credits        Int                @default(0)
   lastDequeuedAt DateTime?
   createdAt      DateTime           @default(now())
   updatedAt      DateTime           @updatedAt

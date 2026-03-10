@@ -11,6 +11,7 @@ import {
   Settings,
   HelpCircle,
   ChevronDown,
+  Coins,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -36,6 +37,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { useApp } from '@/contexts/AppContext';
+import { useCredits } from '@/hooks/useApi';
 import { mockTools } from '@/lib/mockData';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
@@ -50,6 +52,7 @@ export function TopBar() {
   
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const { data: credits } = useCredits();
 
   const isDark = preferences.theme === 'dark';
 
@@ -108,6 +111,15 @@ export function TopBar() {
 
         {/* Right Section */}
         <div className="flex items-center gap-1.5 lg:gap-2">
+          {/* Credits Badge */}
+          <button
+            onClick={() => navigate('/pricing')}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 text-xs font-semibold hover:bg-amber-500/20 transition-colors cursor-pointer"
+          >
+            <Coins className="h-3.5 w-3.5" />
+            <span>{credits !== undefined ? credits.toLocaleString() : '...'} credits</span>
+          </button>
+
           {/* Server Status */}
           <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-success/10 text-success text-xs font-medium">
             <span className="status-dot status-online" />

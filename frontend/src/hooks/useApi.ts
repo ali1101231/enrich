@@ -5,6 +5,7 @@ import {
   runsApi,
   adminApi,
   packagesApi,
+  creditsApi,
   type AuthUser,
   type BatchItem,
   type BatchProgress,
@@ -236,6 +237,18 @@ export function useAdminDeleteUser() {
     mutationFn: (userId: string) => adminApi.deleteUser(userId),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["admin", "users"] });
+    },
+  });
+}
+
+export function useAdminUpdateUserCredits() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ userId, credits }: { userId: string; credits: number }) =>
+      adminApi.updateUserCredits(userId, credits),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin", "users"] });
+      qc.invalidateQueries({ queryKey: ["admin", "user-detail"] });
     },
   });
 }
@@ -514,5 +527,29 @@ export function usePackages() {
       return res.items;
     },
     staleTime: 60_000,
+  });
+}
+
+// ---- Credits ----
+export function useCredits() {
+  return useQuery<number>({
+    queryKey: ["credits"],
+    queryFn: async () => {
+      const res = await creditsApi.getBalance();
+      return res.credits;
+    },
+    staleTime: 15_000,
+    refetchInterval: 30_000,
+  });
+}
+
+export function usePurchasePackage() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (packageId: string) => creditsApi.purchase(packageId),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["credits"] });
+      qc.invalidateQueries({ queryKey: ["auth", "me"] });
+    },
   });
 }

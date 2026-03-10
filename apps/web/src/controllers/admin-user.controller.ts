@@ -6,6 +6,10 @@ const updateRoleSchema = z.object({
   role: z.enum(["user", "admin"]),
 });
 
+const updateCreditsSchema = z.object({
+  credits: z.number().int().min(0),
+});
+
 export class AdminUserController {
   listUsers = async (_req: Request, res: Response): Promise<void> => {
     const users = await prisma.user.findMany({
@@ -15,6 +19,7 @@ export class AdminUserController {
         displayName: true,
         role: true,
         isActive: true,
+        credits: true,
         createdAt: true,
       },
       orderBy: { createdAt: "desc" },
@@ -33,6 +38,7 @@ export class AdminUserController {
         displayName: true,
         role: true,
         isActive: true,
+        credits: true,
         createdAt: true,
       },
     });
@@ -161,5 +167,23 @@ export class AdminUserController {
     await prisma.user.delete({ where: { id: userId } });
 
     res.status(200).json({ message: "User deleted" });
+  };
+
+  updateCredits = async (req: Request, res: Response): Promise<void> => {
+    const userId = req.params.userId;
+    const body = updateCreditsSchema.parse(req.body);
+
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) {
+      res.status(404).json({ error: "User not found" });
+      return;
+    }
+
+    await prisma.user.update({
+      where: { id: userId },
+      data: { credits: body.credits },
+    });
+
+    res.status(200).json({ message: `Credits updated to ${body.credits}`, credits: body.credits });
   };
 }

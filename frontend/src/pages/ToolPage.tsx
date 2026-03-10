@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Upload, ChevronRight, Play, CheckCircle2, Loader2, FileText, Type } from 'lucide-react';
+import { Upload, ChevronRight, Play, CheckCircle2, Loader2, FileText, Type, Coins, AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -15,6 +15,7 @@ import { getToolById } from '@/lib/mockData';
 import { useToast } from '@/hooks/use-toast';
 import { batchApi, ApiError } from '@/lib/api';
 import { useQueryClient } from '@tanstack/react-query';
+import { useCredits } from '@/hooks/useApi';
 import type { ToolField } from '@/types';
 
 type Step = 'input' | 'map' | 'configure' | 'run';
@@ -58,6 +59,8 @@ export default function ToolPage() {
   const [mapping, setMapping] = useState<Record<string, string>>({});
   const [pasteText, setPasteText] = useState('');
   const [isRunning, setIsRunning] = useState(false);
+  const [totalRowCount, setTotalRowCount] = useState(0);
+  const { data: creditBalance = 0 } = useCredits();
 
   // Reset all input state when switching tools
   useEffect(() => {
@@ -69,6 +72,7 @@ export default function ToolPage() {
     setMapping({});
     setPasteText('');
     setIsRunning(false);
+    setTotalRowCount(0);
   }, [toolId]);
 
   // The primary required field determines what bulk paste accepts
@@ -103,6 +107,7 @@ export default function ToolPage() {
       });
       setHeaders(h);
       setRows(r);
+      setTotalRowCount(lines.length - 1);
 
       // Auto-detect: for each required field, find the best matching CSV column
       const initialMapping: Record<string, string> = {};
@@ -133,6 +138,7 @@ export default function ToolPage() {
       return;
     }
     // Build preview rows using the primary field
+    setTotalRowCount(lines.length);
     setHeaders([pasteField.id]);
     setRows(lines.slice(0, 20).map(l => ({ [pasteField.id]: l })));
     setMapping({ [pasteField.id]: pasteField.id });
@@ -417,18 +423,50 @@ export default function ToolPage() {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Rows:</span>
-                  <span className="font-medium">{rows.length}{inputMode === 'csv' ? '+' : ''}</span>
+                  <span className="font-medium">{totalRowCount.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Mode:</span>
                   <span className="font-medium">{inputMode === 'paste' ? `Bulk ${getPasteLabel(pasteField!)}` : 'CSV Upload'}</span>
                 </div>
               </div>
+
+              {/* Credit Cost Preview */}
+              <div className={cn(
+                'p-4 rounded-lg border space-y-2',
+                totalRowCount > creditBalance ? 'border-destructive/50 bg-destructive/5' : 'border-amber-500/30 bg-amber-500/5'
+              )}>
+                <div className="flex items-center gap-2 text-sm font-medium">
+                  <Coins className="h-4 w-4 text-amber-500" />
+                  Credit Cost
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Credits required:</span>
+                  <span className="font-semibold">{totalRowCount.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Your balance:</span>
+                  <span className="font-semibold">{creditBalance.toLocaleString()}</span>
+                </div>
+                <div className="border-t pt-2 flex justify-between text-sm">
+                  <span className="text-muted-foreground">After run:</span>
+                  <span className={cn('font-semibold', totalRowCount > creditBalance ? 'text-destructive' : 'text-success')}>
+                    {(creditBalance - totalRowCount).toLocaleString()}
+                  </span>
+                </div>
+                {totalRowCount > creditBalance && (
+                  <div className="flex items-center gap-2 text-sm text-destructive mt-1">
+                    <AlertTriangle className="h-4 w-4" />
+                    Insufficient credits. Please purchase more credits to start this run.
+                  </div>
+                )}
+              </div>
+
               <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={() => setStep(inputMode === 'paste' ? 'input' : 'map')}>Back</Button>
-                <Button className="gradient-koldify text-white" onClick={handleRun} disabled={isRunning}>
+                <Button className="gradient-koldify text-white" onClick={handleRun} disabled={isRunning || totalRowCount > creditBalance}>
                   {isRunning ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Play className="h-4 w-4 mr-2" />}
-                  Start Run
+                  Start Run ({totalRowCount.toLocaleString()} credits)
                 </Button>
               </div>
             </CardContent>
