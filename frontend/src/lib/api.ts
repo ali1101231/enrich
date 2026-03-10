@@ -172,6 +172,24 @@ export interface AdminExportItem {
   };
 }
 
+export interface PackageItem {
+  id: string;
+  name: string;
+  credits: number;
+  monthlyPrice: number;
+  yearlyPrice: number;
+  isTopLevel: boolean;
+  isActive: boolean;
+  isHighlighted: boolean;
+  badge: string | null;
+  subtitle: string | null;
+  buttonText: string;
+  features: string[];
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export const adminApi = {
   listUsers() {
     return request<{ items: AdminUserItem[] }>("/admin/users");
@@ -276,6 +294,35 @@ export const adminApi = {
   },
   listAllExports() {
     return request<{ items: AdminExportItem[] }>("/admin/activity/exports");
+  },
+
+  // ---- Packages ----
+  listPackages() {
+    return request<{ items: PackageItem[] }>("/admin/packages");
+  },
+  createPackage(data: { name: string; credits: number; monthlyPrice: number; yearlyPrice: number; isTopLevel?: boolean; isHighlighted?: boolean; badge?: string; subtitle?: string; buttonText?: string; features?: string[]; sortOrder?: number }) {
+    return request<PackageItem>("/admin/packages", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  },
+  updatePackage(packageId: string, data: { name?: string; credits?: number; monthlyPrice?: number; yearlyPrice?: number; isTopLevel?: boolean; isActive?: boolean; isHighlighted?: boolean; badge?: string | null; subtitle?: string | null; buttonText?: string; features?: string[]; sortOrder?: number }) {
+    return request<PackageItem>(`/admin/packages/${encodeURIComponent(packageId)}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    });
+  },
+  deletePackage(packageId: string) {
+    return request<void>(`/admin/packages/${encodeURIComponent(packageId)}`, {
+      method: "DELETE",
+    });
+  },
+};
+
+// ---- Public Packages (pricing page) ----
+export const packagesApi = {
+  list() {
+    return request<{ items: PackageItem[] }>("/packages");
   },
 };
 

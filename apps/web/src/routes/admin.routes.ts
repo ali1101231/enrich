@@ -5,12 +5,14 @@ import { AdminApiKeyController } from "../controllers/admin-api-key.controller.j
 import { AdminAssignmentController } from "../controllers/admin-assignment.controller.js";
 import { AdminUserController } from "../controllers/admin-user.controller.js";
 import { AdminActivityController } from "../controllers/admin-activity.controller.js";
+import { AdminPackageController } from "../controllers/admin-package.controller.js";
 
 const router = Router();
 const keyController = new AdminApiKeyController();
 const assignmentController = new AdminAssignmentController();
 const userController = new AdminUserController();
 const activityController = new AdminActivityController();
+const packageController = new AdminPackageController();
 
 router.use(requireAdmin);
 router.get("/users", asyncHandler(userController.listUsers));
@@ -39,5 +41,12 @@ router.get("/activity/batches/:batchId/exports", asyncHandler(activityController
 router.get("/activity/exports", asyncHandler(activityController.listAllExports));
 router.delete("/activity/exports/:exportId", asyncHandler(activityController.deleteExport));
 router.post("/activity/exports/bulk-delete", asyncHandler(activityController.bulkDeleteExports));
+
+// Packages
+router.get("/packages", asyncHandler(packageController.list));
+router.post("/packages", asyncHandler(packageController.create));
+router.get("/packages/:packageId", asyncHandler(packageController.getById));
+router.patch("/packages/:packageId", asyncHandler(packageController.update));
+router.delete("/packages/:packageId", asyncHandler(packageController.remove));
 
 export { router as adminRoutes };

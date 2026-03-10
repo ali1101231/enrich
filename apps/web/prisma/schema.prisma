@@ -168,3 +168,23 @@ model BatchExport {
   @@index([userId, createdAt])
   @@map("exports")
 }
+
+model Package {
+  id            String   @id @default(cuid())
+  name          String
+  credits       Int
+  monthlyPrice  Float
+  yearlyPrice   Float
+  isTopLevel    Boolean  @default(false)
+  isActive      Boolean  @default(true)
+  isHighlighted Boolean  @default(false)
+  badge         String?
+  subtitle      String?
+  buttonText    String   @default("Get Started")
+  features      Json     @default("[]")
+  sortOrder     Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("packages")
+}

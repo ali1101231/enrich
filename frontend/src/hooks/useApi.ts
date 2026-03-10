@@ -4,6 +4,7 @@ import {
   batchApi,
   runsApi,
   adminApi,
+  packagesApi,
   type AuthUser,
   type BatchItem,
   type BatchProgress,
@@ -18,6 +19,7 @@ import {
   type ResultCounts,
   type ExportItem,
   type AdminExportItem,
+  type PackageItem,
 } from "@/lib/api";
 
 // ---- Auth ----
@@ -462,5 +464,55 @@ export function useAdminBulkDeleteExports() {
       qc.invalidateQueries({ queryKey: ["admin", "all-exports"] });
       qc.invalidateQueries({ queryKey: ["admin", "activity", "batch-exports"] });
     },
+  });
+}
+
+// ---- Admin: Packages ----
+export function useAdminPackages() {
+  return useQuery<PackageItem[]>({
+    queryKey: ["admin", "packages"],
+    queryFn: async () => {
+      const res = await adminApi.listPackages();
+      return res.items;
+    },
+    staleTime: 30_000,
+  });
+}
+
+export function useAdminCreatePackage() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { name: string; credits: number; monthlyPrice: number; yearlyPrice: number; isTopLevel?: boolean; isHighlighted?: boolean; badge?: string; subtitle?: string; buttonText?: string; features?: string[]; sortOrder?: number }) =>
+      adminApi.createPackage(data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin", "packages"] }),
+  });
+}
+
+export function useAdminUpdatePackage() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ packageId, data }: { packageId: string; data: { name?: string; credits?: number; monthlyPrice?: number; yearlyPrice?: number; isTopLevel?: boolean; isActive?: boolean; isHighlighted?: boolean; badge?: string | null; subtitle?: string | null; buttonText?: string; features?: string[]; sortOrder?: number } }) =>
+      adminApi.updatePackage(packageId, data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin", "packages"] }),
+  });
+}
+
+export function useAdminDeletePackage() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (packageId: string) => adminApi.deletePackage(packageId),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin", "packages"] }),
+  });
+}
+
+// ---- Public: Packages (pricing page) ----
+export function usePackages() {
+  return useQuery<PackageItem[]>({
+    queryKey: ["packages"],
+    queryFn: async () => {
+      const res = await packagesApi.list();
+      return res.items;
+    },
+    staleTime: 60_000,
   });
 }
