@@ -73,7 +73,7 @@ export default function ToolPage() {
     if (!file || !tool) return;
     setIsRunning(true);
     try {
-      const batch = await batchApi.uploadCsv(file);
+      const batch = await batchApi.uploadCsv(file, toolId);
       queryClient.invalidateQueries({ queryKey: ['batches'] });
       toast({ title: 'Run started', description: `Processing ${file.name}` });
       navigate(`/runs/${batch.batchId}`);

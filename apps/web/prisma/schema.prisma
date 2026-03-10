@@ -85,6 +85,7 @@ model ApiKeyAssignment {
 model Batch {
   id               String         @id @default(cuid())
   userId           String
+  toolId           String?
   sourceType       BatchSourceType
   originalFileName String?
   r2Key            String?

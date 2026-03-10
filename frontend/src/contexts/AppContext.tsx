@@ -32,7 +32,7 @@ const defaultPreferences: UserPreferences = {
     runFailed: true,
     keyWarnings: true,
   },
-  pinnedTools: ['post-finder', 'blitz-email-enricher', 'csv-deduplicator'],
+  pinnedTools: ['blitz-email-enricher', 'blitz-phone-enricher', 'blitz-company-enricher', 'blitz-domain-to-linkedin'],
   defaultKeyStrategy: 'rotate',
 };
 
