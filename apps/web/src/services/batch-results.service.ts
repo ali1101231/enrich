@@ -12,7 +12,7 @@ export interface RowResult {
 export class BatchResultsService {
   async getResults(
     batchId: string,
-    opts: { status?: "SUCCESS" | "FAILURE"; limit?: number; offset?: number } = {},
+    opts: { status?: "SUCCESS" | "FAILURE" | "SKIPPED"; limit?: number; offset?: number } = {},
   ): Promise<{ items: RowResult[]; total: number }> {
     const where: Record<string, unknown> = {
       job: { batchId },
@@ -52,15 +52,18 @@ export class BatchResultsService {
     };
   }
 
-  async getCounts(batchId: string): Promise<{ success: number; failure: number; total: number }> {
-    const [success, failure] = await Promise.all([
+  async getCounts(batchId: string): Promise<{ success: number; failure: number; skipped: number; total: number }> {
+    const [success, failure, skipped] = await Promise.all([
       prisma.jobResult.count({
         where: { job: { batchId }, status: "SUCCESS" },
       }),
       prisma.jobResult.count({
         where: { job: { batchId }, status: "FAILURE" },
       }),
+      prisma.jobResult.count({
+        where: { job: { batchId }, status: "SKIPPED" },
+      }),
     ]);
-    return { success, failure, total: success + failure };
+    return { success, failure, skipped, total: success + failure + skipped };
   }
 }

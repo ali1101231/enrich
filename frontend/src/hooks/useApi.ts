@@ -212,6 +212,15 @@ export function useAdminSetKeyActive() {
   });
 }
 
+export function useAdminUpdateKeyRateLimit() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ keyId, requestsPerSecond }: { keyId: string; requestsPerSecond: number }) =>
+      adminApi.updateKeyRateLimit(keyId, requestsPerSecond),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin", "keys"] }),
+  });
+}
+
 // ---- Admin: Assignments ----
 export function useAdminAssignments(userId?: string) {
   return useQuery<AssignmentItem[]>({

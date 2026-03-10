@@ -9,6 +9,7 @@ import {
   EyeOff,
   Users,
   Power,
+  Gauge,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -38,10 +39,23 @@ import type { AdminKeyItem } from '@/lib/api';
 function KeyCard({
   keyData,
   onToggleActive,
+  onUpdateRateLimit,
 }: {
   keyData: AdminKeyItem;
   onToggleActive: (id: string, isActive: boolean) => void;
+  onUpdateRateLimit: (id: string, rps: number) => void;
 }) {
+  const [editingRps, setEditingRps] = useState(false);
+  const [rpsValue, setRpsValue] = useState(String(keyData.requestsPerSecond));
+
+  const handleSaveRps = () => {
+    const parsed = parseInt(rpsValue, 10);
+    if (parsed >= 1 && parsed <= 20) {
+      onUpdateRateLimit(keyData.id, parsed);
+      setEditingRps(false);
+    }
+  };
+
   return (
     <Card>
       <CardContent className="p-4">
@@ -100,6 +114,32 @@ function KeyCard({
             <span>
               {keyData.activeUsers}/{keyData.maxUsers} users
             </span>
+          </div>
+          <div className="flex items-center gap-1 text-muted-foreground">
+            <Gauge className="h-4 w-4" />
+            {editingRps ? (
+              <span className="flex items-center gap-1">
+                <Input
+                  type="number"
+                  min={1}
+                  max={20}
+                  value={rpsValue}
+                  onChange={(e) => setRpsValue(e.target.value)}
+                  className="h-6 w-14 text-xs px-1"
+                  onKeyDown={(e) => { if (e.key === 'Enter') handleSaveRps(); if (e.key === 'Escape') setEditingRps(false); }}
+                  autoFocus
+                />
+                <span className="text-xs">req/s</span>
+                <Button variant="ghost" size="sm" className="h-6 px-1 text-xs" onClick={handleSaveRps}>Save</Button>
+              </span>
+            ) : (
+              <button
+                className="hover:underline cursor-pointer"
+                onClick={() => { setRpsValue(String(keyData.requestsPerSecond)); setEditingRps(true); }}
+              >
+                {keyData.requestsPerSecond} req/s
+              </button>
+            )}
           </div>
           <div className="text-muted-foreground">
             Added {formatDistanceToNow(new Date(keyData.createdAt), { addSuffix: true })}
@@ -185,7 +225,7 @@ function AddKeyDialog({ onAdd }: { onAdd: (label: string, rawKey: string) => voi
 }
 
 export default function AdminKeys() {
-  const { keys, addKey, setKeyActive, stats } = useAdmin();
+  const { keys, addKey, setKeyActive, updateKeyRateLimit, stats } = useAdmin();
 
   const totalUsers = keys.reduce((acc, k) => acc + k.activeUsers, 0);
   const totalCapacity = keys.reduce((acc, k) => acc + k.maxUsers, 0);
@@ -241,7 +281,7 @@ export default function AdminKeys() {
       ) : (
         <div className="grid gap-4 md:grid-cols-2">
           {keys.map((key) => (
-            <KeyCard key={key.id} keyData={key} onToggleActive={setKeyActive} />
+            <KeyCard key={key.id} keyData={key} onToggleActive={setKeyActive} onUpdateRateLimit={updateKeyRateLimit} />
           ))}
         </div>
       )}

@@ -3,6 +3,8 @@ import { BLITZ_TOOL_IDS } from "@koldify/shared";
 export interface BlitzEndpointConfig {
   /** Blitz API path, e.g. "/v2/enrichment/email" */
   path: string;
+  /** Aliases for the required input field */
+  requiredAliases: string[];
   /** Build the request body from a CSV row */
   buildPayload: (row: Record<string, string>) => Record<string, string>;
   /** Merge original row + Blitz response into the final result */
@@ -63,6 +65,25 @@ function resolveField(
   );
 }
 
+/**
+ * Check whether a row has the required input field for a tool.
+ * Returns null if valid, or a human-readable reason if the row should be skipped.
+ */
+function checkField(
+  row: Record<string, string>,
+  aliases: string[],
+): string | null {
+  for (const alias of aliases) {
+    const key = Object.keys(row).find(
+      (k) => k.toLowerCase().trim() === alias.toLowerCase(),
+    );
+    if (key && row[key]?.trim()) {
+      return null; // valid
+    }
+  }
+  return `Missing required input. Expected one of: ${aliases.join(", ")}`;
+}
+
 // ---- Response helpers ----
 
 function flattenObject(
@@ -87,6 +108,7 @@ function flattenObject(
 
 const emailEnricher: BlitzEndpointConfig = {
   path: "/v2/enrichment/email",
+  requiredAliases: PERSON_LINKEDIN_ALIASES,
   buildPayload: (row) => ({
     person_linkedin_url: resolveField(row, PERSON_LINKEDIN_ALIASES),
   }),
@@ -102,6 +124,7 @@ const emailEnricher: BlitzEndpointConfig = {
 
 const phoneEnricher: BlitzEndpointConfig = {
   path: "/v2/enrichment/phone",
+  requiredAliases: PERSON_LINKEDIN_ALIASES,
   buildPayload: (row) => ({
     person_linkedin_url: resolveField(row, PERSON_LINKEDIN_ALIASES),
   }),
@@ -114,6 +137,7 @@ const phoneEnricher: BlitzEndpointConfig = {
 
 const companyEnricher: BlitzEndpointConfig = {
   path: "/v2/enrichment/company",
+  requiredAliases: COMPANY_LINKEDIN_ALIASES,
   buildPayload: (row) => ({
     company_linkedin_url: resolveField(row, COMPANY_LINKEDIN_ALIASES),
   }),
@@ -138,6 +162,7 @@ const companyEnricher: BlitzEndpointConfig = {
 
 const domainToLinkedin: BlitzEndpointConfig = {
   path: "/v2/enrichment/domain-to-linkedin",
+  requiredAliases: DOMAIN_ALIASES,
   buildPayload: (row) => ({
     domain: resolveField(row, DOMAIN_ALIASES),
   }),
@@ -165,4 +190,14 @@ export function getEndpointConfig(
 
 export function isSupportedBlitzTool(toolId: string): boolean {
   return toolId in ENDPOINT_REGISTRY;
+}
+
+/**
+ * Pre-validate a row before sending to Blitz.
+ * Returns null if the row has valid input, or a skip reason string if it should be skipped.
+ */
+export function validateRow(toolId: string, row: Record<string, string>): string | null {
+  const config = ENDPOINT_REGISTRY[toolId];
+  if (!config) return null;
+  return checkField(row, config.requiredAliases);
 }

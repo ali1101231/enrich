@@ -22,13 +22,14 @@ import { useBatchDetail, useBatchProgress, useBatchJobs, useBatchExports, useExp
 import { batchApi } from '@/lib/api';
 import { format } from 'date-fns';
 
-type UIStatus = 'running' | 'paused' | 'completed' | 'failed' | 'pending' | 'cancelled';
+type UIStatus = 'running' | 'paused' | 'completed' | 'failed' | 'partial' | 'pending' | 'cancelled';
 
 const statusConfig: Record<UIStatus, { icon: React.ElementType; color: string; bg: string; label: string }> = {
   running: { icon: Play, color: 'text-primary', bg: 'bg-primary/10', label: 'Running' },
   paused: { icon: Pause, color: 'text-blue-500', bg: 'bg-blue-500/10', label: 'Paused' },
   pending: { icon: Clock, color: 'text-muted-foreground', bg: 'bg-muted', label: 'Pending' },
   completed: { icon: CheckCircle2, color: 'text-success', bg: 'bg-success/10', label: 'Completed' },
+  partial: { icon: Activity, color: 'text-yellow-500', bg: 'bg-yellow-500/10', label: 'Partial' },
   failed: { icon: XCircle, color: 'text-destructive', bg: 'bg-destructive/10', label: 'Failed' },
   cancelled: { icon: Square, color: 'text-muted-foreground', bg: 'bg-muted', label: 'Cancelled' },
 };
@@ -36,7 +37,7 @@ const statusConfig: Record<UIStatus, { icon: React.ElementType; color: string; b
 function toUIStatus(s: string): UIStatus {
   const map: Record<string, UIStatus> = {
     QUEUED: 'pending', RUNNING: 'running', COMPLETED: 'completed',
-    FAILED: 'failed', PARTIAL: 'failed',
+    FAILED: 'failed', PARTIAL: 'partial',
   };
   return map[s] ?? 'pending';
 }
@@ -156,6 +157,30 @@ export default function RunDetailPage() {
             </Card>
           </div>
 
+          {/* Row-level result breakdown */}
+          {resultCounts && resultCounts.total > 0 && (
+            <div className="grid grid-cols-3 gap-4">
+              <Card>
+                <CardContent className="p-4">
+                  <p className="text-sm text-muted-foreground">Rows Enriched</p>
+                  <p className="text-2xl font-bold text-success">{resultCounts.success.toLocaleString()}</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4">
+                  <p className="text-sm text-muted-foreground">Rows Skipped</p>
+                  <p className="text-2xl font-bold text-yellow-500">{resultCounts.skipped.toLocaleString()}</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4">
+                  <p className="text-sm text-muted-foreground">Rows Failed</p>
+                  <p className="text-2xl font-bold text-destructive">{resultCounts.failure.toLocaleString()}</p>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
           {/* Jobs */}
           <Card>
             <CardHeader>
@@ -243,7 +268,7 @@ export default function RunDetailPage() {
               <CardTitle className="text-lg">Outputs</CardTitle>
             </CardHeader>
             <CardContent>
-              {(uiStatus === 'completed' || uiStatus === 'failed') ? (
+              {(uiStatus === 'completed' || uiStatus === 'failed' || uiStatus === 'partial') ? (
                 <div className="space-y-2">
                   <Button
                     className="w-full"
@@ -259,7 +284,7 @@ export default function RunDetailPage() {
                   </Button>
                   {resultCounts && (
                     <p className="text-xs text-muted-foreground text-center">
-                      {resultCounts.success.toLocaleString()} succeeded, {resultCounts.failure.toLocaleString()} failed
+                      {resultCounts.success.toLocaleString()} succeeded{resultCounts.skipped > 0 ? `, ${resultCounts.skipped.toLocaleString()} skipped` : ''}{resultCounts.failure > 0 ? `, ${resultCounts.failure.toLocaleString()} failed` : ''}
                     </p>
                   )}
                   {exports.length > 0 && (
@@ -283,6 +308,10 @@ export default function RunDetailPage() {
                     </div>
                   )}
                 </div>
+              ) : resultCounts && resultCounts.total > 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-4">
+                  {resultCounts.success.toLocaleString()} succeeded{resultCounts.skipped > 0 ? `, ${resultCounts.skipped.toLocaleString()} skipped` : ''}{resultCounts.failure > 0 ? `, ${resultCounts.failure.toLocaleString()} failed` : ''}
+                </p>
               ) : (
                 <p className="text-sm text-muted-foreground text-center py-4">
                   Outputs will be available when the run completes
