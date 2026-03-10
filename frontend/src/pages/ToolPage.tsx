@@ -5,15 +5,14 @@ import { cn, autoDetectColumns } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
-import { useApp } from '@/contexts/AppContext';
 import { getToolById } from '@/lib/mockData';
 import { useToast } from '@/hooks/use-toast';
 import { batchApi, ApiError } from '@/lib/api';
+import { useQueryClient } from '@tanstack/react-query';
 
 type Step = 'upload' | 'map' | 'configure' | 'run';
 
@@ -21,7 +20,7 @@ export default function ToolPage() {
   const { toolId } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { addBatchAsRun } = useApp();
+  const queryClient = useQueryClient();
 
   const tool = getToolById(toolId || '');
   const [step, setStep] = useState<Step>('upload');
@@ -75,14 +74,7 @@ export default function ToolPage() {
     setIsRunning(true);
     try {
       const batch = await batchApi.uploadCsv(file);
-      addBatchAsRun({
-        batchId: batch.batchId,
-        toolId: tool.id,
-        toolName: tool.name,
-        toolProvider: tool.provider,
-        fileName: file.name,
-        totalRows: batch.totalRows,
-      });
+      queryClient.invalidateQueries({ queryKey: ['batches'] });
       toast({ title: 'Run started', description: `Processing ${file.name}` });
       navigate(`/runs/${batch.batchId}`);
     } catch (err) {

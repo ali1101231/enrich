@@ -2,21 +2,14 @@ import { useState } from 'react';
 import {
   Search,
   MoreVertical,
-  UserCheck,
-  UserX,
   Key,
-  CreditCard,
-  Mail,
-  ChevronDown,
   X,
   Plus,
-  Check,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
 import { Card, CardContent } from '@/components/ui/card';
 import {
   Table,
@@ -30,7 +23,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import {
@@ -41,74 +33,40 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Label } from '@/components/ui/label';
-import { useAdmin, AdminUser } from '@/contexts/AdminContext';
+import { useAdmin } from '@/contexts/AdminContext';
 import { formatDistanceToNow } from 'date-fns';
-
-const statusColors = {
-  active: 'bg-success/10 text-success',
-  suspended: 'bg-destructive/10 text-destructive',
-  pending: 'bg-warning/10 text-warning',
-};
-
-const planCredits = {
-  starter: 100000,
-  business: 200000,
-  enterprise: 500000,
-};
+import type { AdminUserItem } from '@/lib/api';
 
 export default function AdminUsers() {
   const {
     users,
     keys,
-    suspendUser,
-    activateUser,
-    assignKeyToUser,
-    removeKeyFromUser,
-    setUserCredits,
-    updateUser,
+    assignments,
+    manualAssign,
+    deactivateAssignment,
+    deactivateUserAssignments,
   } = useAdmin();
 
   const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
-  const [creditsDialogOpen, setCreditsDialogOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<AdminUserItem | null>(null);
   const [keysDialogOpen, setKeysDialogOpen] = useState(false);
-  const [newCredits, setNewCredits] = useState('');
 
   const filteredUsers = users.filter((user) => {
     const matchesSearch =
-      user.name.toLowerCase().includes(search.toLowerCase()) ||
+      (user.displayName ?? '').toLowerCase().includes(search.toLowerCase()) ||
       user.email.toLowerCase().includes(search.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || user.status === statusFilter;
-    return matchesSearch && matchesStatus;
+    return matchesSearch;
   });
 
-  const handleSetCredits = () => {
-    if (selectedUser && newCredits) {
-      setUserCredits(selectedUser.id, parseInt(newCredits));
-      setCreditsDialogOpen(false);
-      setNewCredits('');
-    }
-  };
-
-  const handleChangePlan = (userId: string, plan: 'starter' | 'business' | 'enterprise') => {
-    updateUser(userId, { plan, creditsTotal: planCredits[plan] });
-  };
+  const getUserAssignments = (userId: string) =>
+    assignments.filter(a => a.userId === userId && a.isActive);
 
   return (
     <div className="p-6 lg:p-8 animate-fade-in">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-3xl font-bold">Users</h1>
-          <p className="text-muted-foreground">Manage user accounts and credits</p>
+          <p className="text-muted-foreground">Manage user accounts and key assignments</p>
         </div>
       </div>
 
@@ -123,17 +81,6 @@ export default function AdminUsers() {
             className="pl-9"
           />
         </div>
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-[150px]">
-            <SelectValue placeholder="Status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Status</SelectItem>
-            <SelectItem value="active">Active</SelectItem>
-            <SelectItem value="suspended">Suspended</SelectItem>
-            <SelectItem value="pending">Pending</SelectItem>
-          </SelectContent>
-        </Select>
       </div>
 
       {/* Users Table */}
@@ -143,79 +90,45 @@ export default function AdminUsers() {
             <TableHeader>
               <TableRow>
                 <TableHead>User</TableHead>
+                <TableHead>Role</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>Plan</TableHead>
-                <TableHead>Credits</TableHead>
                 <TableHead>Keys</TableHead>
-                <TableHead>Runs</TableHead>
-                <TableHead>Last Active</TableHead>
+                <TableHead>Joined</TableHead>
                 <TableHead className="w-[50px]"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredUsers.map((user) => {
-                const creditPercent = (user.creditsUsed / user.creditsTotal) * 100;
-                const userKeys = keys.filter((k) => user.assignedKeyIds.includes(k.id));
+                const userAssignments = getUserAssignments(user.id);
 
                 return (
                   <TableRow key={user.id}>
                     <TableCell>
                       <div>
-                        <p className="font-medium">{user.name}</p>
+                        <p className="font-medium">{user.displayName ?? user.email}</p>
                         <p className="text-sm text-muted-foreground">{user.email}</p>
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge className={cn('capitalize', statusColors[user.status])}>
-                        {user.status}
+                      <Badge variant="outline" className="capitalize text-xs">
+                        {user.role}
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <Select
-                        value={user.plan}
-                        onValueChange={(v) => handleChangePlan(user.id, v as any)}
-                      >
-                        <SelectTrigger className="w-[120px] h-8">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="starter">Starter</SelectItem>
-                          <SelectItem value="business">Business</SelectItem>
-                          <SelectItem value="enterprise">Enterprise</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <Badge className={cn(
+                        user.isActive ? 'bg-success/10 text-success' : 'bg-destructive/10 text-destructive'
+                      )}>
+                        {user.isActive ? 'active' : 'inactive'}
+                      </Badge>
                     </TableCell>
                     <TableCell>
-                      <div className="space-y-1 min-w-[140px]">
-                        <div className="flex items-center justify-between text-xs">
-                          <span>{(user.creditsUsed / 1000).toFixed(0)}K</span>
-                          <span className="text-muted-foreground">
-                            / {(user.creditsTotal / 1000).toFixed(0)}K
-                          </span>
-                        </div>
-                        <Progress
-                          value={creditPercent}
-                          className={cn('h-1.5', creditPercent > 90 && '[&>div]:bg-destructive')}
-                        />
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1">
-                        {userKeys.length > 0 ? (
-                          <Badge variant="secondary" className="text-xs">
-                            {userKeys.length} key{userKeys.length > 1 ? 's' : ''}
-                          </Badge>
-                        ) : (
-                          <span className="text-xs text-muted-foreground">None</span>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <span className="text-sm">{user.runsTotal}</span>
+                      <Badge variant="secondary" className="text-xs">
+                        {userAssignments.length} key{userAssignments.length !== 1 ? 's' : ''}
+                      </Badge>
                     </TableCell>
                     <TableCell>
                       <span className="text-sm text-muted-foreground">
-                        {formatDistanceToNow(new Date(user.lastActive), { addSuffix: true })}
+                        {formatDistanceToNow(new Date(user.createdAt), { addSuffix: true })}
                       </span>
                     </TableCell>
                     <TableCell>
@@ -235,29 +148,13 @@ export default function AdminUsers() {
                             <Key className="h-4 w-4 mr-2" />
                             Manage Keys
                           </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => {
-                              setSelectedUser(user);
-                              setNewCredits(user.creditsTotal.toString());
-                              setCreditsDialogOpen(true);
-                            }}
-                          >
-                            <CreditCard className="h-4 w-4 mr-2" />
-                            Set Credits
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          {user.status === 'active' ? (
+                          {userAssignments.length > 0 && (
                             <DropdownMenuItem
-                              onClick={() => suspendUser(user.id)}
+                              onClick={() => deactivateUserAssignments(user.id)}
                               className="text-destructive focus:text-destructive"
                             >
-                              <UserX className="h-4 w-4 mr-2" />
-                              Suspend User
-                            </DropdownMenuItem>
-                          ) : (
-                            <DropdownMenuItem onClick={() => activateUser(user.id)}>
-                              <UserCheck className="h-4 w-4 mr-2" />
-                              Activate User
+                              <X className="h-4 w-4 mr-2" />
+                              Remove All Keys
                             </DropdownMenuItem>
                           )}
                         </DropdownMenuContent>
@@ -271,50 +168,21 @@ export default function AdminUsers() {
         </CardContent>
       </Card>
 
-      {/* Credits Dialog */}
-      <Dialog open={creditsDialogOpen} onOpenChange={setCreditsDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Set Credits</DialogTitle>
-            <DialogDescription>
-              Update the total credits for {selectedUser?.name}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label>Total Credits</Label>
-              <Input
-                type="number"
-                value={newCredits}
-                onChange={(e) => setNewCredits(e.target.value)}
-                placeholder="e.g., 200000"
-              />
-              <p className="text-xs text-muted-foreground">
-                Current usage: {selectedUser?.creditsUsed.toLocaleString()} credits
-              </p>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setCreditsDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleSetCredits}>Save</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
       {/* Keys Assignment Dialog */}
       <Dialog open={keysDialogOpen} onOpenChange={setKeysDialogOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Manage Keys</DialogTitle>
             <DialogDescription>
-              Assign or remove API keys for {selectedUser?.name}
+              Assign or remove API keys for {selectedUser?.displayName ?? selectedUser?.email}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             {keys.map((key) => {
-              const isAssigned = selectedUser?.assignedKeyIds.includes(key.id);
+              const assignment = selectedUser
+                ? assignments.find(a => a.userId === selectedUser.id && a.apiKeyId === key.id && a.isActive)
+                : undefined;
+              const isAssigned = !!assignment;
               return (
                 <div
                   key={key.id}
@@ -322,17 +190,19 @@ export default function AdminUsers() {
                 >
                   <div>
                     <p className="font-medium">{key.label}</p>
-                    <p className="text-xs text-muted-foreground font-mono">{key.keyMasked}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {key.activeUsers}/{key.maxUsers} users
+                    </p>
                   </div>
                   <Button
                     variant={isAssigned ? 'destructive' : 'default'}
                     size="sm"
                     onClick={() => {
                       if (selectedUser) {
-                        if (isAssigned) {
-                          removeKeyFromUser(selectedUser.id, key.id);
+                        if (isAssigned && assignment) {
+                          deactivateAssignment(assignment.id);
                         } else {
-                          assignKeyToUser(selectedUser.id, key.id);
+                          manualAssign(selectedUser.id, key.id);
                         }
                       }
                     }}

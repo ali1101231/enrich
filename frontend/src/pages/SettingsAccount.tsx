@@ -33,10 +33,10 @@ export default function SettingsAccount() {
         <CardContent className="space-y-6">
           <div className="flex items-center gap-4">
             <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary text-2xl font-bold">
-              {user?.name?.charAt(0) || 'U'}
+              {user?.name?.charAt(0) || user?.email?.charAt(0) || 'U'}
             </div>
             <div>
-              <p className="text-xl font-semibold">{user?.name}</p>
+              <p className="text-xl font-semibold">{user?.name || user?.email}</p>
               <p className="text-muted-foreground">{user?.email}</p>
             </div>
           </div>
@@ -46,7 +46,7 @@ export default function SettingsAccount() {
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label>Full Name</Label>
-              <Input defaultValue={user?.name} />
+              <Input defaultValue={user?.name ?? ''} />
             </div>
             <div className="space-y-2">
               <Label>Email</Label>

@@ -2,15 +2,13 @@ import { useState } from 'react';
 import {
   Plus,
   Key,
-  Trash2,
-  Edit2,
   MoreVertical,
   CheckCircle2,
   XCircle,
-  AlertCircle,
   Eye,
   EyeOff,
   Users,
+  Power,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -18,7 +16,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
 import {
   Dialog,
   DialogContent,
@@ -34,42 +31,17 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
-import { useAdmin, AdminKey } from '@/contexts/AdminContext';
+import { useAdmin } from '@/contexts/AdminContext';
 import { formatDistanceToNow } from 'date-fns';
-
-const statusConfig = {
-  active: { icon: CheckCircle2, color: 'text-success', label: 'Active' },
-  'rate-limited': { icon: AlertCircle, color: 'text-warning', label: 'Rate Limited' },
-  invalid: { icon: XCircle, color: 'text-destructive', label: 'Invalid' },
-};
+import type { AdminKeyItem } from '@/lib/api';
 
 function KeyCard({
   keyData,
-  onEdit,
-  onDelete,
+  onToggleActive,
 }: {
-  keyData: AdminKey;
-  onEdit: (id: string, updates: Partial<AdminKey>) => void;
-  onDelete: (id: string) => void;
+  keyData: AdminKeyItem;
+  onToggleActive: (id: string, isActive: boolean) => void;
 }) {
-  const config = statusConfig[keyData.status];
-  const StatusIcon = config.icon;
-  const [editOpen, setEditOpen] = useState(false);
-  const [editLabel, setEditLabel] = useState(keyData.label);
-  const [editCredits, setEditCredits] = useState(keyData.creditsTotal.toString());
-  const creditPercent = (keyData.creditsUsed / keyData.creditsTotal) * 100;
-
   return (
     <Card>
       <CardContent className="p-4">
@@ -81,12 +53,26 @@ function KeyCard({
             <div className="min-w-0">
               <div className="flex items-center gap-2">
                 <p className="font-semibold truncate">{keyData.label}</p>
-                <Badge variant="secondary" className={cn('shrink-0', config.color)}>
-                  <StatusIcon className="h-3 w-3 mr-1" />
-                  {config.label}
+                <Badge
+                  variant="secondary"
+                  className={cn(
+                    'shrink-0',
+                    keyData.isActive ? 'text-success' : 'text-destructive'
+                  )}
+                >
+                  {keyData.isActive ? (
+                    <>
+                      <CheckCircle2 className="h-3 w-3 mr-1" />
+                      Active
+                    </>
+                  ) : (
+                    <>
+                      <XCircle className="h-3 w-3 mr-1" />
+                      Inactive
+                    </>
+                  )}
                 </Badge>
               </div>
-              <p className="text-sm text-muted-foreground font-mono truncate">{keyData.keyMasked}</p>
             </div>
           </div>
 
@@ -97,125 +83,44 @@ function KeyCard({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => setEditOpen(true)}>
-                <Edit2 className="h-4 w-4 mr-2" />
-                Edit Key
+              <DropdownMenuItem
+                onClick={() => onToggleActive(keyData.id, !keyData.isActive)}
+              >
+                <Power className="h-4 w-4 mr-2" />
+                {keyData.isActive ? 'Deactivate' : 'Activate'}
               </DropdownMenuItem>
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <DropdownMenuItem
-                    className="text-destructive focus:text-destructive"
-                    onSelect={(e) => e.preventDefault()}
-                  >
-                    <Trash2 className="h-4 w-4 mr-2" />
-                    Delete
-                  </DropdownMenuItem>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Delete this key?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      This will remove the key from all assigned users. This action cannot be undone.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={() => onDelete(keyData.id)}>
-                      Delete
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
             </DropdownMenuContent>
           </DropdownMenu>
-        </div>
-
-        {/* Credit Usage */}
-        <div className="space-y-2 mb-4">
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">Credits Used</span>
-            <span className="font-medium">
-              {(keyData.creditsUsed / 1000).toFixed(0)}K / {(keyData.creditsTotal / 1000).toFixed(0)}K
-            </span>
-          </div>
-          <Progress value={creditPercent} className="h-2" />
         </div>
 
         {/* Stats */}
         <div className="flex items-center gap-4 text-sm">
           <div className="flex items-center gap-1 text-muted-foreground">
             <Users className="h-4 w-4" />
-            <span>{keyData.assignedUserCount} users</span>
+            <span>
+              {keyData.activeUsers}/{keyData.maxUsers} users
+            </span>
           </div>
-          {keyData.lastUsedAt && (
-            <div className="text-muted-foreground">
-              Last used {formatDistanceToNow(new Date(keyData.lastUsedAt), { addSuffix: true })}
-            </div>
-          )}
+          <div className="text-muted-foreground">
+            Added {formatDistanceToNow(new Date(keyData.createdAt), { addSuffix: true })}
+          </div>
         </div>
-
-        {/* Edit Dialog */}
-        <Dialog open={editOpen} onOpenChange={setEditOpen}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Edit Key</DialogTitle>
-              <DialogDescription>Update the key label and credit limit</DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <Label>Label</Label>
-                <Input
-                  value={editLabel}
-                  onChange={(e) => setEditLabel(e.target.value)}
-                  placeholder="e.g., Primary Pool Key"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Total Credits</Label>
-                <Input
-                  type="number"
-                  value={editCredits}
-                  onChange={(e) => setEditCredits(e.target.value)}
-                  placeholder="e.g., 1000000"
-                />
-              </div>
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setEditOpen(false)}>
-                Cancel
-              </Button>
-              <Button
-                onClick={() => {
-                  onEdit(keyData.id, {
-                    label: editLabel,
-                    creditsTotal: parseInt(editCredits),
-                  });
-                  setEditOpen(false);
-                }}
-              >
-                Save
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
       </CardContent>
     </Card>
   );
 }
 
-function AddKeyDialog({ onAdd }: { onAdd: (label: string, key: string, credits: number) => void }) {
+function AddKeyDialog({ onAdd }: { onAdd: (label: string, rawKey: string) => void }) {
   const [open, setOpen] = useState(false);
   const [label, setLabel] = useState('');
   const [keyValue, setKeyValue] = useState('');
-  const [credits, setCredits] = useState('1000000');
   const [showKey, setShowKey] = useState(false);
 
   const handleSubmit = () => {
-    if (label && keyValue && credits) {
-      onAdd(label, keyValue, parseInt(credits));
+    if (label && keyValue) {
+      onAdd(label, keyValue);
       setLabel('');
       setKeyValue('');
-      setCredits('1000000');
       setOpen(false);
     }
   };
@@ -265,21 +170,12 @@ function AddKeyDialog({ onAdd }: { onAdd: (label: string, key: string, credits: 
               </Button>
             </div>
           </div>
-          <div className="space-y-2">
-            <Label>Credit Limit</Label>
-            <Input
-              type="number"
-              value={credits}
-              onChange={(e) => setCredits(e.target.value)}
-              placeholder="e.g., 1000000"
-            />
-          </div>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => setOpen(false)}>
             Cancel
           </Button>
-          <Button onClick={handleSubmit} disabled={!label || !keyValue || !credits}>
+          <Button onClick={handleSubmit} disabled={!label || !keyValue}>
             Add Key
           </Button>
         </DialogFooter>
@@ -289,10 +185,10 @@ function AddKeyDialog({ onAdd }: { onAdd: (label: string, key: string, credits: 
 }
 
 export default function AdminKeys() {
-  const { keys, addKey, updateKey, deleteKey, stats } = useAdmin();
+  const { keys, addKey, setKeyActive, stats } = useAdmin();
 
-  const totalKeyCredits = keys.reduce((acc, k) => acc + k.creditsTotal, 0);
-  const totalKeyUsed = keys.reduce((acc, k) => acc + k.creditsUsed, 0);
+  const totalUsers = keys.reduce((acc, k) => acc + k.activeUsers, 0);
+  const totalCapacity = keys.reduce((acc, k) => acc + k.maxUsers, 0);
 
   return (
     <div className="p-6 lg:p-8 animate-fade-in">
@@ -308,22 +204,22 @@ export default function AdminKeys() {
       <Card className="mb-6">
         <CardHeader>
           <CardTitle>Pool Summary</CardTitle>
-          <CardDescription>Combined credits across all keys</CardDescription>
+          <CardDescription>Key usage across all keys</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-3">
             <div>
-              <p className="text-sm text-muted-foreground">Total Pool Size</p>
-              <p className="text-2xl font-bold">{(totalKeyCredits / 1000000).toFixed(1)}M credits</p>
+              <p className="text-sm text-muted-foreground">Total Keys</p>
+              <p className="text-2xl font-bold">{keys.length}</p>
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Used</p>
-              <p className="text-2xl font-bold">{(totalKeyUsed / 1000).toFixed(0)}K credits</p>
+              <p className="text-sm text-muted-foreground">Active Keys</p>
+              <p className="text-2xl font-bold">{keys.filter(k => k.isActive).length}</p>
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Available</p>
+              <p className="text-sm text-muted-foreground">User Slots</p>
               <p className="text-2xl font-bold text-success">
-                {((totalKeyCredits - totalKeyUsed) / 1000).toFixed(0)}K credits
+                {totalUsers} / {totalCapacity}
               </p>
             </div>
           </div>
@@ -345,7 +241,7 @@ export default function AdminKeys() {
       ) : (
         <div className="grid gap-4 md:grid-cols-2">
           {keys.map((key) => (
-            <KeyCard key={key.id} keyData={key} onEdit={updateKey} onDelete={deleteKey} />
+            <KeyCard key={key.id} keyData={key} onToggleActive={setKeyActive} />
           ))}
         </div>
       )}
