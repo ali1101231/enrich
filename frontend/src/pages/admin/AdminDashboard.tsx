@@ -10,18 +10,20 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useAdmin } from '@/contexts/AdminContext';
+import { useApp } from '@/contexts/AppContext';
 import { formatDistanceToNow } from 'date-fns';
 
 export default function AdminDashboard() {
   const { users, keys, activity, stats } = useAdmin();
+  const { user } = useApp();
 
   const creditUsagePercent = (stats.totalCreditsUsed / stats.totalCreditsAvailable) * 100;
 
   return (
     <div className="p-6 lg:p-8 animate-fade-in">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-        <p className="text-muted-foreground">Manage users, keys, and monitor usage</p>
+        <h1 className="text-3xl font-bold">Welcome back, {user?.name || 'Admin'}</h1>
+        <p className="text-muted-foreground">Here's what's happening across the platform</p>
       </div>
 
       {/* Stats Grid */}

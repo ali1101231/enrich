@@ -14,7 +14,6 @@ import {
   Globe,
   Linkedin,
   CreditCard,
-  Shield,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -136,19 +135,6 @@ export function AppSidebar() {
           {bottomNavItems.map((item) => (
             <NavLink key={item.href} item={item} showText={!collapsed} />
           ))}
-
-          {/* Admin Link */}
-          <div className="my-4 mx-2 border-t border-sidebar-border" />
-          <Link
-            to="/admin"
-            className={cn(
-              'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200',
-              'bg-primary/5 hover:bg-primary/10 text-primary border border-primary/20'
-            )}
-          >
-            <Shield className="h-[18px] w-[18px] flex-shrink-0" />
-            {!collapsed && <span className="flex-1 truncate">Admin Portal</span>}
-          </Link>
         </nav>
       </ScrollArea>
 
