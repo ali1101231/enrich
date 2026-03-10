@@ -86,6 +86,7 @@ model Batch {
   userId           String
   sourceType       BatchSourceType
   originalFileName String?
+  r2Key            String?
   totalRows        Int
   chunkSize        Int
   status           BatchStatus    @default(QUEUED)

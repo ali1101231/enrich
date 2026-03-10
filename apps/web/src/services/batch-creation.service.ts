@@ -23,7 +23,13 @@ export class BatchCreationService {
       throw new Error("Input rows are empty");
     }
 
-    await this.keyAssignmentService.autoAssignLeastLoadedKey(input.userId);
+    // Key assignment is best-effort during batch creation;
+    // the scheduler will assign keys when dispatching jobs.
+    try {
+      await this.keyAssignmentService.autoAssignLeastLoadedKey(input.userId);
+    } catch {
+      // No API key available yet — batch and jobs are still created.
+    }
 
     const chunkSize = input.chunkSize ?? env.CHUNK_SIZE_DEFAULT;
     const chunks = this.chunkingService.chunkRows(input.rows, chunkSize);
@@ -83,6 +89,13 @@ export class BatchCreationService {
       totalRows: input.rows.length,
       totalJobs: chunks.length,
     };
+  }
+
+  async setR2Key(batchId: string, r2Key: string): Promise<void> {
+    await prisma.batch.update({
+      where: { id: batchId },
+      data: { r2Key },
+    });
   }
 
   mapSourceType(sourceType: "CSV_UPLOAD" | "PASTED_ROWS"): BatchSourceType {

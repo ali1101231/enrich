@@ -58,4 +58,89 @@ export class BatchProgressService {
       ),
     };
   }
+
+  async getBatchById(batchId: string) {
+    const batch = await prisma.batch.findUnique({
+      where: { id: batchId },
+      select: {
+        id: true,
+        userId: true,
+        sourceType: true,
+        originalFileName: true,
+        totalRows: true,
+        chunkSize: true,
+        status: true,
+        startedAt: true,
+        completedAt: true,
+        createdAt: true,
+      },
+    });
+    return batch;
+  }
+
+  async listUserBatches(userId: string, limit = 50) {
+    const batches = await prisma.batch.findMany({
+      where: { userId },
+      include: {
+        jobs: {
+          select: { status: true, rowCount: true },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+      take: limit,
+    });
+
+    return batches.map((batch) => {
+      let completedRows = 0;
+      let failedRows = 0;
+      let runningRows = 0;
+      let queuedRows = 0;
+
+      for (const job of batch.jobs) {
+        if (job.status === JobStatus.QUEUED || job.status === JobStatus.QUEUED_FOR_WORKER) {
+          queuedRows += job.rowCount;
+        } else if (job.status === JobStatus.RUNNING) {
+          runningRows += job.rowCount;
+        } else if (job.status === JobStatus.COMPLETED) {
+          completedRows += job.rowCount;
+        } else if (job.status === JobStatus.FAILED) {
+          failedRows += job.rowCount;
+        }
+      }
+
+      return {
+        id: batch.id,
+        sourceType: batch.sourceType,
+        originalFileName: batch.originalFileName,
+        totalRows: batch.totalRows,
+        status: batch.status,
+        completedRows,
+        failedRows,
+        runningRows,
+        queuedRows,
+        createdAt: batch.createdAt.toISOString(),
+      };
+    });
+  }
+
+  async listJobsForBatch(batchId: string) {
+    const jobs = await prisma.job.findMany({
+      where: { batchId },
+      select: {
+        id: true,
+        sequence: true,
+        rowCount: true,
+        status: true,
+        attempts: true,
+        maxAttempts: true,
+        queuedAt: true,
+        startedAt: true,
+        finishedAt: true,
+        errorMessage: true,
+        createdAt: true,
+      },
+      orderBy: { sequence: "asc" },
+    });
+    return jobs;
+  }
 }
