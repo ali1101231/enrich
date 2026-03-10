@@ -11,6 +11,7 @@ import {
   type DashboardStats,
   type AdminUserItem,
   type AdminKeyItem,
+  type AdminBatchItem,
   type AssignmentItem,
   type RowResult,
   type ResultCounts,
@@ -274,6 +275,98 @@ export function useAdminDeactivateUserAssignments() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["admin", "assignments"] });
       qc.invalidateQueries({ queryKey: ["admin", "keys"] });
+    },
+  });
+}
+
+// ---- Admin: Activity (all batches) ----
+export function useAdminAllBatches(limit?: number) {
+  return useQuery<AdminBatchItem[]>({
+    queryKey: ["admin", "activity", "batches", limit],
+    queryFn: async () => {
+      const res = await adminApi.listAllBatches(limit);
+      return res.items;
+    },
+    staleTime: 10_000,
+    refetchInterval: 15_000,
+  });
+}
+
+export function useAdminBatchDetail(batchId: string | undefined) {
+  return useQuery<BatchItem>({
+    queryKey: ["admin", "activity", "batch", batchId],
+    queryFn: () => adminApi.getBatchById(batchId!),
+    enabled: !!batchId,
+    staleTime: 5_000,
+    refetchInterval: (query) => {
+      const data = query.state.data;
+      if (!data) return 5000;
+      if (data.status === "COMPLETED" || data.status === "FAILED" || data.status === "PARTIAL") return false;
+      return 5000;
+    },
+  });
+}
+
+export function useAdminBatchProgress(batchId: string | undefined) {
+  return useQuery<BatchProgress>({
+    queryKey: ["admin", "activity", "batch-progress", batchId],
+    queryFn: () => adminApi.getBatchProgress(batchId!),
+    enabled: !!batchId,
+    refetchInterval: (query) => {
+      const data = query.state.data;
+      if (!data) return 5000;
+      if (data.status === "COMPLETED" || data.status === "FAILED") return false;
+      return 3000;
+    },
+    staleTime: 2000,
+  });
+}
+
+export function useAdminBatchJobs(batchId: string | undefined) {
+  return useQuery({
+    queryKey: ["admin", "activity", "batch-jobs", batchId],
+    queryFn: () => adminApi.listBatchJobs(batchId!),
+    enabled: !!batchId,
+    staleTime: 5_000,
+    refetchInterval: (query) => {
+      const data = query.state.data;
+      if (!data) return 5000;
+      const allDone = data.items.every(
+        (j: { status: string }) => j.status === "COMPLETED" || j.status === "FAILED",
+      );
+      return allDone ? false : 5000;
+    },
+  });
+}
+
+export function useAdminBatchResultCounts(batchId: string | undefined) {
+  return useQuery<ResultCounts>({
+    queryKey: ["admin", "activity", "batch-result-counts", batchId],
+    queryFn: () => adminApi.getBatchResultCounts(batchId!),
+    enabled: !!batchId,
+    staleTime: 10_000,
+    refetchInterval: 15_000,
+  });
+}
+
+export function useAdminBatchExports(batchId: string | undefined) {
+  return useQuery<ExportItem[]>({
+    queryKey: ["admin", "activity", "batch-exports", batchId],
+    queryFn: async () => {
+      const res = await adminApi.listBatchExports(batchId!);
+      return res.items;
+    },
+    enabled: !!batchId,
+    staleTime: 10_000,
+  });
+}
+
+export function useAdminExportCsv() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (batchId: string) => adminApi.exportBatchCsv(batchId),
+    onSuccess: (_data, batchId) => {
+      qc.invalidateQueries({ queryKey: ["admin", "activity", "batch-exports", batchId] });
     },
   });
 }
