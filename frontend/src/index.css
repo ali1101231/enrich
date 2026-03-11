@@ -1,10 +1,10 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 /* Koldify Design System - Premium dark SaaS aesthetic */
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
-
 @layer base {
   :root {
     /* Koldify brand colors - deep purple gradient */
@@ -151,8 +151,21 @@
   /* Grid pattern background */
   .bg-grid-pattern {
     background-image: 
-      radial-gradient(circle at 1px 1px, hsl(var(--border) / 0.5) 1px, transparent 0);
-    background-size: 28px 28px;
+      radial-gradient(circle at top right, hsl(var(--primary) / 0.09), transparent 42%),
+      radial-gradient(circle at bottom left, hsl(var(--koldify-amber) / 0.06), transparent 48%),
+      radial-gradient(circle at 1px 1px, hsl(var(--border) / 0.45) 1px, transparent 0);
+    background-size: auto, auto, 22px 22px;
+    background-position: center, center, 0 0;
+  }
+
+  .surface-elevated {
+    background: hsl(var(--card) / 0.85);
+    box-shadow: 0 10px 36px -28px hsl(var(--foreground) / 0.45);
+  }
+
+  .motion-200 {
+    transition-duration: 200ms;
+    transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
   }
   
   /* Glass effect */

@@ -179,7 +179,8 @@ export default function Dashboard() {
   ];
 
   return (
-    <div className="p-6 lg:p-8 space-y-8">
+    <div className="h-full min-h-0 overflow-hidden p-5 lg:p-6">
+      <div className="flex h-full min-h-0 flex-col gap-6">
       {/* Header */}
       <motion.div
         variants={fadeUp}
@@ -189,20 +190,20 @@ export default function Dashboard() {
         className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
       >
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Welcome back, {user?.name?.split(' ')[0] || user?.email?.split('@')[0]}</h1>
-          <p className="text-muted-foreground text-sm mt-0.5">Here's what's happening with your runs</p>
+          <h1 className="text-4xl font-bold tracking-tight">Welcome back, {user?.name?.split(' ')[0] || user?.email?.split('@')[0]} 👋</h1>
+          <p className="text-muted-foreground text-sm mt-1">Here’s an overview of your enrichment runs.</p>
         </div>
         <Button 
           onClick={() => navigate('/runs')}
-          className="gradient-koldify text-white hover:opacity-90 shadow-glow-sm"
+          className="rounded-xl border border-border bg-white text-foreground shadow-sm hover:bg-white/95"
         >
-          <Play className="h-4 w-4 mr-2" />
-          Start New Run
+          Open all runs
+          <ArrowRight className="h-4 w-4 ml-2" />
         </Button>
       </motion.div>
 
       {/* Stats Grid */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {[
           { title: 'Credits', value: credits !== undefined ? credits.toLocaleString() : '...', subtitle: 'Available balance', icon: Coins },
           { title: 'Active Runs', value: activeRuns.length, subtitle: 'Currently processing', icon: Activity },
@@ -215,9 +216,9 @@ export default function Dashboard() {
         ))}
       </div>
 
-      <motion.div variants={fadeUp} initial="hidden" animate="visible" custom={0.45} className="grid gap-6 lg:grid-cols-3">
+      <motion.div variants={fadeUp} initial="hidden" animate="visible" custom={0.45} className="grid min-h-0 flex-1 gap-6 lg:grid-cols-3">
         {/* Active & Recent Runs */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2 min-h-0 space-y-6">
           {/* Active Runs */}
           {activeRuns.length > 0 && (
             <div>
@@ -239,7 +240,7 @@ export default function Dashboard() {
           )}
 
           {/* Recent Runs */}
-          <div>
+          <div className="min-h-0">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-base font-semibold">Recent Runs</h2>
               <Link 
@@ -249,9 +250,9 @@ export default function Dashboard() {
                 View all <ArrowRight className="h-3.5 w-3.5" />
               </Link>
             </div>
-            <Card>
-              <CardContent className="p-0">
-                <div className="divide-y">
+            <Card className="min-h-0">
+              <CardContent className="p-0 min-h-0">
+                <div className="max-h-[420px] overflow-y-auto divide-y scrollbar-thin">
                   {recentBatches.map(batch => {
                     const statusKey = batchStatusKey(batch.status);
                     const statusConfig = {
@@ -297,7 +298,7 @@ export default function Dashboard() {
         </div>
 
         {/* Right Sidebar */}
-        <div className="space-y-6">
+        <div className="min-h-0 space-y-6">
           {/* Quick Actions */}
           <div>
             <h2 className="text-base font-semibold mb-4">Quick Actions</h2>
@@ -325,7 +326,7 @@ export default function Dashboard() {
               <h2 className="text-base font-semibold">Pinned Tools</h2>
               <Pin className="h-3.5 w-3.5 text-muted-foreground" />
             </div>
-            <div className="space-y-2">
+            <div className="max-h-[260px] space-y-2 overflow-y-auto pr-1 scrollbar-thin">
               {pinnedTools.length === 0 ? (
                 <Card>
                   <CardContent className="p-6 text-center text-muted-foreground">
@@ -366,6 +367,7 @@ export default function Dashboard() {
           </div>
         </div>
       </motion.div>
+      </div>
     </div>
   );
 }
