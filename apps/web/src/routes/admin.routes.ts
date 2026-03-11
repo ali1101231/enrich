@@ -6,6 +6,7 @@ import { AdminAssignmentController } from "../controllers/admin-assignment.contr
 import { AdminUserController } from "../controllers/admin-user.controller.js";
 import { AdminActivityController } from "../controllers/admin-activity.controller.js";
 import { AdminPackageController } from "../controllers/admin-package.controller.js";
+import { AdminToolController } from "../controllers/admin-tool.controller.js";
 
 const router = Router();
 const keyController = new AdminApiKeyController();
@@ -13,6 +14,7 @@ const assignmentController = new AdminAssignmentController();
 const userController = new AdminUserController();
 const activityController = new AdminActivityController();
 const packageController = new AdminPackageController();
+const toolController = new AdminToolController();
 
 router.use(requireAdmin);
 router.get("/users", asyncHandler(userController.listUsers));
@@ -49,5 +51,11 @@ router.post("/packages", asyncHandler(packageController.create));
 router.get("/packages/:packageId", asyncHandler(packageController.getById));
 router.patch("/packages/:packageId", asyncHandler(packageController.update));
 router.delete("/packages/:packageId", asyncHandler(packageController.remove));
+
+// Tools
+router.get("/tools", asyncHandler(toolController.list));
+router.post("/tools", asyncHandler(toolController.create));
+router.patch("/tools/:toolId", asyncHandler(toolController.update));
+router.delete("/tools/:toolId", asyncHandler(toolController.remove));
 
 export { router as adminRoutes };

@@ -229,16 +229,7 @@ export function TopBar() {
               </div>
             ) : (
               <div className="p-2">
-                {['apify', 'blitz', 'csv'].map(provider => {
-                  const providerTools = filteredTools.filter(t => t.provider === provider);
-                  if (providerTools.length === 0) return null;
-                  
-                  return (
-                    <div key={provider}>
-                      <p className="px-3 py-2 text-[11px] font-semibold text-muted-foreground uppercase tracking-widest">
-                        {provider} Tools
-                      </p>
-                      {providerTools.map(tool => (
+                {filteredTools.map(tool => (
                         <button
                           key={tool.id}
                           className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-muted/80 text-left transition-colors"
@@ -255,10 +246,7 @@ export function TopBar() {
                             {tool.provider}
                           </Badge>
                         </button>
-                      ))}
-                    </div>
-                  );
-                })}
+                ))}
               </div>
             )}
           </ScrollArea>

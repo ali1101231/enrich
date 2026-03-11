@@ -3,6 +3,7 @@ import { CsvParserService } from "../services/csv-parser.service.js";
 import { BatchCreationService } from "../services/batch-creation.service.js";
 import { StorageService } from "../services/storage.service.js";
 import { CreditService, CreditError } from "../services/credit.service.js";
+import { ToolService } from "../services/tool.service.js";
 import { logError } from "../lib/logger.js";
 import type { Request, Response } from "express";
 
@@ -18,6 +19,7 @@ export class BatchInputController {
     private readonly batchCreation = new BatchCreationService(),
     private readonly storage = new StorageService(),
     private readonly creditService = new CreditService(),
+    private readonly toolService = new ToolService(),
   ) {}
 
   uploadCsv = async (req: Request, res: Response): Promise<void> => {
@@ -37,9 +39,13 @@ export class BatchInputController {
     const chunkSize = req.body?.chunkSize ? Number(req.body.chunkSize) : undefined;
     const toolId = typeof req.body?.toolId === "string" ? req.body.toolId : undefined;
 
-    // Deduct credits: 1 credit per row
+    // Look up per-tool credit cost (defaults to 1 if tool not configured)
+    const creditCostPerRow = toolId ? await this.toolService.getCreditCost(toolId) : 1;
+    const totalCredits = rows.length * creditCostPerRow;
+
+    // Deduct credits
     try {
-      await this.creditService.deduct(userId, rows.length);
+      await this.creditService.deduct(userId, totalCredits);
     } catch (err) {
       if (err instanceof CreditError) {
         res.status(err.statusCode).json({ error: err.message });
@@ -84,9 +90,13 @@ export class BatchInputController {
 
     const userId = req.authUser?.id ?? "demo-user";
 
-    // Deduct credits: 1 credit per row
+    // Look up per-tool credit cost (defaults to 1 if tool not configured)
+    const creditCostPerRow = parsed.toolId ? await this.toolService.getCreditCost(parsed.toolId) : 1;
+    const totalCredits = rows.length * creditCostPerRow;
+
+    // Deduct credits
     try {
-      await this.creditService.deduct(userId, rows.length);
+      await this.creditService.deduct(userId, totalCredits);
     } catch (err) {
       if (err instanceof CreditError) {
         res.status(err.statusCode).json({ error: err.message });

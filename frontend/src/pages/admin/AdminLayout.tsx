@@ -18,6 +18,7 @@ import {
   Moon,
   FileText,
   Package,
+  Wrench,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -44,6 +45,7 @@ const mainNavItems: NavItem[] = [
   { title: 'Dashboard', href: '/admin', icon: LayoutDashboard, end: true },
   { title: 'Users', href: '/admin/users', icon: Users },
   { title: 'API Keys', href: '/admin/keys', icon: Key },
+  { title: 'Tools', href: '/admin/tools', icon: Wrench },
   { title: 'Packages', href: '/admin/packages', icon: Package },
   { title: 'Activity', href: '/admin/activity', icon: Activity },
   { title: 'Files', href: '/admin/files', icon: FileText },

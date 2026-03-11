@@ -189,3 +189,16 @@ model Package {
 
   @@map("packages")
 }
+
+model Tool {
+  id          String   @id @default(cuid())
+  toolId      String   @unique
+  name        String
+  description String?
+  creditCost  Int      @default(1)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("tools")
+}
