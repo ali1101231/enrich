@@ -7,6 +7,7 @@ import {
   packagesApi,
   creditsApi,
   offersApi,
+  guidesApi,
   toolCreditApi,
   type AuthUser,
   type BatchItem,
@@ -26,6 +27,8 @@ import {
   type AdminToolItem,
   type AdminOfferItem,
   type OfferItem,
+  type AdminGuideItem,
+  type GuideItem,
 } from "@/lib/api";
 
 // ---- Auth ----
@@ -599,6 +602,44 @@ export function useAdminDeleteOffer() {
   });
 }
 
+// ---- Admin: Guides ----
+export function useAdminGuides() {
+  return useQuery<AdminGuideItem[]>({
+    queryKey: ["admin", "guides"],
+    queryFn: async () => {
+      const res = await adminApi.listGuides();
+      return res.items;
+    },
+    staleTime: 30_000,
+  });
+}
+
+export function useAdminCreateGuide() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { title: string; content: string; videoUrl?: string; isActive?: boolean }) =>
+      adminApi.createGuide(data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin", "guides"] }),
+  });
+}
+
+export function useAdminUpdateGuide() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ guideId, data }: { guideId: string; data: { title?: string; content?: string; videoUrl?: string | null; isActive?: boolean } }) =>
+      adminApi.updateGuide(guideId, data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin", "guides"] }),
+  });
+}
+
+export function useAdminDeleteGuide() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (guideId: string) => adminApi.deleteGuide(guideId),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin", "guides"] }),
+  });
+}
+
 // ---- Tool Credit Cost (for users) ----
 export function useToolCreditCost(toolId: string | undefined) {
   return useQuery<number>({
@@ -670,5 +711,18 @@ export function useAvailOffer() {
       qc.invalidateQueries({ queryKey: ["credits"] });
       qc.invalidateQueries({ queryKey: ["auth", "me"] });
     },
+  });
+}
+
+// ---- Guides ----
+export function useGuides() {
+  return useQuery<GuideItem[]>({
+    queryKey: ["guides"],
+    queryFn: async () => {
+      const res = await guidesApi.list();
+      return res.items;
+    },
+    staleTime: 10_000,
+    refetchInterval: 10_000,
   });
 }
