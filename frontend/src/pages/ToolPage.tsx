@@ -1,17 +1,17 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Upload, ChevronRight, Play, CheckCircle2, Loader2, FileText, Type, Coins, AlertTriangle } from 'lucide-react';
+import { Upload, ChevronRight, Play, CheckCircle2, Loader2, FileText, Type, Coins, AlertTriangle, Pin, PinOff } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
 import { getToolById } from '@/lib/mockData';
+import { useApp } from '@/contexts/AppContext';
 import { useToast } from '@/hooks/use-toast';
 import { batchApi, ApiError } from '@/lib/api';
 import { useQueryClient } from '@tanstack/react-query';
@@ -50,7 +50,9 @@ export default function ToolPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  const { preferences, togglePinnedTool } = useApp();
   const tool = getToolById(toolId || '');
+  const isPinned = tool ? preferences.pinnedTools.includes(tool.id) : false;
   const [step, setStep] = useState<Step>('input');
   const [inputMode, setInputMode] = useState<InputMode>('csv');
   const [file, setFile] = useState<File | null>(null);
@@ -212,13 +214,21 @@ export default function ToolPage() {
           <div className="flex h-12 w-12 items-center justify-center rounded-xl gradient-koldify shadow-glow-sm">
             <Play className="h-6 w-6 text-white" />
           </div>
-          <div>
+          <div className="flex-1">
             <div className="flex items-center gap-2">
               <h1 className="text-2xl font-bold">{tool.name}</h1>
-              <Badge variant="outline">{tool.provider}</Badge>
             </div>
             <p className="text-muted-foreground">{tool.description}</p>
           </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => togglePinnedTool(tool.id)}
+            className={cn('shrink-0', isPinned && 'text-primary')}
+            title={isPinned ? 'Unpin tool' : 'Pin tool'}
+          >
+            {isPinned ? <PinOff className="h-5 w-5" /> : <Pin className="h-5 w-5" />}
+          </Button>
         </motion.div>
 
         {/* Steps */}

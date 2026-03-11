@@ -1,6 +1,6 @@
 import { 
   ApifyKey, 
-  BlitzKey, 
+  ApiKey, 
   Run, 
   RunDetails, 
   OutputFile, 
@@ -56,12 +56,12 @@ export const mockApifyKeys: ApifyKey[] = [
   },
 ];
 
-// Mock Blitz Keys
-export const mockBlitzKeys: BlitzKey[] = [
+// Mock API Keys
+export const mockApiKeys: ApiKey[] = [
   {
-    id: 'blitz-1',
+    id: 'key-1',
     label: 'Production Key',
-    keyMasked: 'blitz_****...****9xKm',
+    keyMasked: 'sk_****...****9xKm',
     enabled: true,
     status: 'active',
     createdAt: '2024-01-18T12:00:00Z',
@@ -76,9 +76,9 @@ export const mockBlitzKeys: BlitzKey[] = [
 export const mockRuns: Run[] = [
   {
     id: 'run-1',
-    toolId: 'blitz-email-enricher',
+    toolId: 'email-enricher',
     toolName: 'Email Enricher',
-    toolProvider: 'blitz',
+    toolProvider: 'koldify',
     inputFileName: 'leads_batch_1.csv',
     status: 'running',
     progress: 67,
@@ -91,9 +91,9 @@ export const mockRuns: Run[] = [
   },
   {
     id: 'run-2',
-    toolId: 'blitz-phone-enricher',
+    toolId: 'phone-enricher',
     toolName: 'Phone Finder',
-    toolProvider: 'blitz',
+    toolProvider: 'koldify',
     inputFileName: 'contacts_q1.csv',
     status: 'paused',
     progress: 45,
@@ -105,9 +105,9 @@ export const mockRuns: Run[] = [
   },
   {
     id: 'run-3',
-    toolId: 'blitz-company-enricher',
+    toolId: 'company-enricher',
     toolName: 'Company Enricher',
-    toolProvider: 'blitz',
+    toolProvider: 'koldify',
     inputFileName: 'companies.csv',
     status: 'completed',
     progress: 100,
@@ -120,9 +120,9 @@ export const mockRuns: Run[] = [
   },
   {
     id: 'run-4',
-    toolId: 'blitz-domain-to-linkedin',
+    toolId: 'domain-to-linkedin',
     toolName: 'Domain to LinkedIn',
-    toolProvider: 'blitz',
+    toolProvider: 'koldify',
     inputFileName: 'domains.csv',
     status: 'failed',
     progress: 23,
@@ -136,9 +136,9 @@ export const mockRuns: Run[] = [
   },
   {
     id: 'run-5',
-    toolId: 'blitz-email-enricher',
+    toolId: 'email-enricher',
     toolName: 'Email Enricher',
-    toolProvider: 'blitz',
+    toolProvider: 'koldify',
     inputFileName: 'prospects_q1.csv',
     status: 'completed',
     progress: 100,
@@ -260,16 +260,16 @@ export const mockDashboardStats: DashboardStats = {
   avgRuntime: 1845, // 30 min 45 sec
   totalRunsToday: 8,
   apifyKeysActive: 2,
-  blitzKeyValid: true,
+  apiKeyValid: true,
 };
 
 // Mock Tools
 export const mockTools: Tool[] = [
   {
-    id: 'blitz-email-enricher',
+    id: 'email-enricher',
     name: 'Email Enricher',
     description: 'Find verified email addresses from LinkedIn profile URLs',
-    provider: 'blitz',
+    provider: 'koldify',
     icon: 'MailPlus',
     category: 'Enrichment',
     requiredFields: [
@@ -278,10 +278,10 @@ export const mockTools: Tool[] = [
     optionalFields: [],
   },
   {
-    id: 'blitz-phone-enricher',
+    id: 'phone-enricher',
     name: 'Phone Finder',
     description: 'Find phone numbers from LinkedIn profile URLs',
-    provider: 'blitz',
+    provider: 'koldify',
     icon: 'Phone',
     category: 'Enrichment',
     requiredFields: [
@@ -290,10 +290,10 @@ export const mockTools: Tool[] = [
     optionalFields: [],
   },
   {
-    id: 'blitz-company-enricher',
+    id: 'company-enricher',
     name: 'Company Enricher',
     description: 'Get detailed company information from LinkedIn company URLs',
-    provider: 'blitz',
+    provider: 'koldify',
     icon: 'Building2',
     category: 'Enrichment',
     requiredFields: [
@@ -302,10 +302,10 @@ export const mockTools: Tool[] = [
     optionalFields: [],
   },
   {
-    id: 'blitz-domain-to-linkedin',
+    id: 'domain-to-linkedin',
     name: 'Domain to LinkedIn',
     description: 'Find LinkedIn company page from a domain',
-    provider: 'blitz',
+    provider: 'koldify',
     icon: 'Linkedin',
     category: 'Conversion',
     requiredFields: [

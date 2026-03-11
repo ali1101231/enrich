@@ -12,6 +12,8 @@ import {
   HelpCircle,
   ChevronDown,
   Coins,
+  Pin,
+  PinOff,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -48,6 +50,7 @@ export function TopBar() {
     preferences,
     logout, 
     updatePreferences,
+    togglePinnedTool,
   } = useApp();
   
   const [searchOpen, setSearchOpen] = useState(false);
@@ -230,9 +233,9 @@ export function TopBar() {
             ) : (
               <div className="p-2">
                 {filteredTools.map(tool => (
-                        <button
+                        <div
                           key={tool.id}
-                          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-muted/80 text-left transition-colors"
+                          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-muted/80 text-left transition-colors cursor-pointer"
                           onClick={() => handleToolSelect(tool.id)}
                         >
                           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
@@ -242,10 +245,17 @@ export function TopBar() {
                             <p className="font-medium text-sm">{tool.name}</p>
                             <p className="text-xs text-muted-foreground truncate">{tool.description}</p>
                           </div>
-                          <Badge variant="secondary" className="text-[10px]">
-                            {tool.provider}
-                          </Badge>
-                        </button>
+                          <button
+                            className={cn(
+                              'shrink-0 p-1 rounded hover:bg-muted transition-colors',
+                              preferences.pinnedTools.includes(tool.id) ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
+                            )}
+                            title={preferences.pinnedTools.includes(tool.id) ? 'Unpin tool' : 'Pin tool'}
+                            onClick={(e) => { e.stopPropagation(); togglePinnedTool(tool.id); }}
+                          >
+                            {preferences.pinnedTools.includes(tool.id) ? <PinOff className="h-3.5 w-3.5" /> : <Pin className="h-3.5 w-3.5" />}
+                          </button>
+                        </div>
                 ))}
               </div>
             )}
