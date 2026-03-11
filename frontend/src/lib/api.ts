@@ -234,6 +234,37 @@ export interface OfferItem {
   isSoldOut: boolean;
 }
 
+export interface AdminGuideItem {
+  id: string;
+  title: string;
+  content: string;
+  videoUrl: string | null;
+  isActive: boolean;
+  createdById: string | null;
+  createdAt: string;
+  updatedAt: string;
+  createdBy: {
+    id: string;
+    email: string;
+    displayName: string | null;
+  } | null;
+}
+
+export interface GuideItem {
+  id: string;
+  title: string;
+  content: string;
+  videoUrl: string | null;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  createdBy: {
+    id: string;
+    email: string;
+    displayName: string | null;
+  } | null;
+}
+
 export const adminApi = {
   listUsers() {
     return request<{ items: AdminUserItem[] }>("/admin/users");
@@ -411,6 +442,28 @@ export const adminApi = {
       method: "DELETE",
     });
   },
+
+  // ---- Guides ----
+  listGuides() {
+    return request<{ items: AdminGuideItem[] }>("/admin/guides");
+  },
+  createGuide(data: { title: string; content: string; videoUrl?: string; isActive?: boolean }) {
+    return request<AdminGuideItem>("/admin/guides", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  },
+  updateGuide(guideId: string, data: { title?: string; content?: string; videoUrl?: string | null; isActive?: boolean }) {
+    return request<AdminGuideItem>(`/admin/guides/${encodeURIComponent(guideId)}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    });
+  },
+  deleteGuide(guideId: string) {
+    return request<void>(`/admin/guides/${encodeURIComponent(guideId)}`, {
+      method: "DELETE",
+    });
+  },
 };
 
 // ---- Public Packages (pricing page) ----
@@ -442,6 +495,13 @@ export const offersApi = {
     return request<{ message: string; offerId: string; offerTitle: string; creditsAdded: number; credits: number; redemption: { id: string; createdAt: string; credits: number } }>(`/offers/${encodeURIComponent(offerId)}/avail`, {
       method: "POST",
     });
+  },
+};
+
+// ---- Guides ----
+export const guidesApi = {
+  list() {
+    return request<{ items: GuideItem[] }>("/guides");
   },
 };
 

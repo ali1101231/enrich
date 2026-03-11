@@ -51,8 +51,24 @@ model User {
   exports        BatchExport[]
   offerRedemptions OfferRedemption[]
   offersCreated  Offer[]           @relation("OfferCreatedBy")
+  guidesCreated  Guide[]           @relation("GuideCreatedBy")
 
   @@map("users")
+}
+
+model Guide {
+  id          String   @id @default(cuid())
+  title       String
+  content     String
+  videoUrl    String?
+  isActive    Boolean  @default(true)
+  createdById String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdBy   User?    @relation("GuideCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([isActive, createdAt])
+  @@map("guides")
 }
 
 model ApiKey {
