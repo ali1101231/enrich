@@ -175,7 +175,7 @@ export default function Dashboard() {
 
   const quickActions = [
     { title: 'New Run', icon: Play, href: '/runs', primary: true },
-    { title: 'Upload CSV', icon: Upload, href: '/csv/csv-splitter' },
+    { title: 'Email Enricher', icon: Upload, href: '/tools/blitz-email-enricher' },
     { title: 'View Outputs', icon: FolderOutput, href: '/files' },
   ];
 

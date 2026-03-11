@@ -192,6 +192,17 @@ export interface PackageItem {
   updatedAt: string;
 }
 
+export interface AdminToolItem {
+  id: string;
+  toolId: string;
+  name: string;
+  description: string | null;
+  creditCost: number;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export const adminApi = {
   listUsers() {
     return request<{ items: AdminUserItem[] }>("/admin/users");
@@ -325,6 +336,28 @@ export const adminApi = {
       method: "DELETE",
     });
   },
+
+  // ---- Tools ----
+  listTools() {
+    return request<{ items: AdminToolItem[] }>("/admin/tools");
+  },
+  createTool(data: { toolId: string; name: string; description?: string; creditCost?: number }) {
+    return request<AdminToolItem>("/admin/tools", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  },
+  updateTool(id: string, data: { name?: string; description?: string | null; creditCost?: number; isActive?: boolean }) {
+    return request<AdminToolItem>(`/admin/tools/${encodeURIComponent(id)}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    });
+  },
+  deleteTool(id: string) {
+    return request<void>(`/admin/tools/${encodeURIComponent(id)}`, {
+      method: "DELETE",
+    });
+  },
 };
 
 // ---- Public Packages (pricing page) ----
@@ -344,6 +377,13 @@ export const creditsApi = {
       method: "POST",
       body: JSON.stringify({ packageId }),
     });
+  },
+};
+
+// ---- Tool Credit Cost ----
+export const toolCreditApi = {
+  getCreditCost(toolId: string) {
+    return request<{ toolId: string; creditCost: number }>(`/tools/${encodeURIComponent(toolId)}/credit-cost`);
   },
 };
 

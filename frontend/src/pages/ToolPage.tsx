@@ -15,7 +15,7 @@ import { getToolById } from '@/lib/mockData';
 import { useToast } from '@/hooks/use-toast';
 import { batchApi, ApiError } from '@/lib/api';
 import { useQueryClient } from '@tanstack/react-query';
-import { useCredits } from '@/hooks/useApi';
+import { useCredits, useToolCreditCost } from '@/hooks/useApi';
 import type { ToolField } from '@/types';
 
 type Step = 'input' | 'map' | 'configure' | 'run';
@@ -61,6 +61,7 @@ export default function ToolPage() {
   const [isRunning, setIsRunning] = useState(false);
   const [totalRowCount, setTotalRowCount] = useState(0);
   const { data: creditBalance = 0 } = useCredits();
+  const { data: creditCostPerRow = 1 } = useToolCreditCost(toolId);
 
   // Reset all input state when switching tools
   useEffect(() => {
@@ -434,15 +435,19 @@ export default function ToolPage() {
               {/* Credit Cost Preview */}
               <div className={cn(
                 'p-4 rounded-lg border space-y-2',
-                totalRowCount > creditBalance ? 'border-destructive/50 bg-destructive/5' : 'border-amber-500/30 bg-amber-500/5'
+                totalRowCount * creditCostPerRow > creditBalance ? 'border-destructive/50 bg-destructive/5' : 'border-amber-500/30 bg-amber-500/5'
               )}>
                 <div className="flex items-center gap-2 text-sm font-medium">
                   <Coins className="h-4 w-4 text-amber-500" />
                   Credit Cost
                 </div>
                 <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Cost per URL:</span>
+                  <span className="font-semibold">{creditCostPerRow} credit{creditCostPerRow !== 1 ? 's' : ''}</span>
+                </div>
+                <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Credits required:</span>
-                  <span className="font-semibold">{totalRowCount.toLocaleString()}</span>
+                  <span className="font-semibold">{(totalRowCount * creditCostPerRow).toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Your balance:</span>
@@ -450,11 +455,11 @@ export default function ToolPage() {
                 </div>
                 <div className="border-t pt-2 flex justify-between text-sm">
                   <span className="text-muted-foreground">After run:</span>
-                  <span className={cn('font-semibold', totalRowCount > creditBalance ? 'text-destructive' : 'text-success')}>
-                    {(creditBalance - totalRowCount).toLocaleString()}
+                  <span className={cn('font-semibold', totalRowCount * creditCostPerRow > creditBalance ? 'text-destructive' : 'text-success')}>
+                    {(creditBalance - totalRowCount * creditCostPerRow).toLocaleString()}
                   </span>
                 </div>
-                {totalRowCount > creditBalance && (
+                {totalRowCount * creditCostPerRow > creditBalance && (
                   <div className="flex items-center gap-2 text-sm text-destructive mt-1">
                     <AlertTriangle className="h-4 w-4" />
                     Insufficient credits. Please purchase more credits to start this run.
@@ -464,9 +469,9 @@ export default function ToolPage() {
 
               <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={() => setStep(inputMode === 'paste' ? 'input' : 'map')}>Back</Button>
-                <Button className="gradient-koldify text-white" onClick={handleRun} disabled={isRunning || totalRowCount > creditBalance}>
+                <Button className="gradient-koldify text-white" onClick={handleRun} disabled={isRunning || totalRowCount * creditCostPerRow > creditBalance}>
                   {isRunning ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Play className="h-4 w-4 mr-2" />}
-                  Start Run ({totalRowCount.toLocaleString()} credits)
+                  Start Run ({(totalRowCount * creditCostPerRow).toLocaleString()} credits)
                 </Button>
               </div>
             </CardContent>

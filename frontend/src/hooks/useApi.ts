@@ -6,6 +6,7 @@ import {
   adminApi,
   packagesApi,
   creditsApi,
+  toolCreditApi,
   type AuthUser,
   type BatchItem,
   type BatchProgress,
@@ -21,6 +22,7 @@ import {
   type ExportItem,
   type AdminExportItem,
   type PackageItem,
+  type AdminToolItem,
 } from "@/lib/api";
 
 // ---- Auth ----
@@ -515,6 +517,57 @@ export function useAdminDeletePackage() {
   return useMutation({
     mutationFn: (packageId: string) => adminApi.deletePackage(packageId),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["admin", "packages"] }),
+  });
+}
+
+// ---- Admin: Tools ----
+export function useAdminTools() {
+  return useQuery<AdminToolItem[]>({
+    queryKey: ["admin", "tools"],
+    queryFn: async () => {
+      const res = await adminApi.listTools();
+      return res.items;
+    },
+    staleTime: 30_000,
+  });
+}
+
+export function useAdminCreateTool() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { toolId: string; name: string; description?: string; creditCost?: number }) =>
+      adminApi.createTool(data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin", "tools"] }),
+  });
+}
+
+export function useAdminUpdateTool() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: { name?: string; description?: string | null; creditCost?: number; isActive?: boolean } }) =>
+      adminApi.updateTool(id, data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin", "tools"] }),
+  });
+}
+
+export function useAdminDeleteTool() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => adminApi.deleteTool(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin", "tools"] }),
+  });
+}
+
+// ---- Tool Credit Cost (for users) ----
+export function useToolCreditCost(toolId: string | undefined) {
+  return useQuery<number>({
+    queryKey: ["tool-credit-cost", toolId],
+    queryFn: async () => {
+      const res = await toolCreditApi.getCreditCost(toolId!);
+      return res.creditCost;
+    },
+    enabled: !!toolId,
+    staleTime: 60_000,
   });
 }
 

@@ -76,9 +76,9 @@ export const mockBlitzKeys: BlitzKey[] = [
 export const mockRuns: Run[] = [
   {
     id: 'run-1',
-    toolId: 'post-finder',
-    toolName: 'Post Finder',
-    toolProvider: 'apify',
+    toolId: 'blitz-email-enricher',
+    toolName: 'Email Enricher',
+    toolProvider: 'blitz',
     inputFileName: 'leads_batch_1.csv',
     status: 'running',
     progress: 67,
@@ -87,12 +87,12 @@ export const mockRuns: Run[] = [
     stage: 'processing',
     startedAt: '2024-02-07T14:00:00Z',
     eta: '~12 min',
-    keyLabel: 'Main Production',
+    keyLabel: 'Production Key',
   },
   {
     id: 'run-2',
-    toolId: 'email-enricher',
-    toolName: 'Email Enricher',
+    toolId: 'blitz-phone-enricher',
+    toolName: 'Phone Finder',
     toolProvider: 'blitz',
     inputFileName: 'contacts_q1.csv',
     status: 'paused',
@@ -105,10 +105,10 @@ export const mockRuns: Run[] = [
   },
   {
     id: 'run-3',
-    toolId: 'linkedin-scraper',
-    toolName: 'LinkedIn Comment Scraper',
-    toolProvider: 'apify',
-    inputFileName: 'viral_posts.csv',
+    toolId: 'blitz-company-enricher',
+    toolName: 'Company Enricher',
+    toolProvider: 'blitz',
+    inputFileName: 'companies.csv',
     status: 'completed',
     progress: 100,
     rowsProcessed: 500,
@@ -116,14 +116,14 @@ export const mockRuns: Run[] = [
     stage: 'completed',
     startedAt: '2024-02-07T10:00:00Z',
     completedAt: '2024-02-07T11:23:00Z',
-    keyLabel: 'Main Production',
+    keyLabel: 'Production Key',
   },
   {
     id: 'run-4',
-    toolId: 'reverse-phone',
-    toolName: 'Reverse Phone Lookup',
+    toolId: 'blitz-domain-to-linkedin',
+    toolName: 'Domain to LinkedIn',
     toolProvider: 'blitz',
-    inputFileName: 'phone_list.csv',
+    inputFileName: 'domains.csv',
     status: 'failed',
     progress: 23,
     rowsProcessed: 230,
@@ -136,10 +136,10 @@ export const mockRuns: Run[] = [
   },
   {
     id: 'run-5',
-    toolId: 'csv-dedup',
-    toolName: 'CSV Deduplicator',
-    toolProvider: 'csv',
-    inputFileName: 'master_list.csv',
+    toolId: 'blitz-email-enricher',
+    toolName: 'Email Enricher',
+    toolProvider: 'blitz',
+    inputFileName: 'prospects_q1.csv',
     status: 'completed',
     progress: 100,
     rowsProcessed: 5000,
@@ -187,39 +187,39 @@ export const mockRunDetails: RunDetails = {
 export const mockOutputFiles: OutputFile[] = [
   {
     id: 'file-1',
-    name: 'linkedin_comments_enriched.csv',
+    name: 'companies_enriched.csv',
     size: 2456000,
     type: 'csv',
     createdAt: '2024-02-07T11:23:00Z',
     runId: 'run-3',
-    toolName: 'LinkedIn Comment Scraper',
+    toolName: 'Company Enricher',
   },
   {
     id: 'file-2',
-    name: 'master_list_deduped.csv',
+    name: 'emails_enriched.csv',
     size: 1234000,
     type: 'csv',
     createdAt: '2024-02-06T16:05:00Z',
     runId: 'run-5',
-    toolName: 'CSV Deduplicator',
+    toolName: 'Email Enricher',
   },
   {
     id: 'file-3',
-    name: 'posts_found_batch1.csv',
+    name: 'phones_found.csv',
     size: 892000,
     type: 'csv',
     createdAt: '2024-02-05T18:30:00Z',
     runId: 'run-old-1',
-    toolName: 'Post Finder',
+    toolName: 'Phone Finder',
   },
   {
     id: 'file-4',
-    name: 'emails_enriched_q1.csv',
+    name: 'domains_linkedin.csv',
     size: 567000,
     type: 'csv',
     createdAt: '2024-02-04T14:00:00Z',
     runId: 'run-old-2',
-    toolName: 'Blitz Email Enricher',
+    toolName: 'Domain to LinkedIn',
   },
 ];
 
@@ -229,7 +229,7 @@ export const mockNotifications: Notification[] = [
     id: 'notif-1',
     type: 'run-completed',
     title: 'Run Completed',
-    message: 'LinkedIn Comment Scraper finished processing 500 rows',
+    message: 'Company Enricher finished processing 500 rows',
     timestamp: '2024-02-07T11:23:00Z',
     read: false,
     runId: 'run-3',
@@ -238,7 +238,7 @@ export const mockNotifications: Notification[] = [
     id: 'notif-2',
     type: 'run-failed',
     title: 'Run Failed',
-    message: 'Reverse Phone Lookup failed: Rate limit exceeded',
+    message: 'Domain to LinkedIn failed: Rate limit exceeded',
     timestamp: '2024-02-07T09:15:00Z',
     read: false,
     runId: 'run-4',
@@ -265,96 +265,6 @@ export const mockDashboardStats: DashboardStats = {
 
 // Mock Tools
 export const mockTools: Tool[] = [
-  // Apify Tools
-  {
-    id: 'post-finder',
-    name: 'Post Finder',
-    description: 'Find viral LinkedIn posts based on keywords and engagement metrics',
-    provider: 'apify',
-    icon: 'Search',
-    category: 'Discovery',
-    requiredFields: [
-      { id: 'keywords', name: 'Keywords', description: 'Search keywords', type: 'text', aliases: ['keyword', 'search', 'query'] },
-    ],
-    optionalFields: [
-      { id: 'min_likes', name: 'Min Likes', description: 'Minimum likes', type: 'number', aliases: ['likes', 'min_engagement'] },
-    ],
-  },
-  {
-    id: 'reaction-scraper',
-    name: 'Reaction Scraper',
-    description: 'Scrape reactions and engagement data from LinkedIn posts',
-    provider: 'apify',
-    icon: 'Heart',
-    category: 'Engagement',
-    requiredFields: [
-      { id: 'post_url', name: 'Post URL', description: 'LinkedIn post URL', type: 'url', aliases: ['url', 'link', 'post_link'] },
-    ],
-    optionalFields: [],
-  },
-  {
-    id: 'linkedin-comment-scraper',
-    name: 'LinkedIn Comment Scraper',
-    description: 'Extract comments and commenters from LinkedIn posts',
-    provider: 'apify',
-    icon: 'MessageSquare',
-    category: 'Engagement',
-    requiredFields: [
-      { id: 'post_url', name: 'Post URL', description: 'LinkedIn post URL', type: 'url', aliases: ['url', 'link', 'linkedin_url'] },
-    ],
-    optionalFields: [
-      { id: 'max_comments', name: 'Max Comments', description: 'Maximum comments to scrape', type: 'number', aliases: ['limit'] },
-    ],
-  },
-  {
-    id: 'apify-email-enricher',
-    name: 'Apify Email Enricher',
-    description: 'Enrich emails with LinkedIn and company data',
-    provider: 'apify',
-    icon: 'Mail',
-    category: 'Enrichment',
-    requiredFields: [
-      { id: 'email', name: 'Email', description: 'Email address', type: 'email', aliases: ['email_address', 'e-mail'] },
-    ],
-    optionalFields: [],
-  },
-  {
-    id: 'linkedin-profile-enhancer',
-    name: 'LinkedIn Profile Enhancer',
-    description: 'Get detailed profile information from LinkedIn URLs',
-    provider: 'apify',
-    icon: 'UserPlus',
-    category: 'Enrichment',
-    requiredFields: [
-      { id: 'linkedin_url', name: 'LinkedIn URL', description: 'LinkedIn profile URL', type: 'linkedin', aliases: ['profile_url', 'linkedin', 'url'] },
-    ],
-    optionalFields: [],
-  },
-  {
-    id: 'contact-details-scraper',
-    name: 'Contact Details Scraper',
-    description: 'Extract contact information from profiles',
-    provider: 'apify',
-    icon: 'Contact',
-    category: 'Enrichment',
-    requiredFields: [
-      { id: 'linkedin_url', name: 'LinkedIn URL', description: 'LinkedIn profile URL', type: 'linkedin', aliases: ['profile_url', 'linkedin', 'url'] },
-    ],
-    optionalFields: [],
-  },
-  {
-    id: 'inmail-checker',
-    name: 'InMail Checker',
-    description: 'Check if LinkedIn profiles accept InMail messages',
-    provider: 'apify',
-    icon: 'Send',
-    category: 'Validation',
-    requiredFields: [
-      { id: 'linkedin_url', name: 'LinkedIn URL', description: 'LinkedIn profile URL', type: 'linkedin', aliases: ['profile_url', 'linkedin', 'url'] },
-    ],
-    optionalFields: [],
-  },
-  // Blitz Tools
   {
     id: 'blitz-email-enricher',
     name: 'Email Enricher',
@@ -403,46 +313,7 @@ export const mockTools: Tool[] = [
     ],
     optionalFields: [],
   },
-  // CSV Tools
-  {
-    id: 'csv-splitter',
-    name: 'CSV Splitter',
-    description: 'Split large CSV files into smaller chunks',
-    provider: 'csv',
-    icon: 'Scissors',
-    category: 'Transform',
-    requiredFields: [],
-    optionalFields: [
-      { id: 'rows_per_file', name: 'Rows per File', description: 'Number of rows per output file', type: 'number', aliases: ['chunk_size', 'split_size'] },
-    ],
-  },
-  {
-    id: 'csv-merger',
-    name: 'CSV Merger',
-    description: 'Merge multiple CSV files into one',
-    provider: 'csv',
-    icon: 'Combine',
-    category: 'Transform',
-    requiredFields: [],
-    optionalFields: [],
-  },
-  {
-    id: 'csv-deduplicator',
-    name: 'CSV Deduplicator',
-    description: 'Remove duplicate rows based on key columns',
-    provider: 'csv',
-    icon: 'Copy',
-    category: 'Transform',
-    requiredFields: [],
-    optionalFields: [
-      { id: 'key_column', name: 'Key Column', description: 'Column to use for deduplication', type: 'text', aliases: ['dedup_key', 'unique_key'] },
-    ],
-  },
 ];
-
-// Helper to get tools by provider
-export const getToolsByProvider = (provider: 'apify' | 'blitz' | 'csv') => 
-  mockTools.filter(t => t.provider === provider);
 
 // Helper to get tool by ID
 export const getToolById = (id: string) => 
