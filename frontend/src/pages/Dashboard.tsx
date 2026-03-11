@@ -202,11 +202,10 @@ export default function Dashboard() {
       </motion.div>
 
       {/* Stats Grid */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {[
           { title: 'Credits', value: credits !== undefined ? credits.toLocaleString() : '...', subtitle: 'Available balance', icon: Coins },
           { title: 'Active Runs', value: activeRuns.length, subtitle: 'Currently processing', icon: Activity },
-          { title: 'Success Rate', value: `${successRate}%`, subtitle: 'All time', icon: TrendingUp },
           { title: 'Total Runs', value: batches.length, subtitle: 'All batches', icon: Clock },
           { title: 'Total Today', value: totalToday, subtitle: 'Runs started', icon: Zap },
         ].map((stat, i) => (
