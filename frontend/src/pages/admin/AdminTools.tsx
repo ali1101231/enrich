@@ -384,14 +384,14 @@ function ToolFormFields({
       <div className="space-y-2">
         <Label>Tool ID</Label>
         <Input
-          placeholder="e.g. blitz-email-enricher"
+          placeholder="e.g. email-enricher"
           value={form.toolId}
           onChange={(e) => setForm((f) => ({ ...f, toolId: e.target.value }))}
           disabled={!isCreate}
           className={cn(!isCreate && 'opacity-60')}
         />
         {isCreate && (
-          <p className="text-xs text-muted-foreground">Must match the tool ID used in the system (e.g. blitz-email-enricher).</p>
+          <p className="text-xs text-muted-foreground">Must match the tool ID used in the system (e.g. email-enricher).</p>
         )}
       </div>
 

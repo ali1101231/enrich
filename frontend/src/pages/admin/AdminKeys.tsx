@@ -177,7 +177,7 @@ function AddKeyDialog({ onAdd }: { onAdd: (label: string, rawKey: string) => voi
         <DialogHeader>
           <DialogTitle>Add API Key to Pool</DialogTitle>
           <DialogDescription>
-            Add a new Blitz API key that can be assigned to users
+            Add a new API key that can be assigned to users
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4 py-4">
@@ -196,7 +196,7 @@ function AddKeyDialog({ onAdd }: { onAdd: (label: string, rawKey: string) => voi
                 type={showKey ? 'text' : 'password'}
                 value={keyValue}
                 onChange={(e) => setKeyValue(e.target.value)}
-                placeholder="blitz_..."
+                placeholder="sk_..."
                 className="pr-10"
               />
               <Button

@@ -11,8 +11,8 @@ import {
   TrendingDown,
   ArrowRight,
   FolderOutput,
-  Upload,
   Pin,
+  PinOff,
   Activity,
   Coins,
 } from 'lucide-react';
@@ -157,7 +157,7 @@ function StatCard({
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const { user, preferences } = useApp();
+  const { user, preferences, togglePinnedTool } = useApp();
   const { data: batches = [], isLoading } = useBatches();
   const { data: credits } = useCredits();
 
@@ -175,7 +175,6 @@ export default function Dashboard() {
 
   const quickActions = [
     { title: 'New Run', icon: Play, href: '/runs', primary: true },
-    { title: 'Email Enricher', icon: Upload, href: '/tools/blitz-email-enricher' },
     { title: 'View Outputs', icon: FolderOutput, href: '/files' },
   ];
 
@@ -352,9 +351,13 @@ export default function Dashboard() {
                           <p className="font-medium text-sm truncate">{tool.name}</p>
                           <p className="text-[11px] text-muted-foreground truncate">{tool.description}</p>
                         </div>
-                        <Badge variant="outline" className="shrink-0 text-[10px]">
-                          {tool.provider}
-                        </Badge>
+                        <button
+                          className="shrink-0 p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                          title="Unpin tool"
+                          onClick={(e) => { e.stopPropagation(); togglePinnedTool(tool.id); }}
+                        >
+                          <PinOff className="h-3.5 w-3.5" />
+                        </button>
                       </div>
                     </CardContent>
                   </Card>

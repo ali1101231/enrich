@@ -14,10 +14,10 @@ KEYS:
   PUT /keys/apify/:id - { label?, enabled? } => ApifyKey
   DELETE /keys/apify/:id - {} => {}
   
-  GET /keys/blitz - [] => BlitzKey[]
-  POST /keys/blitz - { label, key } => BlitzKey
-  PUT /keys/blitz/:id - { label?, enabled? } => BlitzKey
-  DELETE /keys/blitz/:id - {} => {}
+  GET /keys/pool - [] => ApiKey[]
+  POST /keys/pool - { label, key } => ApiKey
+  PUT /keys/pool/:id - { label?, enabled? } => ApiKey
+  DELETE /keys/pool/:id - {} => {}
 
 RUNS:
   POST /runs - RunConfig => Run
@@ -61,7 +61,7 @@ export interface ApifyKey {
   successRate: number;
 }
 
-export interface BlitzKey {
+export interface ApiKey {
   id: string;
   label: string;
   keyMasked: string;
@@ -82,7 +82,7 @@ export interface Run {
   id: string;
   toolId: string;
   toolName: string;
-  toolProvider: 'apify' | 'blitz' | 'csv';
+  toolProvider: 'apify' | 'koldify' | 'csv';
   inputFileName: string;
   status: RunStatus;
   progress: number;
@@ -155,7 +155,7 @@ export interface MappingPreset {
 }
 
 // ============ Tool Types ============
-export type ToolProvider = 'apify' | 'blitz' | 'csv';
+export type ToolProvider = 'apify' | 'koldify' | 'csv';
 
 export interface Tool {
   id: string;
@@ -183,7 +183,7 @@ export interface DashboardStats {
   avgRuntime: number; // in seconds
   totalRunsToday: number;
   apifyKeysActive: number;
-  blitzKeyValid: boolean;
+  apiKeyValid: boolean;
 }
 
 // ============ Notification Types ============

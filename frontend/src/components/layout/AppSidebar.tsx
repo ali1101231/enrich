@@ -31,10 +31,10 @@ interface NavItem {
 }
 
 const tools: NavItem[] = [
-  { title: 'Email Enricher', href: '/tools/blitz-email-enricher', icon: Mail },
-  { title: 'Phone Finder', href: '/tools/blitz-phone-enricher', icon: Phone },
-  { title: 'Company Enricher', href: '/tools/blitz-company-enricher', icon: Building2 },
-  { title: 'Domain → LinkedIn', href: '/tools/blitz-domain-to-linkedin', icon: Linkedin },
+  { title: 'Email Enricher', href: '/tools/email-enricher', icon: Mail },
+  { title: 'Phone Finder', href: '/tools/phone-enricher', icon: Phone },
+  { title: 'Company Enricher', href: '/tools/company-enricher', icon: Building2 },
+  { title: 'Domain → LinkedIn', href: '/tools/domain-to-linkedin', icon: Linkedin },
 ];
 
 const bottomNavItems: NavItem[] = [

@@ -32,7 +32,7 @@ const defaultPreferences: UserPreferences = {
     runFailed: true,
     keyWarnings: true,
   },
-  pinnedTools: ['blitz-email-enricher', 'blitz-phone-enricher', 'blitz-company-enricher', 'blitz-domain-to-linkedin'],
+  pinnedTools: ['email-enricher', 'phone-enricher', 'company-enricher', 'domain-to-linkedin'],
   defaultKeyStrategy: 'rotate',
 };
 
@@ -58,7 +58,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
     preferences: (() => {
       try {
         const saved = localStorage.getItem('koldify-preferences');
-        return saved ? { ...defaultPreferences, ...JSON.parse(saved) } : defaultPreferences;
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          // Migrate old blitz-* pinned tool IDs
+          if (parsed.pinnedTools) {
+            parsed.pinnedTools = parsed.pinnedTools.map((id: string) =>
+              id.startsWith('blitz-') ? id.replace('blitz-', '') : id
+            );
+          }
+          return { ...defaultPreferences, ...parsed };
+        }
+        return defaultPreferences;
       } catch {
         return defaultPreferences;
       }
