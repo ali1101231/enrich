@@ -1,4 +1,4 @@
-# Koldify Ops Hub Monorepo
+# Enrich it Monorepo
 
 Production-style monorepo with:
 

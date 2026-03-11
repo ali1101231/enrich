@@ -14,10 +14,14 @@ import {
   CreditCard,
   Mail,
   Phone,
+  BookOpen,
+  Newspaper,
+  Tag,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useBatches } from '@/hooks/useApi';
 
 interface NavItem {
   title: string;
@@ -25,11 +29,6 @@ interface NavItem {
   icon: React.ElementType;
   badge?: string | number;
 }
-
-const mainNavItems: NavItem[] = [
-  { title: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { title: 'Runs', href: '/runs', icon: Play, badge: 2 },
-];
 
 const tools: NavItem[] = [
   { title: 'Email Enricher', href: '/tools/blitz-email-enricher', icon: Mail },
@@ -40,6 +39,9 @@ const tools: NavItem[] = [
 
 const bottomNavItems: NavItem[] = [
   { title: 'Files', href: '/files', icon: FolderOutput },
+  { title: 'Guide', href: '/guide', icon: BookOpen },
+  { title: 'News', href: '/news', icon: Newspaper },
+  { title: 'Offers', href: '/offers', icon: Tag },
   { title: 'Pricing', href: '/pricing', icon: CreditCard },
   { title: 'Settings', href: '/settings/account', icon: Settings },
 ];
@@ -47,6 +49,13 @@ const bottomNavItems: NavItem[] = [
 export function AppSidebar() {
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
+  const { data: batches } = useBatches();
+  const activeRunCount = batches?.filter(b => b.status === 'RUNNING' || b.status === 'QUEUED').length ?? 0;
+
+  const mainNavItems: NavItem[] = [
+    { title: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+    { title: 'Runs', href: '/runs', icon: Play, badge: activeRunCount || undefined },
+  ];
 
   const isActive = (href: string) => location.pathname === href || location.pathname.startsWith(href + '/');
 
@@ -91,7 +100,7 @@ export function AppSidebar() {
             <div className="flex h-9 w-9 items-center justify-center rounded-xl gradient-koldify shadow-glow-sm">
               <Sparkles className="h-4 w-4 text-white" />
             </div>
-            <span className="text-lg font-bold gradient-koldify-text tracking-tight">Koldify</span>
+            <span className="text-lg font-bold gradient-koldify-text tracking-tight">Enrich it</span>
           </Link>
         )}
         {collapsed && (
