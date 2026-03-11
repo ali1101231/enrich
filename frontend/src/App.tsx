@@ -20,6 +20,8 @@ import NotFound from "./pages/NotFound";
 import Guide from "@/pages/Guide";
 import News from "@/pages/News";
 import Offers from "@/pages/Offers";
+import Usage from "@/pages/Usage";
+import Support from "@/pages/Support";
 
 // Admin Pages
 import AdminLayout from "@/pages/admin/AdminLayout";
@@ -58,7 +60,9 @@ const App = () => (
               <Route path="files" element={<Files />} />
               <Route path="guide" element={<Guide />} />
               <Route path="news" element={<News />} />
+              <Route path="support" element={<Support />} />
               <Route path="offers" element={<Offers />} />
+              <Route path="usage" element={<Usage />} />
               <Route path="pricing" element={<Pricing />} />
               
               {/* Tools */}
