@@ -11,6 +11,7 @@ import { AdminPackageController } from "../controllers/admin-package.controller.
 import { PackagePurchaseController } from "../controllers/package-purchase.controller.js";
 import { CreditService } from "../services/credit.service.js";
 import { ToolService } from "../services/tool.service.js";
+import { OfferController } from "../controllers/offer.controller.js";
 
 const router = Router();
 const exportController = new ExportController();
@@ -18,6 +19,7 @@ const packageController = new AdminPackageController();
 const purchaseController = new PackagePurchaseController();
 const creditService = new CreditService();
 const toolService = new ToolService();
+const offerController = new OfferController();
 
 router.get("/health", async (_req, res) => {
   const checks: Record<string, string> = {};
@@ -52,6 +54,10 @@ router.get("/credits", requireAuth, asyncHandler(async (req, res) => {
 
 // Package purchase (adds credits)
 router.post("/packages/purchase", requireAuth, asyncHandler(purchaseController.purchase));
+
+// Offers
+router.get("/offers", requireAuth, asyncHandler(offerController.listActive));
+router.post("/offers/:offerId/avail", requireAuth, asyncHandler(offerController.avail));
 
 // Tool credit cost (for authenticated users to check cost before processing)
 router.get("/tools/:toolId/credit-cost", requireAuth, asyncHandler(async (req, res) => {

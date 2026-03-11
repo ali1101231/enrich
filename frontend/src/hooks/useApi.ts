@@ -6,6 +6,7 @@ import {
   adminApi,
   packagesApi,
   creditsApi,
+  offersApi,
   toolCreditApi,
   type AuthUser,
   type BatchItem,
@@ -23,6 +24,8 @@ import {
   type AdminExportItem,
   type PackageItem,
   type AdminToolItem,
+  type AdminOfferItem,
+  type OfferItem,
 } from "@/lib/api";
 
 // ---- Auth ----
@@ -558,6 +561,44 @@ export function useAdminDeleteTool() {
   });
 }
 
+// ---- Admin: Offers ----
+export function useAdminOffers() {
+  return useQuery<AdminOfferItem[]>({
+    queryKey: ["admin", "offers"],
+    queryFn: async () => {
+      const res = await adminApi.listOffers();
+      return res.items;
+    },
+    staleTime: 30_000,
+  });
+}
+
+export function useAdminCreateOffer() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { title: string; description?: string; credits: number; maxRedemptions: number; isActive?: boolean }) =>
+      adminApi.createOffer(data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin", "offers"] }),
+  });
+}
+
+export function useAdminUpdateOffer() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ offerId, data }: { offerId: string; data: { title?: string; description?: string | null; credits?: number; maxRedemptions?: number; isActive?: boolean } }) =>
+      adminApi.updateOffer(offerId, data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin", "offers"] }),
+  });
+}
+
+export function useAdminDeleteOffer() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (offerId: string) => adminApi.deleteOffer(offerId),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin", "offers"] }),
+  });
+}
+
 // ---- Tool Credit Cost (for users) ----
 export function useToolCreditCost(toolId: string | undefined) {
   return useQuery<number>({
@@ -601,6 +642,31 @@ export function usePurchasePackage() {
   return useMutation({
     mutationFn: (packageId: string) => creditsApi.purchase(packageId),
     onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["credits"] });
+      qc.invalidateQueries({ queryKey: ["auth", "me"] });
+    },
+  });
+}
+
+// ---- Offers ----
+export function useOffers() {
+  return useQuery<OfferItem[]>({
+    queryKey: ["offers"],
+    queryFn: async () => {
+      const res = await offersApi.list();
+      return res.items;
+    },
+    staleTime: 30_000,
+    refetchInterval: 30_000,
+  });
+}
+
+export function useAvailOffer() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (offerId: string) => offersApi.avail(offerId),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["offers"] });
       qc.invalidateQueries({ queryKey: ["credits"] });
       qc.invalidateQueries({ queryKey: ["auth", "me"] });
     },

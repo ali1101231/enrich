@@ -19,6 +19,7 @@ import {
   FileText,
   Package,
   Wrench,
+  Tag,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -47,6 +48,7 @@ const mainNavItems: NavItem[] = [
   { title: 'API Keys', href: '/admin/keys', icon: Key },
   { title: 'Tools', href: '/admin/tools', icon: Wrench },
   { title: 'Packages', href: '/admin/packages', icon: Package },
+  { title: 'Offers', href: '/admin/offers', icon: Tag },
   { title: 'Activity', href: '/admin/activity', icon: Activity },
   { title: 'Files', href: '/admin/files', icon: FileText },
 ];
