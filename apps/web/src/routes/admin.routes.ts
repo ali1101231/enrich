@@ -7,6 +7,7 @@ import { AdminUserController } from "../controllers/admin-user.controller.js";
 import { AdminActivityController } from "../controllers/admin-activity.controller.js";
 import { AdminPackageController } from "../controllers/admin-package.controller.js";
 import { AdminToolController } from "../controllers/admin-tool.controller.js";
+import { AdminOfferController } from "../controllers/admin-offer.controller.js";
 
 const router = Router();
 const keyController = new AdminApiKeyController();
@@ -15,6 +16,7 @@ const userController = new AdminUserController();
 const activityController = new AdminActivityController();
 const packageController = new AdminPackageController();
 const toolController = new AdminToolController();
+const offerController = new AdminOfferController();
 
 router.use(requireAdmin);
 router.get("/users", asyncHandler(userController.listUsers));
@@ -57,5 +59,11 @@ router.get("/tools", asyncHandler(toolController.list));
 router.post("/tools", asyncHandler(toolController.create));
 router.patch("/tools/:toolId", asyncHandler(toolController.update));
 router.delete("/tools/:toolId", asyncHandler(toolController.remove));
+
+// Offers
+router.get("/offers", asyncHandler(offerController.list));
+router.post("/offers", asyncHandler(offerController.create));
+router.patch("/offers/:offerId", asyncHandler(offerController.update));
+router.delete("/offers/:offerId", asyncHandler(offerController.remove));
 
 export { router as adminRoutes };

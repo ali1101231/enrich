@@ -203,6 +203,37 @@ export interface AdminToolItem {
   updatedAt: string;
 }
 
+export interface AdminOfferItem {
+  id: string;
+  title: string;
+  description: string | null;
+  credits: number;
+  maxRedemptions: number;
+  redeemedCount: number;
+  remainingRedemptions: number;
+  redemptionCount: number;
+  isActive: boolean;
+  createdById: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface OfferItem {
+  id: string;
+  title: string;
+  description: string | null;
+  credits: number;
+  maxRedemptions: number;
+  redeemedCount: number;
+  remainingRedemptions: number;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  hasRedeemed: boolean;
+  redeemedAt: string | null;
+  isSoldOut: boolean;
+}
+
 export const adminApi = {
   listUsers() {
     return request<{ items: AdminUserItem[] }>("/admin/users");
@@ -358,6 +389,28 @@ export const adminApi = {
       method: "DELETE",
     });
   },
+
+  // ---- Offers ----
+  listOffers() {
+    return request<{ items: AdminOfferItem[] }>("/admin/offers");
+  },
+  createOffer(data: { title: string; description?: string; credits: number; maxRedemptions: number; isActive?: boolean }) {
+    return request<AdminOfferItem>("/admin/offers", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  },
+  updateOffer(offerId: string, data: { title?: string; description?: string | null; credits?: number; maxRedemptions?: number; isActive?: boolean }) {
+    return request<AdminOfferItem>(`/admin/offers/${encodeURIComponent(offerId)}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    });
+  },
+  deleteOffer(offerId: string) {
+    return request<void>(`/admin/offers/${encodeURIComponent(offerId)}`, {
+      method: "DELETE",
+    });
+  },
 };
 
 // ---- Public Packages (pricing page) ----
@@ -376,6 +429,18 @@ export const creditsApi = {
     return request<{ message: string; creditsAdded: number; credits: number }>("/packages/purchase", {
       method: "POST",
       body: JSON.stringify({ packageId }),
+    });
+  },
+};
+
+// ---- Offers ----
+export const offersApi = {
+  list() {
+    return request<{ items: OfferItem[] }>("/offers");
+  },
+  avail(offerId: string) {
+    return request<{ message: string; offerId: string; offerTitle: string; creditsAdded: number; credits: number; redemption: { id: string; createdAt: string; credits: number } }>(`/offers/${encodeURIComponent(offerId)}/avail`, {
+      method: "POST",
     });
   },
 };

@@ -49,6 +49,8 @@ model User {
   batches        Batch[]
   jobs           Job[]
   exports        BatchExport[]
+  offerRedemptions OfferRedemption[]
+  offersCreated  Offer[]           @relation("OfferCreatedBy")
 
   @@map("users")
 }
@@ -201,4 +203,37 @@ model Tool {
   updatedAt   DateTime @updatedAt
 
   @@map("tools")
+}
+
+model Offer {
+  id             String            @id @default(cuid())
+  title          String
+  description    String?
+  credits        Int
+  maxRedemptions Int
+  redeemedCount  Int               @default(0)
+  isActive       Boolean           @default(true)
+  createdById    String?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  redemptions    OfferRedemption[]
+  createdBy      User?             @relation("OfferCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([isActive, createdAt])
+  @@map("offers")
+}
+
+model OfferRedemption {
+  id        String   @id @default(cuid())
+  offerId   String
+  userId    String
+  credits   Int
+  createdAt DateTime @default(now())
+  offer     Offer    @relation(fields: [offerId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([offerId, userId])
+  @@index([offerId, createdAt])
+  @@index([userId, createdAt])
+  @@map("offer_redemptions")
 }
