@@ -17,6 +17,9 @@ import SettingsPreferences from "@/pages/SettingsPreferences";
 import ToolPage from "@/pages/ToolPage";
 import Login from "@/pages/Login";
 import NotFound from "./pages/NotFound";
+import Guide from "@/pages/Guide";
+import News from "@/pages/News";
+import Offers from "@/pages/Offers";
 
 // Admin Pages
 import AdminLayout from "@/pages/admin/AdminLayout";
@@ -53,6 +56,9 @@ const App = () => (
               <Route path="runs" element={<Runs />} />
               <Route path="runs/:id" element={<RunDetail />} />
               <Route path="files" element={<Files />} />
+              <Route path="guide" element={<Guide />} />
+              <Route path="news" element={<News />} />
+              <Route path="offers" element={<Offers />} />
               <Route path="pricing" element={<Pricing />} />
               
               {/* Tools */}

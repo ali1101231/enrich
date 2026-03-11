@@ -13,7 +13,7 @@ import {
 // Mock User
 export const mockUser: User = {
   id: 'user-1',
-  email: 'alex@koldify.io',
+  email: 'alex@enrichit.io',
   name: 'Alex Chen',
   plan: 'pro',
   createdAt: '2024-01-15T10:00:00Z',

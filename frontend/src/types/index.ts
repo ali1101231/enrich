@@ -1,4 +1,4 @@
-// API Contract Types for Koldify SaaS
+// API Contract Types for Enrich it SaaS
 // Backend endpoints to implement:
 
 /*
