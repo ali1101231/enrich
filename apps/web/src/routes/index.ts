@@ -13,6 +13,7 @@ import { CreditService } from "../services/credit.service.js";
 import { ToolService } from "../services/tool.service.js";
 import { OfferController } from "../controllers/offer.controller.js";
 import { GuideController } from "../controllers/guide.controller.js";
+import { NewsController } from "../controllers/news.controller.js";
 
 const router = Router();
 const exportController = new ExportController();
@@ -22,6 +23,7 @@ const creditService = new CreditService();
 const toolService = new ToolService();
 const offerController = new OfferController();
 const guideController = new GuideController();
+const newsController = new NewsController();
 
 router.get("/health", async (_req, res) => {
   const checks: Record<string, string> = {};
@@ -63,6 +65,9 @@ router.post("/offers/:offerId/avail", requireAuth, asyncHandler(offerController.
 
 // Guides
 router.get("/guides", requireAuth, asyncHandler(guideController.listActive));
+
+// News
+router.get("/news", requireAuth, asyncHandler(newsController.listActive));
 
 // Tool credit cost (for authenticated users to check cost before processing)
 router.get("/tools/:toolId/credit-cost", requireAuth, asyncHandler(async (req, res) => {

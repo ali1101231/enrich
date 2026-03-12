@@ -8,6 +8,7 @@ import {
   creditsApi,
   offersApi,
   guidesApi,
+  newsApi,
   toolCreditApi,
   type AuthUser,
   type BatchItem,
@@ -29,6 +30,8 @@ import {
   type OfferItem,
   type AdminGuideItem,
   type GuideItem,
+  type AdminNewsItem,
+  type NewsItem,
 } from "@/lib/api";
 
 // ---- Auth ----
@@ -640,6 +643,44 @@ export function useAdminDeleteGuide() {
   });
 }
 
+// ---- Admin: News ----
+export function useAdminNews() {
+  return useQuery<AdminNewsItem[]>({
+    queryKey: ["admin", "news"],
+    queryFn: async () => {
+      const res = await adminApi.listNews();
+      return res.items;
+    },
+    staleTime: 30_000,
+  });
+}
+
+export function useAdminCreateNews() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { title: string; content: string; isActive?: boolean }) =>
+      adminApi.createNews(data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin", "news"] }),
+  });
+}
+
+export function useAdminUpdateNews() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ newsId, data }: { newsId: string; data: { title?: string; content?: string; isActive?: boolean } }) =>
+      adminApi.updateNews(newsId, data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin", "news"] }),
+  });
+}
+
+export function useAdminDeleteNews() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (newsId: string) => adminApi.deleteNews(newsId),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin", "news"] }),
+  });
+}
+
 // ---- Tool Credit Cost (for users) ----
 export function useToolCreditCost(toolId: string | undefined) {
   return useQuery<number>({
@@ -720,6 +761,19 @@ export function useGuides() {
     queryKey: ["guides"],
     queryFn: async () => {
       const res = await guidesApi.list();
+      return res.items;
+    },
+    staleTime: 10_000,
+    refetchInterval: 10_000,
+  });
+}
+
+// ---- News ----
+export function useNews() {
+  return useQuery<NewsItem[]>({
+    queryKey: ["news"],
+    queryFn: async () => {
+      const res = await newsApi.list();
       return res.items;
     },
     staleTime: 10_000,

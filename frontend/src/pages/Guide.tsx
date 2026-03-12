@@ -13,7 +13,10 @@ export default function Guide() {
   return (
     <div className="space-y-6 p-6 lg:p-8">
       <div className="flex flex-col gap-2">
-        <h1 className="text-2xl font-bold tracking-tight">Guide</h1>
+        <div className="flex items-center gap-3">
+          <BookOpen className="h-8 w-8 text-primary" />
+          <h1 className="text-2xl font-bold tracking-tight">Guide</h1>
+        </div>
         <p className="text-muted-foreground">
           Learn how to use the platform with live guides published by the admin team.
         </p>
@@ -39,7 +42,7 @@ export default function Guide() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 2xl:grid-cols-2 gap-4">
+        <div className={guides.length === 1 ? 'grid grid-cols-1 gap-4' : 'grid grid-cols-1 2xl:grid-cols-2 gap-4'}>
           {guides.map((guide) => {
             const embedUrl = getYouTubeEmbedUrl(guide.videoUrl);
 
