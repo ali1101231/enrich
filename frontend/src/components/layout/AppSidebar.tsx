@@ -53,20 +53,25 @@ export function AppSidebar() {
     { title: 'Files', href: '/files', icon: FolderOutput },
   ];
 
+  const footerNavItems: NavItem[] = [
+    { title: 'Pricing', href: '/pricing', icon: CreditCard },
+    { title: 'Settings', href: '/settings/account', icon: Settings },
+  ];
+
   const isActive = (href: string) => location.pathname === href || location.pathname.startsWith(href + '/');
 
   const NavLink = ({ item, showText = true }: { item: NavItem; showText?: boolean }) => (
     <Link
       to={item.href}
       className={cn(
-        'group flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200',
+        'group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium motion-200',
         isActive(item.href)
-          ? 'bg-sidebar-accent text-sidebar-accent-foreground shadow-sm'
-          : 'text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground'
+          ? 'bg-sidebar-accent text-sidebar-accent-foreground shadow-[inset_0_0_0_1px_hsl(var(--primary)/0.2),0_14px_24px_-20px_hsl(var(--primary)/0.75)]'
+          : 'text-sidebar-foreground hover:bg-sidebar-accent/70 hover:text-sidebar-accent-foreground'
       )}
     >
       <item.icon className={cn(
-        "h-[18px] w-[18px] flex-shrink-0 transition-colors",
+        'h-[18px] w-[18px] flex-shrink-0 transition-colors',
         isActive(item.href) ? 'text-primary' : 'text-muted-foreground group-hover:text-primary'
       )} />
       {showText && (
@@ -85,23 +90,23 @@ export function AppSidebar() {
   return (
     <aside
       className={cn(
-        'flex flex-col border-r border-sidebar-border bg-sidebar transition-all duration-300',
-        collapsed ? 'w-[68px]' : 'w-56'
+        'flex flex-col border-r border-sidebar-border/90 bg-sidebar/95 backdrop-blur transition-all duration-300',
+        collapsed ? 'w-[72px]' : 'w-[232px]'
       )}
     >
       {/* Logo */}
-      <div className="flex h-16 items-center justify-between px-4 border-b border-sidebar-border">
+      <div className="flex h-[74px] items-center justify-between border-b border-sidebar-border/90 px-4">
         {!collapsed && (
           <Link to="/dashboard" className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl gradient-koldify shadow-glow-sm">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl gradient-koldify shadow-glow-sm">
               <Sparkles className="h-4 w-4 text-white" />
             </div>
-            <span className="text-lg font-bold gradient-koldify-text tracking-tight">Enrich it</span>
+            <span className="text-[1.35rem] font-bold gradient-koldify-text tracking-tight">Enrich it</span>
           </Link>
         )}
         {collapsed && (
           <Link to="/dashboard" className="mx-auto">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl gradient-koldify shadow-glow-sm">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl gradient-koldify shadow-glow-sm">
               <Sparkles className="h-4 w-4 text-white" />
             </div>
           </Link>
@@ -109,7 +114,7 @@ export function AppSidebar() {
         <Button
           variant="ghost"
           size="icon"
-          className={cn('h-7 w-7 text-muted-foreground hover:text-foreground', collapsed && 'hidden')}
+          className={cn('h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground', collapsed && 'hidden')}
           onClick={() => setCollapsed(true)}
         >
           <ChevronLeft className="h-4 w-4" />
@@ -118,15 +123,15 @@ export function AppSidebar() {
 
       {/* Navigation */}
       <ScrollArea className="flex-1 py-4">
-        <nav className="space-y-1 px-3">
+        <nav className="space-y-1.5 px-3">
           {mainNavItems.map((item) => (
             <NavLink key={item.href} item={item} showText={!collapsed} />
           ))}
 
-          <div className="my-4 mx-2 border-t border-sidebar-border" />
+          <div className="mx-2 my-4 border-t border-sidebar-border/85" />
 
           {!collapsed && (
-            <div className="px-3 pb-2 text-[11px] font-semibold text-muted-foreground uppercase tracking-widest">
+            <div className="px-3 pb-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
               Tools
             </div>
           )}
@@ -138,21 +143,22 @@ export function AppSidebar() {
       </ScrollArea>
 
       {!collapsed && (
-        <div className="border-t border-sidebar-border p-3">
-          <nav className="space-y-1">
-            <NavLink item={{ title: 'Pricing', href: '/pricing', icon: CreditCard }} showText />
-            <NavLink item={{ title: 'Settings', href: '/settings/account', icon: Settings }} showText />
+        <div className="border-t border-sidebar-border/85 p-3">
+          <nav className="space-y-1.5">
+            {footerNavItems.map((item) => (
+              <NavLink key={item.href} item={item} showText />
+            ))}
             <button
               type="button"
               onClick={logout}
-              className="group flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-sidebar-foreground transition-all duration-200 hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
+              className="group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-sidebar-foreground motion-200 hover:bg-sidebar-accent/70 hover:text-sidebar-accent-foreground"
             >
               <LogOut className="h-[18px] w-[18px] flex-shrink-0 text-muted-foreground group-hover:text-primary" />
               <span className="flex-1 truncate text-left">Log Out</span>
             </button>
           </nav>
 
-          <div className="mt-4 flex items-center justify-between rounded-xl border border-sidebar-border bg-sidebar-accent/35 px-3 py-2.5">
+          <div className="mt-4 flex items-center justify-between rounded-2xl border border-sidebar-border/85 bg-sidebar-accent/55 px-3 py-2.5">
             <Moon className="h-4 w-4 text-primary" />
             <Switch
               checked={isDark}
@@ -166,15 +172,69 @@ export function AppSidebar() {
 
       {/* Expand Button */}
       {collapsed && (
-        <div className="p-3 border-t border-sidebar-border">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="w-full h-8 text-muted-foreground hover:text-foreground"
-            onClick={() => setCollapsed(false)}
-          >
-            <ChevronRight className="h-4 w-4" />
-          </Button>
+        <div className="border-t border-sidebar-border/85 p-3">
+          <div className="space-y-2">
+            {footerNavItems.map((item) => (
+              <Link
+                key={item.href}
+                to={item.href}
+                title={item.title}
+                aria-label={item.title}
+                className={cn(
+                  'flex h-10 w-full items-center justify-center rounded-xl text-sidebar-foreground motion-200 hover:bg-sidebar-accent/70 hover:text-sidebar-accent-foreground',
+                  isActive(item.href) && 'bg-sidebar-accent text-sidebar-accent-foreground shadow-[inset_0_0_0_1px_hsl(var(--primary)/0.2),0_14px_24px_-20px_hsl(var(--primary)/0.75)]'
+                )}
+              >
+                <item.icon className="h-[18px] w-[18px]" />
+              </Link>
+            ))}
+
+            <button
+              type="button"
+              title="Log Out"
+              aria-label="Log Out"
+              onClick={logout}
+              className="flex h-10 w-full items-center justify-center rounded-xl text-sidebar-foreground motion-200 hover:bg-sidebar-accent/70 hover:text-sidebar-accent-foreground"
+            >
+              <LogOut className="h-[18px] w-[18px]" />
+            </button>
+
+            <div className="flex h-10 items-center justify-center rounded-xl border border-sidebar-border/85 bg-sidebar-accent/55">
+              <button
+                type="button"
+                title="Light mode"
+                aria-label="Light mode"
+                onClick={() => updatePreferences({ theme: 'light' })}
+                className={cn(
+                  'flex h-8 w-8 items-center justify-center rounded-lg transition-colors',
+                  !isDark ? 'bg-background text-primary shadow-sm' : 'text-muted-foreground hover:text-primary'
+                )}
+              >
+                <Sun className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                title="Dark mode"
+                aria-label="Dark mode"
+                onClick={() => updatePreferences({ theme: 'dark' })}
+                className={cn(
+                  'flex h-8 w-8 items-center justify-center rounded-lg transition-colors',
+                  isDark ? 'bg-background text-primary shadow-sm' : 'text-muted-foreground hover:text-primary'
+                )}
+              >
+                <Moon className="h-4 w-4" />
+              </button>
+            </div>
+
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-9 w-full rounded-xl text-muted-foreground hover:text-foreground"
+              onClick={() => setCollapsed(false)}
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       )}
     </aside>

@@ -105,6 +105,41 @@ export function AppProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('koldify-preferences', JSON.stringify(state.preferences));
   }, [state.preferences]);
 
+  // Apply theme preference to the document root so sidebar toggle and settings stay in sync.
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const root = document.documentElement;
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+
+    const applyTheme = () => {
+      const resolvedTheme = state.preferences.theme === 'system'
+        ? (mediaQuery.matches ? 'dark' : 'light')
+        : state.preferences.theme;
+
+      root.classList.toggle('dark', resolvedTheme === 'dark');
+      root.style.colorScheme = resolvedTheme;
+    };
+
+    applyTheme();
+
+    if (state.preferences.theme !== 'system') {
+      return;
+    }
+
+    const handleChange = () => applyTheme();
+
+    if (typeof mediaQuery.addEventListener === 'function') {
+      mediaQuery.addEventListener('change', handleChange);
+      return () => mediaQuery.removeEventListener('change', handleChange);
+    }
+
+    mediaQuery.addListener(handleChange);
+    return () => mediaQuery.removeListener(handleChange);
+  }, [state.preferences.theme]);
+
   const login = useCallback(async (email: string, password: string): Promise<string | null> => {
     setAuthError(null);
     try {

@@ -61,7 +61,7 @@ function BatchRow({ batch, onClick }: { batch: BatchItem; onClick: () => void })
 
   return (
     <div
-      className="group flex items-center gap-4 px-4 py-3.5 hover:bg-muted/40 transition-colors cursor-pointer border-b last:border-b-0"
+      className="group flex cursor-pointer items-center gap-4 border-b px-4 py-3.5 transition-colors hover:bg-muted/30 last:border-b-0"
       onClick={onClick}
     >
       <div className={cn('flex h-10 w-10 items-center justify-center rounded-xl shrink-0', config.bg)}>
@@ -98,7 +98,7 @@ function BatchRow({ batch, onClick }: { batch: BatchItem; onClick: () => void })
           </p>
         </div>
 
-        <Badge variant="secondary" className={cn('text-[11px]', config.color)}>
+        <Badge variant="secondary" className={cn('text-[11px] border-0', config.color)}>
           {config.label}
         </Badge>
       </div>
@@ -127,15 +127,15 @@ export default function RunsPage() {
   };
 
   return (
-    <div className="p-6 lg:p-8 space-y-6">
+    <div className="space-y-6 p-6 lg:p-8">
       <motion.div variants={fadeUp} initial="hidden" animate="visible" custom={0} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Runs</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Runs</h1>
           <p className="text-muted-foreground text-sm">Monitor and manage your job runs</p>
         </div>
         <Button
-          onClick={() => navigate('/tools')}
-          className="gradient-koldify text-white hover:opacity-90 shadow-glow-sm"
+          onClick={() => navigate('/tools/email-enricher')}
+          className="h-11 rounded-2xl gradient-koldify text-white hover:opacity-90 shadow-glow-sm"
         >
           <Play className="h-4 w-4 mr-2" />
           New Run
@@ -149,18 +149,18 @@ export default function RunsPage() {
             placeholder="Search runs..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9 h-9"
+            className="h-10 pl-9"
           />
         </div>
       </motion.div>
 
       <motion.div variants={fadeUp} initial="hidden" animate="visible" custom={0.2}>
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="h-9">
+        <TabsList className="h-10">
           <TabsTrigger value="queue" className="gap-2 text-sm">
             Queue
             {queueBatches.length > 0 && (
-              <Badge variant="secondary" className="h-5 px-1.5 text-[10px]">
+              <Badge variant="secondary" className="h-5 border-0 px-1.5 text-[10px]">
                 {queueBatches.length}
               </Badge>
             )}
@@ -169,18 +169,18 @@ export default function RunsPage() {
         </TabsList>
 
         <TabsContent value="queue" className="mt-6">
-          <Card>
+          <Card className="overflow-hidden border-border/70">
             <CardContent className="p-0">
               {filterBatches(queueBatches).length === 0 ? (
                 <div className="p-16 text-center">
-                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-muted mx-auto mb-4">
+                  <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-muted">
                     <Clock className="h-7 w-7 text-muted-foreground/50" />
                   </div>
                   <h3 className="font-semibold text-base">No active runs</h3>
                   <p className="text-muted-foreground text-sm mt-1">Start a new run to see it here</p>
                   <Button
                     className="mt-5 gradient-koldify text-white shadow-glow-sm"
-                    onClick={() => navigate('/tools')}
+                    onClick={() => navigate('/tools/email-enricher')}
                   >
                     Start First Run
                   </Button>
@@ -199,11 +199,11 @@ export default function RunsPage() {
         </TabsContent>
 
         <TabsContent value="history" className="mt-6">
-          <Card>
+          <Card className="overflow-hidden border-border/70">
             <CardContent className="p-0">
               {filterBatches(historyBatches).length === 0 ? (
                 <div className="p-16 text-center">
-                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-muted mx-auto mb-4">
+                  <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-muted">
                     <FileText className="h-7 w-7 text-muted-foreground/50" />
                   </div>
                   <h3 className="font-semibold text-base">No run history</h3>
