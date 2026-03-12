@@ -90,22 +90,22 @@ export default function RunDetailPage() {
   const label = batch.originalFileName ?? (batch.sourceType === 'CSV_UPLOAD' ? 'CSV Upload' : 'Pasted Rows');
 
   return (
-    <div className="p-6 lg:p-8 space-y-6">
+    <div className="space-y-6 p-6 lg:p-8">
       {/* Header */}
       <motion.div variants={fadeUp} initial="hidden" animate="visible" custom={0} className="flex items-start gap-4">
         <Button
-          variant="ghost"
+          variant="outline"
           size="icon"
           onClick={() => navigate('/runs')}
-          className="shrink-0"
+          className="h-10 w-10 shrink-0 rounded-2xl"
         >
           <ArrowLeft className="h-5 w-5" />
         </Button>
         
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl font-bold">{label}</h1>
-            <Badge variant="secondary" className={config.color}>
+            <h1 className="text-2xl font-bold lg:text-3xl">{label}</h1>
+            <Badge variant="secondary" className={cn('border-0', config.color)}>
               {config.label}
             </Badge>
           </div>
@@ -116,7 +116,7 @@ export default function RunDetailPage() {
       {/* Progress Section */}
       {(uiStatus === 'running' || uiStatus === 'pending') && (
         <motion.div variants={fadeUp} initial="hidden" animate="visible" custom={0.1}>
-        <Card>
+        <Card className="border-primary/20 bg-card/95">
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-4">
               <div>
@@ -132,7 +132,7 @@ export default function RunDetailPage() {
                 )}
               </div>
             </div>
-            <Progress value={percent} className="h-3" />
+            <Progress value={percent} className="h-3.5" />
           </CardContent>
         </Card>
         </motion.div>
@@ -142,26 +142,26 @@ export default function RunDetailPage() {
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-6">
           {/* Metrics */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <Card>
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+            <Card className="border-border/70">
               <CardContent className="p-4">
                 <p className="text-sm text-muted-foreground">Total</p>
                 <p className="text-2xl font-bold">{batch.totalRows.toLocaleString()}</p>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="border-border/70">
               <CardContent className="p-4">
                 <p className="text-sm text-muted-foreground">Completed</p>
                 <p className="text-2xl font-bold text-success">{batch.completedRows.toLocaleString()}</p>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="border-border/70">
               <CardContent className="p-4">
                 <p className="text-sm text-muted-foreground">Running</p>
                 <p className="text-2xl font-bold text-primary">{batch.runningRows.toLocaleString()}</p>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="border-border/70">
               <CardContent className="p-4">
                 <p className="text-sm text-muted-foreground">Failed</p>
                 <p className="text-2xl font-bold text-destructive">{batch.failedRows.toLocaleString()}</p>
@@ -171,20 +171,20 @@ export default function RunDetailPage() {
 
           {/* Row-level result breakdown */}
           {resultCounts && resultCounts.total > 0 && (
-            <div className="grid grid-cols-3 gap-4">
-              <Card>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+              <Card className="border-border/70">
                 <CardContent className="p-4">
                   <p className="text-sm text-muted-foreground">Rows Enriched</p>
                   <p className="text-2xl font-bold text-success">{resultCounts.success.toLocaleString()}</p>
                 </CardContent>
               </Card>
-              <Card>
+              <Card className="border-border/70">
                 <CardContent className="p-4">
                   <p className="text-sm text-muted-foreground">Rows Skipped</p>
                   <p className="text-2xl font-bold text-yellow-500">{resultCounts.skipped.toLocaleString()}</p>
                 </CardContent>
               </Card>
-              <Card>
+              <Card className="border-border/70">
                 <CardContent className="p-4">
                   <p className="text-sm text-muted-foreground">Rows Failed</p>
                   <p className="text-2xl font-bold text-destructive">{resultCounts.failure.toLocaleString()}</p>
@@ -194,13 +194,13 @@ export default function RunDetailPage() {
           )}
 
           {/* Jobs */}
-          <Card>
+          <Card className="border-border/70">
             <CardHeader>
               <CardTitle className="text-lg">Jobs ({jobs.length})</CardTitle>
             </CardHeader>
             <CardContent>
               <Tabs defaultValue="all">
-                <TabsList>
+                <TabsList className="h-10">
                   <TabsTrigger value="all">All</TabsTrigger>
                   <TabsTrigger value="failed">Failed</TabsTrigger>
                 </TabsList>
@@ -208,12 +208,12 @@ export default function RunDetailPage() {
                   <ScrollArea className="h-64">
                     <div className="space-y-1">
                       {jobs.map(job => (
-                        <div key={job.id} className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-muted/40 text-sm">
+                        <div key={job.id} className="flex items-center justify-between rounded-xl px-3 py-2 text-sm hover:bg-muted/35">
                           <span className="font-mono text-muted-foreground">Chunk #{job.sequence}</span>
                           <div className="flex items-center gap-3">
                             <span className="text-muted-foreground">{job.rowCount} rows</span>
-                            <Badge variant="secondary" className={cn('text-[11px]', statusConfig[toUIStatus(job.status)].color)}>
-                              {toUIStatus(job.status)}
+                            <Badge variant="secondary" className={cn('text-[11px] border-0', statusConfig[toUIStatus(job.status)].color)}>
+                              {statusConfig[toUIStatus(job.status)].label}
                             </Badge>
                           </div>
                         </div>
@@ -228,12 +228,12 @@ export default function RunDetailPage() {
                   <ScrollArea className="h-64">
                     <div className="space-y-1">
                       {jobs.filter(j => j.status === 'FAILED').map(job => (
-                        <div key={job.id} className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-muted/40 text-sm">
+                        <div key={job.id} className="flex items-center justify-between rounded-xl px-3 py-2 text-sm hover:bg-muted/35">
                           <span className="font-mono text-muted-foreground">Chunk #{job.sequence}</span>
                           <div className="flex items-center gap-3">
                             <span className="text-muted-foreground">{job.rowCount} rows</span>
                             <span className="text-muted-foreground">Attempts: {job.attempts}</span>
-                            <Badge variant="secondary" className="text-[11px] text-destructive">failed</Badge>
+                            <Badge variant="secondary" className="text-[11px] border-0 text-destructive">Failed</Badge>
                           </div>
                         </div>
                       ))}
@@ -251,7 +251,7 @@ export default function RunDetailPage() {
         {/* Sidebar */}
         <div className="space-y-6">
           {/* Run Info */}
-          <Card>
+          <Card className="border-border/70">
             <CardHeader>
               <CardTitle className="text-lg">Run Info</CardTitle>
             </CardHeader>
@@ -275,7 +275,7 @@ export default function RunDetailPage() {
           </Card>
 
           {/* Outputs */}
-          <Card>
+          <Card className="border-border/70">
             <CardHeader>
               <CardTitle className="text-lg">Outputs</CardTitle>
             </CardHeader>
@@ -283,7 +283,7 @@ export default function RunDetailPage() {
               {(uiStatus === 'completed' || uiStatus === 'failed' || uiStatus === 'partial') ? (
                 <div className="space-y-2">
                   <Button
-                    className="w-full"
+                    className="w-full rounded-2xl gradient-koldify text-white hover:opacity-90"
                     disabled={exportMutation.isPending}
                     onClick={() => exportMutation.mutate(id!)}
                   >
@@ -308,7 +308,7 @@ export default function RunDetailPage() {
                           <a
                             key={exp.id}
                             href={downloadUrl}
-                            className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-muted/40 text-sm"
+                            className="flex items-center justify-between rounded-xl px-3 py-2 text-sm hover:bg-muted/35"
                           >
                             <span className="truncate">{exp.fileName}</span>
                             <span className="text-xs text-muted-foreground shrink-0 ml-2">

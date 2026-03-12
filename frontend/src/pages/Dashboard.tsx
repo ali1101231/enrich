@@ -71,7 +71,7 @@ function BatchRunCard({ batch }: { batch: BatchItem }) {
 
   return (
     <Card 
-      className="group cursor-pointer hover:border-primary/30 hover:shadow-lg transition-all duration-300"
+      className="group cursor-pointer border-border/70 hover:border-primary/30 hover:shadow-[0_22px_34px_-26px_hsl(var(--primary)/0.7)] transition-all duration-300"
       onClick={() => navigate(`/runs/${batch.id}`)}
     >
       <CardContent className="p-4">
@@ -85,7 +85,7 @@ function BatchRunCard({ batch }: { batch: BatchItem }) {
               <p className="text-sm text-muted-foreground truncate">{batch.originalFileName ?? 'Batch'}</p>
             </div>
           </div>
-          <Badge variant="secondary" className={cn('shrink-0 text-[11px]', config.color)}>
+          <Badge variant="secondary" className={cn('shrink-0 text-[11px] border-0', config.color)}>
             {config.label}
           </Badge>
         </div>
@@ -120,7 +120,7 @@ function StatCard({
   trend?: number;
 }) {
   return (
-    <Card className="group hover:border-primary/20">
+    <Card className="group border-border/70 hover:border-primary/20">
       <CardContent className="p-5">
         <div className="flex items-start justify-between">
           <div className="space-y-1">
@@ -130,7 +130,7 @@ function StatCard({
               <p className="text-xs text-muted-foreground">{subtitle}</p>
             )}
           </div>
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 group-hover:bg-primary/15 transition-colors">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/12 group-hover:bg-primary/15 transition-colors">
             <Icon className="h-5 w-5 text-primary" />
           </div>
         </div>
@@ -162,7 +162,7 @@ export default function Dashboard() {
   const { data: credits } = useCredits();
 
   const activeRuns = batches.filter(b => b.status === 'RUNNING' || b.status === 'QUEUED');
-  const recentBatches = batches.slice(0, 5);
+  const recentBatches = batches.slice(0, 4);
   const pinnedTools = mockTools.filter(t => preferences.pinnedTools.includes(t.id));
 
   const completedCount = batches.filter(b => b.status === 'COMPLETED').length;
@@ -179,23 +179,24 @@ export default function Dashboard() {
   ];
 
   return (
-    <div className="h-full min-h-0 overflow-hidden p-5 lg:p-6">
-      <div className="flex h-full min-h-0 flex-col gap-6">
+    <div className="h-full min-h-0 overflow-hidden p-4 lg:p-5">
+      <div className="flex h-full min-h-0 flex-col gap-5">
       {/* Header */}
       <motion.div
         variants={fadeUp}
         initial="hidden"
         animate="visible"
         custom={0}
-        className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+        className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
       >
         <div>
-          <h1 className="text-4xl font-bold tracking-tight">Welcome back, {user?.name?.split(' ')[0] || user?.email?.split('@')[0]} 👋</h1>
-          <p className="text-muted-foreground text-sm mt-1">Here’s an overview of your enrichment runs.</p>
+          <h1 className="text-3xl font-bold tracking-tight lg:text-[3.75rem] lg:leading-[1.02]">Welcome back, {user?.name?.split(' ')[0] || user?.email?.split('@')[0]} 👋</h1>
+          <p className="mt-1 text-sm text-muted-foreground">Here’s an overview of your enrichment runs.</p>
         </div>
         <Button 
           onClick={() => navigate('/runs')}
-          className="rounded-xl border border-border bg-white text-foreground shadow-sm hover:bg-white/95"
+          variant="outline"
+          className="h-11 rounded-2xl border-border/75 bg-background/80"
         >
           Open all runs
           <ArrowRight className="h-4 w-4 ml-2" />
@@ -207,7 +208,7 @@ export default function Dashboard() {
         {[
           { title: 'Credits', value: credits !== undefined ? credits.toLocaleString() : '...', subtitle: 'Available balance', icon: Coins },
           { title: 'Active Runs', value: activeRuns.length, subtitle: 'Currently processing', icon: Activity },
-          { title: 'Total Runs', value: batches.length, subtitle: 'All batches', icon: Clock },
+          { title: 'Total Runs', value: batches.length, subtitle: `${successRate}% success`, icon: Clock },
           { title: 'Total Today', value: totalToday, subtitle: 'Runs started', icon: Zap },
         ].map((stat, i) => (
           <motion.div key={stat.title} variants={fadeUp} initial="hidden" animate="visible" custom={0.1 + i * 0.08}>
@@ -216,9 +217,9 @@ export default function Dashboard() {
         ))}
       </div>
 
-      <motion.div variants={fadeUp} initial="hidden" animate="visible" custom={0.45} className="grid min-h-0 flex-1 gap-6 lg:grid-cols-3">
+      <motion.div variants={fadeUp} initial="hidden" animate="visible" custom={0.45} className="grid min-h-0 flex-1 items-stretch gap-5 lg:grid-cols-[minmax(0,2.1fr)_minmax(320px,1fr)]">
         {/* Active & Recent Runs */}
-        <div className="lg:col-span-2 min-h-0 space-y-6">
+        <div className="flex min-h-0 h-full flex-col gap-5">
           {/* Active Runs */}
           {activeRuns.length > 0 && (
             <div>
@@ -240,8 +241,8 @@ export default function Dashboard() {
           )}
 
           {/* Recent Runs */}
-          <div className="min-h-0">
-            <div className="flex items-center justify-between mb-4">
+          <div className="flex min-h-0 flex-1 flex-col">
+            <div className="mb-4 flex items-center justify-between">
               <h2 className="text-base font-semibold">Recent Runs</h2>
               <Link 
                 to="/runs" 
@@ -250,9 +251,15 @@ export default function Dashboard() {
                 View all <ArrowRight className="h-3.5 w-3.5" />
               </Link>
             </div>
-            <Card className="min-h-0">
-              <CardContent className="p-0 min-h-0">
-                <div className="max-h-[420px] overflow-y-auto divide-y scrollbar-thin">
+            <Card className="min-h-0 flex-1 border-border/70">
+              <CardContent className="min-h-0 p-0">
+                <div className="h-full overflow-y-auto divide-y scrollbar-thin">
+                  {recentBatches.length === 0 && (
+                    <div className="px-5 py-12 text-center">
+                      <p className="text-sm font-medium">No runs yet</p>
+                      <p className="mt-1 text-xs text-muted-foreground">Start your first run to see activity here.</p>
+                    </div>
+                  )}
                   {recentBatches.map(batch => {
                     const statusKey = batchStatusKey(batch.status);
                     const statusConfig = {
@@ -269,7 +276,7 @@ export default function Dashboard() {
                       <Link
                         key={batch.id}
                         to={`/runs/${batch.id}`}
-                        className="flex items-center justify-between px-4 py-3.5 hover:bg-muted/40 transition-colors group"
+                        className="group flex items-center justify-between px-4 py-3.5 transition-colors hover:bg-muted/35"
                       >
                         <div className="flex items-center gap-3 min-w-0">
                           <div className="min-w-0">
@@ -283,7 +290,7 @@ export default function Dashboard() {
                           </span>
                           <Badge 
                             variant="secondary" 
-                            className={cn('text-[11px]', statusConfig[statusKey].color)}
+                            className={cn('text-[11px] border-0', statusConfig[statusKey].color)}
                           >
                             {batchStatusLabel(batch.status)}
                           </Badge>
@@ -298,7 +305,7 @@ export default function Dashboard() {
         </div>
 
         {/* Right Sidebar */}
-        <div className="min-h-0 space-y-6">
+        <div className="flex min-h-0 h-full flex-col gap-5">
           {/* Quick Actions */}
           <div>
             <h2 className="text-base font-semibold mb-4">Quick Actions</h2>
@@ -308,7 +315,7 @@ export default function Dashboard() {
                   key={action.title}
                   variant={action.primary ? 'default' : 'outline'}
                   className={cn(
-                    'h-auto py-4 flex-col gap-2 rounded-xl',
+                    'h-[72px] flex-col gap-2 rounded-2xl py-4',
                     action.primary && 'gradient-koldify text-white hover:opacity-90 shadow-glow-sm'
                   )}
                   onClick={() => navigate(action.href)}
@@ -321,47 +328,49 @@ export default function Dashboard() {
           </div>
 
           {/* Pinned Tools */}
-          <div>
-            <div className="flex items-center justify-between mb-4">
+          <div className="flex min-h-0 flex-1 flex-col">
+            <div className="mb-4 flex items-center justify-between">
               <h2 className="text-base font-semibold">Pinned Tools</h2>
               <Pin className="h-3.5 w-3.5 text-muted-foreground" />
             </div>
-            <div className="max-h-[260px] space-y-2 overflow-y-auto pr-1 scrollbar-thin">
+            <div className="flex min-h-[220px] flex-1 flex-col overflow-y-auto pr-1 scrollbar-thin">
               {pinnedTools.length === 0 ? (
-                <Card>
-                  <CardContent className="p-6 text-center text-muted-foreground">
+                <Card className="h-full border-dashed border-border/80">
+                  <CardContent className="flex h-full min-h-[220px] flex-col items-center justify-center p-6 text-center text-muted-foreground">
                     <Pin className="h-8 w-8 mx-auto mb-2 opacity-30" />
                     <p className="text-sm">No pinned tools yet</p>
                     <p className="text-xs mt-1">Pin your favorite tools for quick access</p>
                   </CardContent>
                 </Card>
               ) : (
-                pinnedTools.map(tool => (
-                  <Card 
-                    key={tool.id}
-                    className="cursor-pointer hover:border-primary/30 transition-all duration-200"
-                    onClick={() => navigate(`/tools/${tool.id}`)}
-                  >
-                    <CardContent className="p-3.5">
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10">
-                          <Zap className="h-4 w-4 text-primary" />
+                <div className="flex min-h-0 flex-col gap-2">
+                  {pinnedTools.map(tool => (
+                    <Card 
+                      key={tool.id}
+                      className="cursor-pointer border-border/70 transition-all duration-200 hover:border-primary/30"
+                      onClick={() => navigate(`/tools/${tool.id}`)}
+                    >
+                      <CardContent className="p-3.5">
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10">
+                            <Zap className="h-4 w-4 text-primary" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="font-medium text-sm truncate">{tool.name}</p>
+                            <p className="text-[11px] text-muted-foreground truncate">{tool.description}</p>
+                          </div>
+                          <button
+                            className="shrink-0 rounded p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                            title="Unpin tool"
+                            onClick={(e) => { e.stopPropagation(); togglePinnedTool(tool.id); }}
+                          >
+                            <PinOff className="h-3.5 w-3.5" />
+                          </button>
                         </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="font-medium text-sm truncate">{tool.name}</p>
-                          <p className="text-[11px] text-muted-foreground truncate">{tool.description}</p>
-                        </div>
-                        <button
-                          className="shrink-0 p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
-                          title="Unpin tool"
-                          onClick={(e) => { e.stopPropagation(); togglePinnedTool(tool.id); }}
-                        >
-                          <PinOff className="h-3.5 w-3.5" />
-                        </button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
               )}
             </div>
           </div>

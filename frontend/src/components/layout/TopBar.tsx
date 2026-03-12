@@ -2,11 +2,9 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   BarChart3,
-  CheckCircle2,
   ChevronDown,
   Coins,
   HelpCircle,
-  LogOut,
   Pin,
   PinOff,
   Search,
@@ -39,7 +37,6 @@ export function TopBar() {
   const {
     user,
     preferences,
-    logout,
     togglePinnedTool,
   } = useApp();
 
@@ -61,16 +58,16 @@ export function TopBar() {
   return (
     <>
       <header className="sticky top-0 z-40 px-3 pt-3 lg:px-4 lg:pt-4">
-        <div className="flex h-[78px] items-center justify-between rounded-[26px] bg-transparent px-4 shadow-none lg:px-6">
+        <div className="flex h-[74px] items-center justify-between rounded-[24px] bg-transparent px-4 lg:px-6">
           <div className="flex min-w-0 items-center gap-3 lg:gap-4">
             <Button
               variant="outline"
-              className="hidden h-12 w-[280px] items-center gap-3 rounded-2xl border-border/70 bg-background/55 px-4 text-muted-foreground transition-all duration-200 hover:border-border hover:bg-background/75 dark:border-white/8 dark:bg-white/[0.03] dark:hover:border-white/16 dark:hover:bg-white/[0.05] md:flex lg:w-[360px]"
+              className="hidden h-11 w-[300px] items-center gap-3 rounded-2xl border-border/75 bg-card px-4 text-muted-foreground hover:border-border hover:bg-card md:flex lg:w-[380px]"
               onClick={() => setSearchOpen(true)}
             >
               <Search className="h-4 w-4" />
               <span className="flex-1 text-left text-sm">Search tools, runs, and routes</span>
-              <kbd className="pointer-events-none hidden h-7 select-none items-center gap-1 rounded-xl border border-border/70 bg-muted/50 px-2.5 font-mono text-[10px] font-medium text-muted-foreground dark:border-white/8 dark:bg-black/10 dark:text-white/52 sm:flex">
+              <kbd className="pointer-events-none hidden h-7 select-none items-center gap-1 rounded-xl border border-border/75 bg-muted/70 px-2.5 font-mono text-[10px] font-medium text-muted-foreground sm:flex">
                 Ctrl K
               </kbd>
             </Button>
@@ -78,7 +75,7 @@ export function TopBar() {
             <Button
               variant="ghost"
               size="icon"
-              className="h-11 w-11 rounded-2xl border border-border/70 bg-background/55 text-foreground/80 dark:border-white/8 dark:bg-white/[0.03] dark:text-white/78 md:hidden"
+              className="h-11 w-11 rounded-2xl border border-border/75 bg-card text-foreground/80 md:hidden"
               onClick={() => setSearchOpen(true)}
             >
               <Search className="h-4 w-4" />
@@ -86,17 +83,10 @@ export function TopBar() {
           </div>
 
           <div className="flex items-center gap-2 lg:gap-3">
-            <div className="hidden items-center gap-2 lg:flex">
-              <div className="flex h-11 items-center gap-2 rounded-2xl border border-border/70 bg-background/55 px-4 text-sm text-foreground/74 dark:border-white/8 dark:bg-white/[0.04] dark:text-white/74">
-                <span className="h-2.5 w-2.5 rounded-full bg-success shadow-[0_0_12px_rgba(34,197,94,0.9)]" />
-                Connected
-              </div>
-            </div>
-
-            <div className="hidden items-center gap-1.5 rounded-[22px] border border-border/70 bg-background/60 p-1.5 shadow-sm dark:border-white/8 dark:bg-white/[0.04] xl:flex">
+            <div className="hidden items-center gap-1.5 rounded-[22px] border border-border/70 bg-card p-1.5 shadow-sm xl:flex">
               <button
                 onClick={() => navigate('/pricing')}
-                className="flex h-9 items-center gap-2 rounded-2xl px-3 text-xs font-semibold text-primary transition-colors duration-200 hover:bg-black/5 dark:text-primary dark:hover:bg-white/[0.05]"
+                className="flex h-9 items-center gap-2 rounded-2xl px-3 text-xs font-semibold text-primary transition-colors duration-200 hover:bg-black/5"
               >
                 <Coins className="h-4 w-4" />
                 <span>{credits !== undefined ? credits.toLocaleString() : '...'} credits</span>
@@ -105,7 +95,7 @@ export function TopBar() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-9 w-9 rounded-2xl text-muted-foreground transition-all duration-200 hover:bg-black/5 hover:text-primary dark:text-white/60 dark:hover:bg-white/[0.06] dark:hover:text-white"
+                className="h-9 w-9 rounded-2xl text-muted-foreground transition-all duration-200 hover:bg-black/5 hover:text-primary"
                 onClick={() => navigate('/offers')}
                 aria-label="Offers"
                 title="Offers"
@@ -116,7 +106,7 @@ export function TopBar() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-9 w-9 rounded-2xl text-muted-foreground transition-all duration-200 hover:bg-black/5 hover:text-foreground dark:text-white/60 dark:hover:bg-white/[0.06] dark:hover:text-white"
+                className="h-9 w-9 rounded-2xl text-muted-foreground transition-all duration-200 hover:bg-black/5 hover:text-foreground"
                 onClick={() => navigate('/usage')}
                 aria-label="Usage"
                 title="Usage"
@@ -126,15 +116,15 @@ export function TopBar() {
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="h-9 gap-2 rounded-2xl px-2.5 text-foreground hover:bg-black/5 dark:text-white dark:hover:bg-white/[0.05]">
+                  <Button variant="ghost" className="h-9 gap-2 rounded-2xl px-2.5 text-foreground hover:bg-black/5">
                     <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[linear-gradient(135deg,#7c3aed,#a78bfa)] text-xs font-semibold text-white shadow-[0_16px_28px_-20px_rgba(124,58,237,0.75)]">
                       {user?.name?.charAt(0) || user?.email?.charAt(0) || 'U'}
                     </div>
                     <span className="max-w-[140px] truncate text-sm font-medium">{user?.name || user?.email}</span>
-                    <ChevronDown className="h-3.5 w-3.5 text-muted-foreground dark:text-white/42" />
+                    <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-64 rounded-[24px] border border-border bg-popover text-popover-foreground dark:border-white/10 dark:bg-[#1f2430] dark:text-white">
+                <DropdownMenuContent align="end" className="w-64 rounded-[24px] border border-border bg-popover text-popover-foreground">
                   <DropdownMenuLabel>
                     <div className="flex flex-col">
                       <span className="font-medium">{user?.name || user?.email}</span>
@@ -158,11 +148,6 @@ export function TopBar() {
                     <HelpCircle className="mr-2 h-4 w-4" />
                     Help
                   </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={logout} className="rounded-lg text-destructive focus:text-destructive">
-                    <LogOut className="mr-2 h-4 w-4" />
-                    Log out
-                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
@@ -171,7 +156,7 @@ export function TopBar() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-11 w-11 rounded-2xl border border-border/70 bg-background/55 text-foreground/80 dark:border-white/8 dark:bg-white/[0.03] dark:text-white/78"
+                className="h-11 w-11 rounded-2xl border border-border/75 bg-card text-foreground/80"
                 onClick={() => navigate('/offers')}
                 aria-label="Offers"
                 title="Offers"
@@ -181,13 +166,13 @@ export function TopBar() {
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-11 w-11 rounded-2xl border border-border/70 bg-background/55 dark:border-white/8 dark:bg-white/[0.03]">
+                  <Button variant="ghost" size="icon" className="h-11 w-11 rounded-2xl border border-border/75 bg-card">
                     <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[linear-gradient(135deg,#7c3aed,#a78bfa)] text-xs font-semibold text-white">
                       {user?.name?.charAt(0) || user?.email?.charAt(0) || 'U'}
                     </div>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-64 rounded-[24px] border border-border bg-popover text-popover-foreground dark:border-white/10 dark:bg-[#1f2430] dark:text-white">
+                <DropdownMenuContent align="end" className="w-64 rounded-[24px] border border-border bg-popover text-popover-foreground">
                   <DropdownMenuLabel>
                     <div className="flex flex-col">
                       <span className="font-medium">{user?.name || user?.email}</span>
@@ -199,10 +184,6 @@ export function TopBar() {
                     <Coins className="mr-2 h-4 w-4" />
                     Credits: {credits !== undefined ? credits.toLocaleString() : '...'}
                   </DropdownMenuItem>
-                  <DropdownMenuItem className="rounded-lg">
-                    <CheckCircle2 className="mr-2 h-4 w-4 text-success" />
-                    Connected
-                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => navigate('/settings/account')} className="rounded-lg">
                     <User className="mr-2 h-4 w-4" />
                     Account
@@ -219,11 +200,6 @@ export function TopBar() {
                     <HelpCircle className="mr-2 h-4 w-4" />
                     Help
                   </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={logout} className="rounded-lg text-destructive focus:text-destructive">
-                    <LogOut className="mr-2 h-4 w-4" />
-                    Log out
-                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
@@ -232,14 +208,14 @@ export function TopBar() {
       </header>
 
       <Dialog open={searchOpen} onOpenChange={setSearchOpen}>
-        <DialogContent className="max-w-lg gap-0 rounded-[28px] border border-border bg-popover p-0 text-popover-foreground dark:border-white/10 dark:bg-[#1f2430] dark:text-white">
-          <div className="flex items-center border-b border-border px-4 dark:border-white/8">
+        <DialogContent className="max-w-lg gap-0 rounded-[28px] border border-border bg-popover/95 p-0 text-popover-foreground backdrop-blur">
+          <div className="flex items-center border-b border-border px-4">
             <Search className="h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search tools..."
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
-              className="h-14 border-0 bg-transparent text-popover-foreground focus-visible:ring-0 dark:text-white"
+              className="h-14 border-0 bg-transparent text-popover-foreground focus-visible:ring-0"
               autoFocus
             />
           </div>
@@ -254,7 +230,7 @@ export function TopBar() {
                 {filteredTools.map((tool) => (
                   <div
                     key={tool.id}
-                    className="flex w-full cursor-pointer items-center gap-3 rounded-2xl px-3 py-3 text-left transition-colors hover:bg-black/5 dark:hover:bg-white/[0.05]"
+                    className="flex w-full cursor-pointer items-center gap-3 rounded-2xl px-3 py-3 text-left transition-colors hover:bg-black/5"
                     onClick={() => handleToolSelect(tool.id)}
                   >
                     <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/12">
@@ -266,7 +242,7 @@ export function TopBar() {
                     </div>
                     <button
                       className={cn(
-                        'shrink-0 rounded-xl p-1.5 transition-colors hover:bg-black/5 dark:hover:bg-white/[0.04]',
+                        'shrink-0 rounded-xl p-1.5 transition-colors hover:bg-black/5',
                         preferences.pinnedTools.includes(tool.id) ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
                       )}
                       title={preferences.pinnedTools.includes(tool.id) ? 'Unpin tool' : 'Pin tool'}
