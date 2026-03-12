@@ -10,6 +10,7 @@ import { AdminToolController } from "../controllers/admin-tool.controller.js";
 import { AdminOfferController } from "../controllers/admin-offer.controller.js";
 import { AdminGuideController } from "../controllers/admin-guide.controller.js";
 import { AdminNewsController } from "../controllers/admin-news.controller.js";
+import { AdminUsageController } from "../controllers/admin-usage.controller.js";
 
 const router = Router();
 const keyController = new AdminApiKeyController();
@@ -21,8 +22,10 @@ const toolController = new AdminToolController();
 const offerController = new AdminOfferController();
 const guideController = new AdminGuideController();
 const newsController = new AdminNewsController();
+const usageController = new AdminUsageController();
 
 router.use(requireAdmin);
+router.get("/usage", asyncHandler(usageController.getUsage));
 router.get("/users", asyncHandler(userController.listUsers));
 router.get("/users/:userId", asyncHandler(userController.getUserDetail));
 router.patch("/users/:userId/role", asyncHandler(userController.updateUserRole));

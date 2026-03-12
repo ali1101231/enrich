@@ -294,6 +294,9 @@ export interface NewsItem {
 }
 
 export const adminApi = {
+  getUsage() {
+    return request<AdminUsageSummary>("/admin/usage");
+  },
   listUsers() {
     return request<{ items: AdminUserItem[] }>("/admin/users");
   },
@@ -591,6 +594,67 @@ export interface DashboardStats {
   batchesToday: number;
 }
 
+export interface UsageToolItem {
+  toolId: string;
+  toolName: string;
+  totalRows: number;
+  totalBatches: number;
+  creditsUsed: number;
+}
+
+export interface UsageDailyPoint {
+  date: string;
+  creditsUsed: number;
+  rowsProcessed: number;
+}
+
+export interface UserUsageSummary {
+  user: {
+    id: string;
+    email: string;
+    displayName: string | null;
+    credits: number;
+  };
+  totals: {
+    totalBatches: number;
+    totalRows: number;
+    creditsUsed: number;
+  };
+  toolUsage: UsageToolItem[];
+  dailyUsage: UsageDailyPoint[];
+}
+
+export interface AdminUsageUserSummary {
+  userId: string;
+  email: string;
+  displayName: string | null;
+  role: string;
+  isActive: boolean;
+  credits: number;
+  totalBatches: number;
+  totalRows: number;
+  creditsUsed: number;
+  toolUsage: UsageToolItem[];
+}
+
+export interface AdminUsageSummary {
+  totals: {
+    totalUsers: number;
+    activeUsers: number;
+    totalBatches: number;
+    totalRows: number;
+    creditsUsed: number;
+    currentCredits: number;
+  };
+  topTools: Array<
+    UsageToolItem & {
+      activeUsers: number;
+    }
+  >;
+  users: AdminUsageUserSummary[];
+  dailyUsage: UsageDailyPoint[];
+}
+
 export const runsApi = {
   history(limit?: number) {
     const qs = limit ? `?limit=${limit}` : "";
@@ -598,6 +662,9 @@ export const runsApi = {
   },
   stats() {
     return request<DashboardStats>("/runs/stats");
+  },
+  usage() {
+    return request<UserUsageSummary>("/runs/usage");
   },
 };
 
