@@ -1,6 +1,7 @@
 import { Outlet, Navigate } from 'react-router-dom';
 import { AppSidebar } from './AppSidebar';
 import { TopBar } from './TopBar';
+import { FloatingHelpFab } from './FloatingHelpFab';
 import { useApp } from '@/contexts/AppContext';
 
 export function AppLayout() {
@@ -32,6 +33,7 @@ export function AppLayout() {
           <Outlet />
         </main>
       </div>
+      <FloatingHelpFab />
     </div>
   );
 }
