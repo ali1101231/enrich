@@ -265,6 +265,34 @@ export interface GuideItem {
   } | null;
 }
 
+export interface AdminNewsItem {
+  id: string;
+  title: string;
+  content: string;
+  isActive: boolean;
+  createdById: string | null;
+  createdAt: string;
+  updatedAt: string;
+  createdBy: {
+    id: string;
+    email: string;
+    displayName: string | null;
+  } | null;
+}
+
+export interface NewsItem {
+  id: string;
+  title: string;
+  content: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  createdBy: {
+    id: string;
+    displayName: string | null;
+  } | null;
+}
+
 export const adminApi = {
   listUsers() {
     return request<{ items: AdminUserItem[] }>("/admin/users");
@@ -464,6 +492,28 @@ export const adminApi = {
       method: "DELETE",
     });
   },
+
+  // ---- News ----
+  listNews() {
+    return request<{ items: AdminNewsItem[] }>("/admin/news");
+  },
+  createNews(data: { title: string; content: string; isActive?: boolean }) {
+    return request<AdminNewsItem>("/admin/news", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  },
+  updateNews(newsId: string, data: { title?: string; content?: string; isActive?: boolean }) {
+    return request<AdminNewsItem>(`/admin/news/${encodeURIComponent(newsId)}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    });
+  },
+  deleteNews(newsId: string) {
+    return request<void>(`/admin/news/${encodeURIComponent(newsId)}`, {
+      method: "DELETE",
+    });
+  },
 };
 
 // ---- Public Packages (pricing page) ----
@@ -502,6 +552,13 @@ export const offersApi = {
 export const guidesApi = {
   list() {
     return request<{ items: GuideItem[] }>("/guides");
+  },
+};
+
+// ---- News ----
+export const newsApi = {
+  list() {
+    return request<{ items: NewsItem[] }>("/news");
   },
 };
 

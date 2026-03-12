@@ -37,6 +37,7 @@ import AdminPackages from "@/pages/admin/AdminPackages";
 import AdminTools from "@/pages/admin/AdminTools";
 import AdminOffers from "@/pages/admin/AdminOffers";
 import AdminGuides from "@/pages/admin/AdminGuides";
+import AdminNews from "@/pages/admin/AdminNews";
 
 const queryClient = new QueryClient();
 
@@ -88,6 +89,7 @@ const App = () => (
               <Route path="packages" element={<AdminPackages />} />
               <Route path="offers" element={<AdminOffers />} />
               <Route path="guides" element={<AdminGuides />} />
+              <Route path="news" element={<AdminNews />} />
               <Route path="activity" element={<AdminActivity />} />
               <Route path="activity/:batchId" element={<AdminRunDetail />} />
               <Route path="files" element={<AdminFiles />} />

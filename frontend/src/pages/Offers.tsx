@@ -36,7 +36,10 @@ export default function Offers() {
   return (
     <div className="space-y-6 p-6 lg:p-8">
       <div className="flex flex-col gap-2">
-        <h1 className="text-2xl font-bold tracking-tight">Offers</h1>
+        <div className="flex items-center gap-3">
+          <Tag className="h-8 w-8 text-primary" />
+          <h1 className="text-2xl font-bold tracking-tight">Offers</h1>
+        </div>
         <p className="text-muted-foreground">
           Avail limited-time offers to add credits to your account.
         </p>
@@ -55,7 +58,7 @@ export default function Offers() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        <div className={offers.length === 1 ? 'grid grid-cols-1 gap-4' : 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4'}>
           {offers.map((offer) => {
             const disabled = offer.hasRedeemed || offer.isSoldOut || pendingOfferId === offer.id;
 

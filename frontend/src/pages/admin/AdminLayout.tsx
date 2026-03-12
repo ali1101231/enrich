@@ -21,6 +21,7 @@ import {
   Wrench,
   Tag,
   BookOpen,
+  Newspaper,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -51,6 +52,7 @@ const mainNavItems: NavItem[] = [
   { title: 'Packages', href: '/admin/packages', icon: Package },
   { title: 'Offers', href: '/admin/offers', icon: Tag },
   { title: 'Guides', href: '/admin/guides', icon: BookOpen },
+  { title: 'News', href: '/admin/news', icon: Newspaper },
   { title: 'Activity', href: '/admin/activity', icon: Activity },
   { title: 'Files', href: '/admin/files', icon: FileText },
 ];
