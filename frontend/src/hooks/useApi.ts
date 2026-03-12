@@ -32,6 +32,8 @@ import {
   type GuideItem,
   type AdminNewsItem,
   type NewsItem,
+  type UserUsageSummary,
+  type AdminUsageSummary,
 } from "@/lib/api";
 
 // ---- Auth ----
@@ -191,6 +193,16 @@ export function useDashboardStats() {
   return useQuery<DashboardStats>({
     queryKey: ["dashboard", "stats"],
     queryFn: () => runsApi.stats(),
+    staleTime: 30_000,
+    refetchInterval: 60_000,
+  });
+}
+
+export function useUsageSummary(userId: string | undefined) {
+  return useQuery<UserUsageSummary>({
+    queryKey: ["runs", "usage", userId],
+    queryFn: () => runsApi.usage(),
+    enabled: !!userId,
     staleTime: 30_000,
     refetchInterval: 60_000,
   });
@@ -374,6 +386,15 @@ export function useAdminAllBatches(limit?: number) {
     },
     staleTime: 10_000,
     refetchInterval: 15_000,
+  });
+}
+
+export function useAdminUsageSummary() {
+  return useQuery<AdminUsageSummary>({
+    queryKey: ["admin", "usage"],
+    queryFn: () => adminApi.getUsage(),
+    staleTime: 30_000,
+    refetchInterval: 60_000,
   });
 }
 

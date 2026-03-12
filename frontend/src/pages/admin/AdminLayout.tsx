@@ -22,6 +22,7 @@ import {
   Tag,
   BookOpen,
   Newspaper,
+  BarChart3,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -53,6 +54,7 @@ const mainNavItems: NavItem[] = [
   { title: 'Offers', href: '/admin/offers', icon: Tag },
   { title: 'Guides', href: '/admin/guides', icon: BookOpen },
   { title: 'News', href: '/admin/news', icon: Newspaper },
+  { title: 'Usage', href: '/admin/usage', icon: BarChart3 },
   { title: 'Activity', href: '/admin/activity', icon: Activity },
   { title: 'Files', href: '/admin/files', icon: FileText },
 ];
