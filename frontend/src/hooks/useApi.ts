@@ -9,6 +9,7 @@ import {
   offersApi,
   guidesApi,
   newsApi,
+  supportApi,
   toolCreditApi,
   type AuthUser,
   type BatchItem,
@@ -32,6 +33,8 @@ import {
   type GuideItem,
   type AdminNewsItem,
   type NewsItem,
+  type SupportTicketItem,
+  type SupportTicketStatus,
   type UserUsageSummary,
   type AdminUsageSummary,
 } from "@/lib/api";
@@ -702,6 +705,41 @@ export function useAdminDeleteNews() {
   });
 }
 
+// ---- Admin: Support ----
+export function useAdminSupportTickets() {
+  return useQuery<SupportTicketItem[]>({
+    queryKey: ["admin", "support", "tickets"],
+    queryFn: async () => {
+      const res = await adminApi.listSupportTickets();
+      return res.items;
+    },
+    staleTime: 10_000,
+    refetchInterval: 10_000,
+  });
+}
+
+export function useAdminReplySupportTicket() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ ticketId, message }: { ticketId: string; message: string }) =>
+      adminApi.replySupportTicket(ticketId, message),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin", "support", "tickets"] });
+    },
+  });
+}
+
+export function useAdminUpdateSupportTicketStatus() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ ticketId, status }: { ticketId: string; status: SupportTicketStatus }) =>
+      adminApi.updateSupportTicketStatus(ticketId, status),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin", "support", "tickets"] });
+    },
+  });
+}
+
 // ---- Tool Credit Cost (for users) ----
 export function useToolCreditCost(toolId: string | undefined) {
   return useQuery<number>({
@@ -799,5 +837,41 @@ export function useNews() {
     },
     staleTime: 10_000,
     refetchInterval: 10_000,
+  });
+}
+
+// ---- Support ----
+export function useSupportTickets() {
+  return useQuery<SupportTicketItem[]>({
+    queryKey: ["support", "tickets"],
+    queryFn: async () => {
+      const res = await supportApi.listTickets();
+      return res.items;
+    },
+    staleTime: 10_000,
+    refetchInterval: 10_000,
+  });
+}
+
+export function useCreateSupportTicket() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { subject: string; message: string }) => supportApi.createTicket(data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["support", "tickets"] });
+      qc.invalidateQueries({ queryKey: ["admin", "support", "tickets"] });
+    },
+  });
+}
+
+export function useReplySupportTicket() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ ticketId, message }: { ticketId: string; message: string }) =>
+      supportApi.replyTicket(ticketId, message),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["support", "tickets"] });
+      qc.invalidateQueries({ queryKey: ["admin", "support", "tickets"] });
+    },
   });
 }

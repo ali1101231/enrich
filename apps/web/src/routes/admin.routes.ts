@@ -11,6 +11,7 @@ import { AdminOfferController } from "../controllers/admin-offer.controller.js";
 import { AdminGuideController } from "../controllers/admin-guide.controller.js";
 import { AdminNewsController } from "../controllers/admin-news.controller.js";
 import { AdminUsageController } from "../controllers/admin-usage.controller.js";
+import { AdminSupportController } from "../controllers/admin-support.controller.js";
 
 const router = Router();
 const keyController = new AdminApiKeyController();
@@ -23,6 +24,7 @@ const offerController = new AdminOfferController();
 const guideController = new AdminGuideController();
 const newsController = new AdminNewsController();
 const usageController = new AdminUsageController();
+const supportController = new AdminSupportController();
 
 router.use(requireAdmin);
 router.get("/usage", asyncHandler(usageController.getUsage));
@@ -84,5 +86,10 @@ router.get("/news", asyncHandler(newsController.list));
 router.post("/news", asyncHandler(newsController.create));
 router.patch("/news/:newsId", asyncHandler(newsController.update));
 router.delete("/news/:newsId", asyncHandler(newsController.remove));
+
+// Support
+router.get("/support/tickets", asyncHandler(supportController.list));
+router.post("/support/tickets/:ticketId/replies", asyncHandler(supportController.reply));
+router.patch("/support/tickets/:ticketId/status", asyncHandler(supportController.updateStatus));
 
 export { router as adminRoutes };

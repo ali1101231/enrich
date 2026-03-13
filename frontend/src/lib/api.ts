@@ -293,6 +293,40 @@ export interface NewsItem {
   } | null;
 }
 
+export type SupportTicketStatus = "OPEN" | "CLOSED";
+export type SupportMessageSenderRole = "USER" | "ADMIN";
+
+export interface SupportTicketMessageItem {
+  id: string;
+  ticketId: string;
+  senderId: string;
+  senderRole: SupportMessageSenderRole;
+  message: string;
+  createdAt: string;
+  sender: {
+    id: string;
+    email: string;
+    displayName: string | null;
+    role: string;
+  };
+}
+
+export interface SupportTicketItem {
+  id: string;
+  userId: string;
+  subject: string;
+  status: SupportTicketStatus;
+  closedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+  user: {
+    id: string;
+    email: string;
+    displayName: string | null;
+  };
+  messages: SupportTicketMessageItem[];
+}
+
 export const adminApi = {
   getUsage() {
     return request<AdminUsageSummary>("/admin/usage");
@@ -517,6 +551,23 @@ export const adminApi = {
       method: "DELETE",
     });
   },
+
+  // ---- Support ----
+  listSupportTickets() {
+    return request<{ items: SupportTicketItem[] }>("/admin/support/tickets");
+  },
+  replySupportTicket(ticketId: string, message: string) {
+    return request<SupportTicketItem>(`/admin/support/tickets/${encodeURIComponent(ticketId)}/replies`, {
+      method: "POST",
+      body: JSON.stringify({ message }),
+    });
+  },
+  updateSupportTicketStatus(ticketId: string, status: SupportTicketStatus) {
+    return request<SupportTicketItem>(`/admin/support/tickets/${encodeURIComponent(ticketId)}/status`, {
+      method: "PATCH",
+      body: JSON.stringify({ status }),
+    });
+  },
 };
 
 // ---- Public Packages (pricing page) ----
@@ -562,6 +613,25 @@ export const guidesApi = {
 export const newsApi = {
   list() {
     return request<{ items: NewsItem[] }>("/news");
+  },
+};
+
+// ---- Support ----
+export const supportApi = {
+  listTickets() {
+    return request<{ items: SupportTicketItem[] }>("/support/tickets");
+  },
+  createTicket(data: { subject: string; message: string }) {
+    return request<SupportTicketItem>("/support/tickets", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  },
+  replyTicket(ticketId: string, message: string) {
+    return request<SupportTicketItem>(`/support/tickets/${encodeURIComponent(ticketId)}/replies`, {
+      method: "POST",
+      body: JSON.stringify({ message }),
+    });
   },
 };
 
