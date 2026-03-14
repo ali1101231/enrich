@@ -316,6 +316,50 @@ export interface AdminWebsiteFaqItem {
   updatedAt: string;
 }
 
+export interface AdminWebsitePricingFeatureItem {
+  id: string;
+  planId: string;
+  text: string;
+  isIncluded: boolean;
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AdminWebsitePricingPlanItem {
+  id: string;
+  name: string;
+  subtitle: string | null;
+  price: string;
+  billingPeriod: string | null;
+  description: string | null;
+  ctaText: string | null;
+  ctaHref: string | null;
+  isPopular: boolean;
+  isActive: boolean;
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
+  features: AdminWebsitePricingFeatureItem[];
+}
+
+export type ContactSubmissionStatus = "new" | "replied" | "closed";
+
+export interface ContactSubmissionItem {
+  id: string;
+  fullName: string;
+  email: string;
+  company: string | null;
+  phone: string | null;
+  subject: string | null;
+  message: string;
+  status: ContactSubmissionStatus;
+  adminNotes: string | null;
+  repliedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface NewsItem {
   id: string;
   title: string;
@@ -654,6 +698,45 @@ export const adminApi = {
     });
   },
 
+  // ---- Website Pricing ----
+  listWebsitePricingPlans() {
+    return request<{ items: AdminWebsitePricingPlanItem[] }>("/admin/website/pricing");
+  },
+  createWebsitePricingPlan(data: { name: string; subtitle?: string | null; price: string; billingPeriod?: string | null; description?: string | null; ctaText?: string | null; ctaHref?: string | null; isPopular?: boolean; isActive?: boolean; sortOrder?: number }) {
+    return request<AdminWebsitePricingPlanItem>("/admin/website/pricing", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  },
+  updateWebsitePricingPlan(planId: string, data: { name?: string; subtitle?: string | null; price?: string; billingPeriod?: string | null; description?: string | null; ctaText?: string | null; ctaHref?: string | null; isPopular?: boolean; isActive?: boolean; sortOrder?: number }) {
+    return request<AdminWebsitePricingPlanItem>(`/admin/website/pricing/${encodeURIComponent(planId)}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    });
+  },
+  deleteWebsitePricingPlan(planId: string) {
+    return request<void>(`/admin/website/pricing/${encodeURIComponent(planId)}`, {
+      method: "DELETE",
+    });
+  },
+  createWebsitePricingFeature(planId: string, data: { text: string; isIncluded?: boolean; sortOrder?: number }) {
+    return request<AdminWebsitePricingFeatureItem>(`/admin/website/pricing/${encodeURIComponent(planId)}/features`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  },
+  updateWebsitePricingFeature(featureId: string, data: { text?: string; isIncluded?: boolean; sortOrder?: number }) {
+    return request<AdminWebsitePricingFeatureItem>(`/admin/website/pricing/features/${encodeURIComponent(featureId)}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    });
+  },
+  deleteWebsitePricingFeature(featureId: string) {
+    return request<void>(`/admin/website/pricing/features/${encodeURIComponent(featureId)}`, {
+      method: "DELETE",
+    });
+  },
+
   // ---- Support ----
   listSupportTickets() {
     return request<{ items: SupportTicketItem[] }>("/admin/support/tickets");
@@ -668,6 +751,36 @@ export const adminApi = {
     return request<SupportTicketItem>(`/admin/support/tickets/${encodeURIComponent(ticketId)}/status`, {
       method: "PATCH",
       body: JSON.stringify({ status }),
+    });
+  },
+
+  // ---- Contact Submissions ----
+  listContactSubmissions() {
+    return request<{ items: ContactSubmissionItem[] }>("/admin/contact-submissions");
+  },
+  getContactSubmissionById(submissionId: string) {
+    return request<ContactSubmissionItem>(`/admin/contact-submissions/${encodeURIComponent(submissionId)}`);
+  },
+  updateContactSubmissionStatus(submissionId: string, status: ContactSubmissionStatus) {
+    return request<ContactSubmissionItem>(`/admin/contact-submissions/${encodeURIComponent(submissionId)}/status`, {
+      method: "PATCH",
+      body: JSON.stringify({ status }),
+    });
+  },
+  updateContactSubmissionNotes(submissionId: string, adminNotes: string | null) {
+    return request<ContactSubmissionItem>(`/admin/contact-submissions/${encodeURIComponent(submissionId)}/notes`, {
+      method: "PATCH",
+      body: JSON.stringify({ adminNotes }),
+    });
+  },
+  markContactSubmissionReplied(submissionId: string) {
+    return request<ContactSubmissionItem>(`/admin/contact-submissions/${encodeURIComponent(submissionId)}/replied`, {
+      method: "PATCH",
+    });
+  },
+  deleteContactSubmission(submissionId: string) {
+    return request<void>(`/admin/contact-submissions/${encodeURIComponent(submissionId)}`, {
+      method: "DELETE",
     });
   },
 };

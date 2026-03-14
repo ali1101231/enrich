@@ -3,12 +3,14 @@ import { WebsiteFaqService } from "../services/website-faq.service.js";
 import { WebsiteLogoService } from "../services/website-logo.service.js";
 import { PublicWebsiteContentService } from "../services/website-content-public.service.js";
 import { WebsiteTestimonialService } from "../services/website-testimonial.service.js";
+import { WebsitePricingService } from "../services/website-pricing.service.js";
 
 export class WebsiteContentController {
   constructor(
     private readonly websiteLogoService = new WebsiteLogoService(),
     private readonly websiteTestimonialService = new WebsiteTestimonialService(),
     private readonly websiteFaqService = new WebsiteFaqService(),
+    private readonly websitePricingService = new WebsitePricingService(),
     private readonly publicWebsiteContentService = new PublicWebsiteContentService(
       websiteLogoService,
       websiteTestimonialService,
@@ -28,6 +30,11 @@ export class WebsiteContentController {
 
   listFaqs = async (_req: Request, res: Response): Promise<void> => {
     const items = await this.websiteFaqService.listActiveFaqPublic();
+    res.status(200).json({ items });
+  };
+
+  listPricing = async (_req: Request, res: Response): Promise<void> => {
+    const items = await this.websitePricingService.listActivePlansPublic();
     res.status(200).json({ items });
   };
 

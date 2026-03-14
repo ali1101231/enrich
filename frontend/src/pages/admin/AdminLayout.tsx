@@ -25,6 +25,8 @@ import {
   Image,
   MessageSquare,
   HelpCircle,
+  BadgeDollarSign,
+  Inbox,
   BarChart3,
   LifeBuoy,
 } from 'lucide-react';
@@ -61,6 +63,8 @@ const mainNavItems: NavItem[] = [
   { title: 'Website Logos', href: '/admin/website/logos', icon: Image },
   { title: 'Website Testimonials', href: '/admin/website/testimonials', icon: MessageSquare },
   { title: 'Website FAQs', href: '/admin/website/faqs', icon: HelpCircle },
+  { title: 'Website Pricing', href: '/admin/website/pricing', icon: BadgeDollarSign },
+  { title: 'Contact Inbox', href: '/admin/contact-submissions', icon: Inbox },
   { title: 'Support', href: '/admin/support', icon: LifeBuoy },
   { title: 'Usage', href: '/admin/usage', icon: BarChart3 },
   { title: 'Activity', href: '/admin/activity', icon: Activity },
