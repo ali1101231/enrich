@@ -51,7 +51,12 @@ interface NavItem {
   end?: boolean;
 }
 
-const mainNavItems: NavItem[] = [
+interface NavSection {
+  title: string;
+  items: NavItem[];
+}
+
+const appNavItems: NavItem[] = [
   { title: 'Dashboard', href: '/admin', icon: LayoutDashboard, end: true },
   { title: 'Users', href: '/admin/users', icon: Users },
   { title: 'API Keys', href: '/admin/keys', icon: Key },
@@ -60,15 +65,23 @@ const mainNavItems: NavItem[] = [
   { title: 'Offers', href: '/admin/offers', icon: Tag },
   { title: 'Guides', href: '/admin/guides', icon: BookOpen },
   { title: 'News', href: '/admin/news', icon: Newspaper },
+  { title: 'Support', href: '/admin/support', icon: LifeBuoy },
+  { title: 'Usage', href: '/admin/usage', icon: BarChart3 },
+  { title: 'Activity', href: '/admin/activity', icon: Activity },
+  { title: 'Files', href: '/admin/files', icon: FileText },
+];
+
+const websiteNavItems: NavItem[] = [
   { title: 'Website Logos', href: '/admin/website/logos', icon: Image },
   { title: 'Website Testimonials', href: '/admin/website/testimonials', icon: MessageSquare },
   { title: 'Website FAQs', href: '/admin/website/faqs', icon: HelpCircle },
   { title: 'Website Pricing', href: '/admin/website/pricing', icon: BadgeDollarSign },
   { title: 'Contact Inbox', href: '/admin/contact-submissions', icon: Inbox },
-  { title: 'Support', href: '/admin/support', icon: LifeBuoy },
-  { title: 'Usage', href: '/admin/usage', icon: BarChart3 },
-  { title: 'Activity', href: '/admin/activity', icon: Activity },
-  { title: 'Files', href: '/admin/files', icon: FileText },
+];
+
+const navSections: NavSection[] = [
+  { title: 'App', items: appNavItems },
+  { title: 'Website', items: websiteNavItems },
 ];
 
 const bottomNavItems: NavItem[] = [
@@ -160,13 +173,18 @@ export default function AdminLayout() {
           {/* Navigation */}
           <ScrollArea className="flex-1 py-4">
             <nav className="space-y-1 px-3">
-              {!collapsed && (
-                <div className="px-3 pb-2 text-[11px] font-semibold text-muted-foreground uppercase tracking-widest">
-                  Management
+              {navSections.map((section, index) => (
+                <div key={section.title}>
+                  {!collapsed && (
+                    <div className="px-3 pb-2 text-[11px] font-semibold text-muted-foreground uppercase tracking-widest">
+                      {section.title}
+                    </div>
+                  )}
+                  {section.items.map((item) => (
+                    <NavLink key={item.href} item={item} showText={!collapsed} />
+                  ))}
+                  {index < navSections.length - 1 && <div className="my-4 mx-2 border-t border-sidebar-border" />}
                 </div>
-              )}
-              {mainNavItems.map((item) => (
-                <NavLink key={item.href} item={item} showText={!collapsed} />
               ))}
 
               <div className="my-4 mx-2 border-t border-sidebar-border" />
