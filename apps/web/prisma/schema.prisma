@@ -34,6 +34,16 @@ enum JobResultStatus {
   SKIPPED
 }
 
+enum SupportTicketStatus {
+  OPEN
+  CLOSED
+}
+
+enum SupportMessageSenderRole {
+  USER
+  ADMIN
+}
+
 model User {
   id             String             @id @default(cuid())
   email          String             @unique
@@ -53,6 +63,8 @@ model User {
   offersCreated  Offer[]           @relation("OfferCreatedBy")
   guidesCreated  Guide[]           @relation("GuideCreatedBy")
   newsCreated    News[]            @relation("NewsCreatedBy")
+  supportTickets SupportTicket[]   @relation("SupportTicketUser")
+  supportTicketMessages SupportTicketMessage[] @relation("SupportTicketMessageSender")
 
   @@map("users")
 }
@@ -84,6 +96,37 @@ model News {
 
   @@index([isActive, createdAt])
   @@map("news")
+}
+
+model SupportTicket {
+  id        String              @id @default(cuid())
+  userId    String
+  subject   String
+  status    SupportTicketStatus @default(OPEN)
+  closedAt  DateTime?
+  createdAt DateTime            @default(now())
+  updatedAt DateTime            @updatedAt
+  user      User                @relation("SupportTicketUser", fields: [userId], references: [id], onDelete: Cascade)
+  messages  SupportTicketMessage[]
+
+  @@index([userId, createdAt])
+  @@index([status, updatedAt])
+  @@map("support_tickets")
+}
+
+model SupportTicketMessage {
+  id         String                   @id @default(cuid())
+  ticketId   String
+  senderId   String
+  senderRole SupportMessageSenderRole
+  message    String
+  createdAt  DateTime                 @default(now())
+  ticket     SupportTicket            @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  sender     User                     @relation("SupportTicketMessageSender", fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@index([ticketId, createdAt])
+  @@index([senderId, createdAt])
+  @@map("support_ticket_messages")
 }
 
 model ApiKey {
@@ -267,4 +310,49 @@ model OfferRedemption {
   @@index([offerId, createdAt])
   @@index([userId, createdAt])
   @@map("offer_redemptions")
+}
+
+model WebsiteLogo {
+  id        String   @id @default(uuid())
+  name      String
+  imageUrl  String
+  altText   String?
+  href      String?
+  isActive  Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isActive])
+  @@index([sortOrder])
+}
+
+model WebsiteTestimonial {
+  id          String   @id @default(uuid())
+  clientName  String
+  clientRole  String?
+  companyName String?
+  quote       String
+  avatarUrl   String?
+  rating      Int?
+  isActive    Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([isActive])
+  @@index([sortOrder])
+}
+
+model WebsiteFaq {
+  id        String   @id @default(uuid())
+  question  String
+  answer    String
+  isActive  Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isActive])
+  @@index([sortOrder])
 }

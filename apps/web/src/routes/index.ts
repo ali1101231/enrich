@@ -14,6 +14,8 @@ import { ToolService } from "../services/tool.service.js";
 import { OfferController } from "../controllers/offer.controller.js";
 import { GuideController } from "../controllers/guide.controller.js";
 import { NewsController } from "../controllers/news.controller.js";
+import { SupportController } from "../controllers/support.controller.js";
+import { WebsiteContentController } from "../controllers/website-content.controller.js";
 
 const router = Router();
 const exportController = new ExportController();
@@ -24,6 +26,8 @@ const toolService = new ToolService();
 const offerController = new OfferController();
 const guideController = new GuideController();
 const newsController = new NewsController();
+const supportController = new SupportController();
+const websiteContentController = new WebsiteContentController();
 
 router.get("/health", async (_req, res) => {
   const checks: Record<string, string> = {};
@@ -40,6 +44,12 @@ router.get("/health", async (_req, res) => {
 });
 
 router.use("/auth", authRoutes);
+
+// Public website content (no auth required)
+router.get("/website-content/logos", asyncHandler(websiteContentController.listLogos));
+router.get("/website-content/testimonials", asyncHandler(websiteContentController.listTestimonials));
+router.get("/website-content/faqs", asyncHandler(websiteContentController.listFaqs));
+router.get("/website-content/all", asyncHandler(websiteContentController.listAll));
 
 // Public: active packages for pricing page
 router.get("/packages", asyncHandler(packageController.listActive));
@@ -68,6 +78,11 @@ router.get("/guides", requireAuth, asyncHandler(guideController.listActive));
 
 // News
 router.get("/news", requireAuth, asyncHandler(newsController.listActive));
+
+// Support
+router.get("/support/tickets", requireAuth, asyncHandler(supportController.listMine));
+router.post("/support/tickets", requireAuth, asyncHandler(supportController.create));
+router.post("/support/tickets/:ticketId/replies", requireAuth, asyncHandler(supportController.reply));
 
 // Tool credit cost (for authenticated users to check cost before processing)
 router.get("/tools/:toolId/credit-cost", requireAuth, asyncHandler(async (req, res) => {

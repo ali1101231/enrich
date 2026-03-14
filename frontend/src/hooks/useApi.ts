@@ -9,6 +9,7 @@ import {
   offersApi,
   guidesApi,
   newsApi,
+  supportApi,
   toolCreditApi,
   type AuthUser,
   type BatchItem,
@@ -32,6 +33,11 @@ import {
   type GuideItem,
   type AdminNewsItem,
   type NewsItem,
+  type AdminWebsiteLogoItem,
+  type AdminWebsiteTestimonialItem,
+  type AdminWebsiteFaqItem,
+  type SupportTicketItem,
+  type SupportTicketStatus,
   type UserUsageSummary,
   type AdminUsageSummary,
 } from "@/lib/api";
@@ -702,6 +708,155 @@ export function useAdminDeleteNews() {
   });
 }
 
+// ---- Admin: Website Logos ----
+export function useAdminWebsiteLogos() {
+  return useQuery<AdminWebsiteLogoItem[]>({
+    queryKey: ["admin", "website", "logos"],
+    queryFn: async () => {
+      const res = await adminApi.listWebsiteLogos();
+      return res.items;
+    },
+    staleTime: 30_000,
+  });
+}
+
+export function useAdminCreateWebsiteLogo() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { name: string; imageUrl: string; altText?: string | null; href?: string | null; isActive?: boolean; sortOrder?: number }) =>
+      adminApi.createWebsiteLogo(data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin", "website", "logos"] }),
+  });
+}
+
+export function useAdminUpdateWebsiteLogo() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ logoId, data }: { logoId: string; data: { name?: string; imageUrl?: string; altText?: string | null; href?: string | null; isActive?: boolean; sortOrder?: number } }) =>
+      adminApi.updateWebsiteLogo(logoId, data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin", "website", "logos"] }),
+  });
+}
+
+export function useAdminDeleteWebsiteLogo() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (logoId: string) => adminApi.deleteWebsiteLogo(logoId),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin", "website", "logos"] }),
+  });
+}
+
+// ---- Admin: Website Testimonials ----
+export function useAdminWebsiteTestimonials() {
+  return useQuery<AdminWebsiteTestimonialItem[]>({
+    queryKey: ["admin", "website", "testimonials"],
+    queryFn: async () => {
+      const res = await adminApi.listWebsiteTestimonials();
+      return res.items;
+    },
+    staleTime: 30_000,
+  });
+}
+
+export function useAdminCreateWebsiteTestimonial() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { clientName: string; clientRole?: string | null; companyName?: string | null; quote: string; avatarUrl?: string | null; rating?: number | null; isActive?: boolean; sortOrder?: number }) =>
+      adminApi.createWebsiteTestimonial(data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin", "website", "testimonials"] }),
+  });
+}
+
+export function useAdminUpdateWebsiteTestimonial() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ testimonialId, data }: { testimonialId: string; data: { clientName?: string; clientRole?: string | null; companyName?: string | null; quote?: string; avatarUrl?: string | null; rating?: number | null; isActive?: boolean; sortOrder?: number } }) =>
+      adminApi.updateWebsiteTestimonial(testimonialId, data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin", "website", "testimonials"] }),
+  });
+}
+
+export function useAdminDeleteWebsiteTestimonial() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (testimonialId: string) => adminApi.deleteWebsiteTestimonial(testimonialId),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin", "website", "testimonials"] }),
+  });
+}
+
+// ---- Admin: Website FAQs ----
+export function useAdminWebsiteFaqs() {
+  return useQuery<AdminWebsiteFaqItem[]>({
+    queryKey: ["admin", "website", "faqs"],
+    queryFn: async () => {
+      const res = await adminApi.listWebsiteFaqs();
+      return res.items;
+    },
+    staleTime: 30_000,
+  });
+}
+
+export function useAdminCreateWebsiteFaq() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { question: string; answer: string; isActive?: boolean; sortOrder?: number }) =>
+      adminApi.createWebsiteFaq(data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin", "website", "faqs"] }),
+  });
+}
+
+export function useAdminUpdateWebsiteFaq() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ faqId, data }: { faqId: string; data: { question?: string; answer?: string; isActive?: boolean; sortOrder?: number } }) =>
+      adminApi.updateWebsiteFaq(faqId, data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin", "website", "faqs"] }),
+  });
+}
+
+export function useAdminDeleteWebsiteFaq() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (faqId: string) => adminApi.deleteWebsiteFaq(faqId),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin", "website", "faqs"] }),
+  });
+}
+
+// ---- Admin: Support ----
+export function useAdminSupportTickets() {
+  return useQuery<SupportTicketItem[]>({
+    queryKey: ["admin", "support", "tickets"],
+    queryFn: async () => {
+      const res = await adminApi.listSupportTickets();
+      return res.items;
+    },
+    staleTime: 10_000,
+    refetchInterval: 10_000,
+  });
+}
+
+export function useAdminReplySupportTicket() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ ticketId, message }: { ticketId: string; message: string }) =>
+      adminApi.replySupportTicket(ticketId, message),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin", "support", "tickets"] });
+    },
+  });
+}
+
+export function useAdminUpdateSupportTicketStatus() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ ticketId, status }: { ticketId: string; status: SupportTicketStatus }) =>
+      adminApi.updateSupportTicketStatus(ticketId, status),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin", "support", "tickets"] });
+    },
+  });
+}
+
 // ---- Tool Credit Cost (for users) ----
 export function useToolCreditCost(toolId: string | undefined) {
   return useQuery<number>({
@@ -799,5 +954,41 @@ export function useNews() {
     },
     staleTime: 10_000,
     refetchInterval: 10_000,
+  });
+}
+
+// ---- Support ----
+export function useSupportTickets() {
+  return useQuery<SupportTicketItem[]>({
+    queryKey: ["support", "tickets"],
+    queryFn: async () => {
+      const res = await supportApi.listTickets();
+      return res.items;
+    },
+    staleTime: 10_000,
+    refetchInterval: 10_000,
+  });
+}
+
+export function useCreateSupportTicket() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { subject: string; message: string }) => supportApi.createTicket(data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["support", "tickets"] });
+      qc.invalidateQueries({ queryKey: ["admin", "support", "tickets"] });
+    },
+  });
+}
+
+export function useReplySupportTicket() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ ticketId, message }: { ticketId: string; message: string }) =>
+      supportApi.replyTicket(ticketId, message),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["support", "tickets"] });
+      qc.invalidateQueries({ queryKey: ["admin", "support", "tickets"] });
+    },
   });
 }

@@ -11,6 +11,10 @@ import { AdminOfferController } from "../controllers/admin-offer.controller.js";
 import { AdminGuideController } from "../controllers/admin-guide.controller.js";
 import { AdminNewsController } from "../controllers/admin-news.controller.js";
 import { AdminUsageController } from "../controllers/admin-usage.controller.js";
+import { AdminSupportController } from "../controllers/admin-support.controller.js";
+import { AdminWebsiteLogoController } from "../controllers/admin-website-logo.controller.js";
+import { AdminWebsiteTestimonialController } from "../controllers/admin-website-testimonial.controller.js";
+import { AdminWebsiteFaqController } from "../controllers/admin-website-faq.controller.js";
 
 const router = Router();
 const keyController = new AdminApiKeyController();
@@ -23,6 +27,10 @@ const offerController = new AdminOfferController();
 const guideController = new AdminGuideController();
 const newsController = new AdminNewsController();
 const usageController = new AdminUsageController();
+const supportController = new AdminSupportController();
+const websiteLogoController = new AdminWebsiteLogoController();
+const websiteTestimonialController = new AdminWebsiteTestimonialController();
+const websiteFaqController = new AdminWebsiteFaqController();
 
 router.use(requireAdmin);
 router.get("/usage", asyncHandler(usageController.getUsage));
@@ -84,5 +92,28 @@ router.get("/news", asyncHandler(newsController.list));
 router.post("/news", asyncHandler(newsController.create));
 router.patch("/news/:newsId", asyncHandler(newsController.update));
 router.delete("/news/:newsId", asyncHandler(newsController.remove));
+
+// Support
+router.get("/support/tickets", asyncHandler(supportController.list));
+router.post("/support/tickets/:ticketId/replies", asyncHandler(supportController.reply));
+router.patch("/support/tickets/:ticketId/status", asyncHandler(supportController.updateStatus));
+
+// Website logos
+router.get("/website/logos", asyncHandler(websiteLogoController.list));
+router.post("/website/logos", asyncHandler(websiteLogoController.create));
+router.patch("/website/logos/:logoId", asyncHandler(websiteLogoController.update));
+router.delete("/website/logos/:logoId", asyncHandler(websiteLogoController.remove));
+
+// Website testimonials
+router.get("/website/testimonials", asyncHandler(websiteTestimonialController.list));
+router.post("/website/testimonials", asyncHandler(websiteTestimonialController.create));
+router.patch("/website/testimonials/:testimonialId", asyncHandler(websiteTestimonialController.update));
+router.delete("/website/testimonials/:testimonialId", asyncHandler(websiteTestimonialController.remove));
+
+// Website FAQs
+router.get("/website/faqs", asyncHandler(websiteFaqController.list));
+router.post("/website/faqs", asyncHandler(websiteFaqController.create));
+router.patch("/website/faqs/:faqId", asyncHandler(websiteFaqController.update));
+router.delete("/website/faqs/:faqId", asyncHandler(websiteFaqController.remove));
 
 export { router as adminRoutes };
