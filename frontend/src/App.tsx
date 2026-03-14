@@ -41,6 +41,8 @@ import AdminNews from "@/pages/admin/AdminNews";
 import AdminWebsiteLogos from "@/pages/admin/AdminWebsiteLogos";
 import AdminWebsiteTestimonials from "@/pages/admin/AdminWebsiteTestimonials";
 import AdminWebsiteFaqs from "@/pages/admin/AdminWebsiteFaqs";
+import AdminWebsitePricing from "@/pages/admin/AdminWebsitePricing";
+import AdminContactSubmissions from "@/pages/admin/AdminContactSubmissions";
 import AdminUsage from "@/pages/admin/AdminUsage";
 import AdminSupport from "@/pages/admin/AdminSupport";
 
@@ -98,6 +100,8 @@ const App = () => (
               <Route path="website/logos" element={<AdminWebsiteLogos />} />
               <Route path="website/testimonials" element={<AdminWebsiteTestimonials />} />
               <Route path="website/faqs" element={<AdminWebsiteFaqs />} />
+              <Route path="website/pricing" element={<AdminWebsitePricing />} />
+              <Route path="contact-submissions" element={<AdminContactSubmissions />} />
               <Route path="support" element={<AdminSupport />} />
               <Route path="usage" element={<AdminUsage />} />
               <Route path="activity" element={<AdminActivity />} />

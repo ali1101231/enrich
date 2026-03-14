@@ -16,6 +16,7 @@ import { GuideController } from "../controllers/guide.controller.js";
 import { NewsController } from "../controllers/news.controller.js";
 import { SupportController } from "../controllers/support.controller.js";
 import { WebsiteContentController } from "../controllers/website-content.controller.js";
+import { ContactSubmissionController } from "../controllers/contact-submission.controller.js";
 
 const router = Router();
 const exportController = new ExportController();
@@ -28,6 +29,7 @@ const guideController = new GuideController();
 const newsController = new NewsController();
 const supportController = new SupportController();
 const websiteContentController = new WebsiteContentController();
+const contactSubmissionController = new ContactSubmissionController();
 
 router.get("/health", async (_req, res) => {
   const checks: Record<string, string> = {};
@@ -49,7 +51,10 @@ router.use("/auth", authRoutes);
 router.get("/website-content/logos", asyncHandler(websiteContentController.listLogos));
 router.get("/website-content/testimonials", asyncHandler(websiteContentController.listTestimonials));
 router.get("/website-content/faqs", asyncHandler(websiteContentController.listFaqs));
+router.get("/website-content/pricing", asyncHandler(websiteContentController.listPricing));
 router.get("/website-content/all", asyncHandler(websiteContentController.listAll));
+
+router.post("/contact-submissions", asyncHandler(contactSubmissionController.create));
 
 // Public: active packages for pricing page
 router.get("/packages", asyncHandler(packageController.listActive));

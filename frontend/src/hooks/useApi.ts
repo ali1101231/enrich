@@ -36,8 +36,11 @@ import {
   type AdminWebsiteLogoItem,
   type AdminWebsiteTestimonialItem,
   type AdminWebsiteFaqItem,
+  type AdminWebsitePricingPlanItem,
   type SupportTicketItem,
   type SupportTicketStatus,
+  type ContactSubmissionItem,
+  type ContactSubmissionStatus,
   type UserUsageSummary,
   type AdminUsageSummary,
 } from "@/lib/api";
@@ -822,6 +825,70 @@ export function useAdminDeleteWebsiteFaq() {
   });
 }
 
+// ---- Admin: Website Pricing ----
+export function useAdminWebsitePricingPlans() {
+  return useQuery<AdminWebsitePricingPlanItem[]>({
+    queryKey: ["admin", "website", "pricing"],
+    queryFn: async () => {
+      const res = await adminApi.listWebsitePricingPlans();
+      return res.items;
+    },
+    staleTime: 30_000,
+  });
+}
+
+export function useAdminCreateWebsitePricingPlan() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { name: string; subtitle?: string | null; price: string; billingPeriod?: string | null; description?: string | null; ctaText?: string | null; ctaHref?: string | null; isPopular?: boolean; isActive?: boolean; sortOrder?: number }) =>
+      adminApi.createWebsitePricingPlan(data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin", "website", "pricing"] }),
+  });
+}
+
+export function useAdminUpdateWebsitePricingPlan() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ planId, data }: { planId: string; data: { name?: string; subtitle?: string | null; price?: string; billingPeriod?: string | null; description?: string | null; ctaText?: string | null; ctaHref?: string | null; isPopular?: boolean; isActive?: boolean; sortOrder?: number } }) =>
+      adminApi.updateWebsitePricingPlan(planId, data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin", "website", "pricing"] }),
+  });
+}
+
+export function useAdminDeleteWebsitePricingPlan() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (planId: string) => adminApi.deleteWebsitePricingPlan(planId),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin", "website", "pricing"] }),
+  });
+}
+
+export function useAdminCreateWebsitePricingFeature() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ planId, data }: { planId: string; data: { text: string; isIncluded?: boolean; sortOrder?: number } }) =>
+      adminApi.createWebsitePricingFeature(planId, data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin", "website", "pricing"] }),
+  });
+}
+
+export function useAdminUpdateWebsitePricingFeature() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ featureId, data }: { featureId: string; data: { text?: string; isIncluded?: boolean; sortOrder?: number } }) =>
+      adminApi.updateWebsitePricingFeature(featureId, data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin", "website", "pricing"] }),
+  });
+}
+
+export function useAdminDeleteWebsitePricingFeature() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (featureId: string) => adminApi.deleteWebsitePricingFeature(featureId),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin", "website", "pricing"] }),
+  });
+}
+
 // ---- Admin: Support ----
 export function useAdminSupportTickets() {
   return useQuery<SupportTicketItem[]>({
@@ -853,6 +920,74 @@ export function useAdminUpdateSupportTicketStatus() {
       adminApi.updateSupportTicketStatus(ticketId, status),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["admin", "support", "tickets"] });
+    },
+  });
+}
+
+// ---- Admin: Contact Submissions ----
+export function useAdminContactSubmissions() {
+  return useQuery<ContactSubmissionItem[]>({
+    queryKey: ["admin", "contact-submissions"],
+    queryFn: async () => {
+      const res = await adminApi.listContactSubmissions();
+      return res.items;
+    },
+    staleTime: 10_000,
+    refetchInterval: 15_000,
+  });
+}
+
+export function useAdminContactSubmission(submissionId: string | undefined) {
+  return useQuery<ContactSubmissionItem>({
+    queryKey: ["admin", "contact-submission", submissionId],
+    queryFn: () => adminApi.getContactSubmissionById(submissionId!),
+    enabled: !!submissionId,
+    staleTime: 10_000,
+  });
+}
+
+export function useAdminUpdateContactSubmissionStatus() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ submissionId, status }: { submissionId: string; status: ContactSubmissionStatus }) =>
+      adminApi.updateContactSubmissionStatus(submissionId, status),
+    onSuccess: (_data, vars) => {
+      qc.invalidateQueries({ queryKey: ["admin", "contact-submissions"] });
+      qc.invalidateQueries({ queryKey: ["admin", "contact-submission", vars.submissionId] });
+    },
+  });
+}
+
+export function useAdminUpdateContactSubmissionNotes() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ submissionId, adminNotes }: { submissionId: string; adminNotes: string | null }) =>
+      adminApi.updateContactSubmissionNotes(submissionId, adminNotes),
+    onSuccess: (_data, vars) => {
+      qc.invalidateQueries({ queryKey: ["admin", "contact-submissions"] });
+      qc.invalidateQueries({ queryKey: ["admin", "contact-submission", vars.submissionId] });
+    },
+  });
+}
+
+export function useAdminMarkContactSubmissionReplied() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (submissionId: string) => adminApi.markContactSubmissionReplied(submissionId),
+    onSuccess: (_data, submissionId) => {
+      qc.invalidateQueries({ queryKey: ["admin", "contact-submissions"] });
+      qc.invalidateQueries({ queryKey: ["admin", "contact-submission", submissionId] });
+    },
+  });
+}
+
+export function useAdminDeleteContactSubmission() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (submissionId: string) => adminApi.deleteContactSubmission(submissionId),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin", "contact-submissions"] });
+      qc.invalidateQueries({ queryKey: ["admin", "contact-submission"] });
     },
   });
 }

@@ -15,6 +15,8 @@ import { AdminSupportController } from "../controllers/admin-support.controller.
 import { AdminWebsiteLogoController } from "../controllers/admin-website-logo.controller.js";
 import { AdminWebsiteTestimonialController } from "../controllers/admin-website-testimonial.controller.js";
 import { AdminWebsiteFaqController } from "../controllers/admin-website-faq.controller.js";
+import { AdminWebsitePricingController } from "../controllers/admin-website-pricing.controller.js";
+import { ContactSubmissionController } from "../controllers/contact-submission.controller.js";
 
 const router = Router();
 const keyController = new AdminApiKeyController();
@@ -31,6 +33,8 @@ const supportController = new AdminSupportController();
 const websiteLogoController = new AdminWebsiteLogoController();
 const websiteTestimonialController = new AdminWebsiteTestimonialController();
 const websiteFaqController = new AdminWebsiteFaqController();
+const websitePricingController = new AdminWebsitePricingController();
+const contactSubmissionController = new ContactSubmissionController();
 
 router.use(requireAdmin);
 router.get("/usage", asyncHandler(usageController.getUsage));
@@ -115,5 +119,24 @@ router.get("/website/faqs", asyncHandler(websiteFaqController.list));
 router.post("/website/faqs", asyncHandler(websiteFaqController.create));
 router.patch("/website/faqs/:faqId", asyncHandler(websiteFaqController.update));
 router.delete("/website/faqs/:faqId", asyncHandler(websiteFaqController.remove));
+
+// Website pricing
+router.get("/website/pricing", asyncHandler(websitePricingController.list));
+router.post("/website/pricing", asyncHandler(websitePricingController.create));
+router.patch("/website/pricing/:planId", asyncHandler(websitePricingController.update));
+router.delete("/website/pricing/:planId", asyncHandler(websitePricingController.remove));
+
+// Website pricing features
+router.post("/website/pricing/:planId/features", asyncHandler(websitePricingController.createFeature));
+router.patch("/website/pricing/features/:featureId", asyncHandler(websitePricingController.updateFeature));
+router.delete("/website/pricing/features/:featureId", asyncHandler(websitePricingController.removeFeature));
+
+// Contact submissions
+router.get("/contact-submissions", asyncHandler(contactSubmissionController.list));
+router.get("/contact-submissions/:submissionId", asyncHandler(contactSubmissionController.getById));
+router.patch("/contact-submissions/:submissionId/status", asyncHandler(contactSubmissionController.updateStatus));
+router.patch("/contact-submissions/:submissionId/notes", asyncHandler(contactSubmissionController.updateNotes));
+router.patch("/contact-submissions/:submissionId/replied", asyncHandler(contactSubmissionController.markReplied));
+router.delete("/contact-submissions/:submissionId", asyncHandler(contactSubmissionController.remove));
 
 export { router as adminRoutes };
