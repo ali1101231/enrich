@@ -280,6 +280,42 @@ export interface AdminNewsItem {
   } | null;
 }
 
+export interface AdminWebsiteLogoItem {
+  id: string;
+  name: string;
+  imageUrl: string;
+  altText: string | null;
+  href: string | null;
+  isActive: boolean;
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AdminWebsiteTestimonialItem {
+  id: string;
+  clientName: string;
+  clientRole: string | null;
+  companyName: string | null;
+  quote: string;
+  avatarUrl: string | null;
+  rating: number | null;
+  isActive: boolean;
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AdminWebsiteFaqItem {
+  id: string;
+  question: string;
+  answer: string;
+  isActive: boolean;
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface NewsItem {
   id: string;
   title: string;
@@ -548,6 +584,72 @@ export const adminApi = {
   },
   deleteNews(newsId: string) {
     return request<void>(`/admin/news/${encodeURIComponent(newsId)}`, {
+      method: "DELETE",
+    });
+  },
+
+  // ---- Website Logos ----
+  listWebsiteLogos() {
+    return request<{ items: AdminWebsiteLogoItem[] }>("/admin/website/logos");
+  },
+  createWebsiteLogo(data: { name: string; imageUrl: string; altText?: string | null; href?: string | null; isActive?: boolean; sortOrder?: number }) {
+    return request<AdminWebsiteLogoItem>("/admin/website/logos", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  },
+  updateWebsiteLogo(logoId: string, data: { name?: string; imageUrl?: string; altText?: string | null; href?: string | null; isActive?: boolean; sortOrder?: number }) {
+    return request<AdminWebsiteLogoItem>(`/admin/website/logos/${encodeURIComponent(logoId)}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    });
+  },
+  deleteWebsiteLogo(logoId: string) {
+    return request<void>(`/admin/website/logos/${encodeURIComponent(logoId)}`, {
+      method: "DELETE",
+    });
+  },
+
+  // ---- Website Testimonials ----
+  listWebsiteTestimonials() {
+    return request<{ items: AdminWebsiteTestimonialItem[] }>("/admin/website/testimonials");
+  },
+  createWebsiteTestimonial(data: { clientName: string; clientRole?: string | null; companyName?: string | null; quote: string; avatarUrl?: string | null; rating?: number | null; isActive?: boolean; sortOrder?: number }) {
+    return request<AdminWebsiteTestimonialItem>("/admin/website/testimonials", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  },
+  updateWebsiteTestimonial(testimonialId: string, data: { clientName?: string; clientRole?: string | null; companyName?: string | null; quote?: string; avatarUrl?: string | null; rating?: number | null; isActive?: boolean; sortOrder?: number }) {
+    return request<AdminWebsiteTestimonialItem>(`/admin/website/testimonials/${encodeURIComponent(testimonialId)}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    });
+  },
+  deleteWebsiteTestimonial(testimonialId: string) {
+    return request<void>(`/admin/website/testimonials/${encodeURIComponent(testimonialId)}`, {
+      method: "DELETE",
+    });
+  },
+
+  // ---- Website FAQs ----
+  listWebsiteFaqs() {
+    return request<{ items: AdminWebsiteFaqItem[] }>("/admin/website/faqs");
+  },
+  createWebsiteFaq(data: { question: string; answer: string; isActive?: boolean; sortOrder?: number }) {
+    return request<AdminWebsiteFaqItem>("/admin/website/faqs", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  },
+  updateWebsiteFaq(faqId: string, data: { question?: string; answer?: string; isActive?: boolean; sortOrder?: number }) {
+    return request<AdminWebsiteFaqItem>(`/admin/website/faqs/${encodeURIComponent(faqId)}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    });
+  },
+  deleteWebsiteFaq(faqId: string) {
+    return request<void>(`/admin/website/faqs/${encodeURIComponent(faqId)}`, {
       method: "DELETE",
     });
   },

@@ -38,6 +38,9 @@ import AdminTools from "@/pages/admin/AdminTools";
 import AdminOffers from "@/pages/admin/AdminOffers";
 import AdminGuides from "@/pages/admin/AdminGuides";
 import AdminNews from "@/pages/admin/AdminNews";
+import AdminWebsiteLogos from "@/pages/admin/AdminWebsiteLogos";
+import AdminWebsiteTestimonials from "@/pages/admin/AdminWebsiteTestimonials";
+import AdminWebsiteFaqs from "@/pages/admin/AdminWebsiteFaqs";
 import AdminUsage from "@/pages/admin/AdminUsage";
 import AdminSupport from "@/pages/admin/AdminSupport";
 
@@ -92,6 +95,9 @@ const App = () => (
               <Route path="offers" element={<AdminOffers />} />
               <Route path="guides" element={<AdminGuides />} />
               <Route path="news" element={<AdminNews />} />
+              <Route path="website/logos" element={<AdminWebsiteLogos />} />
+              <Route path="website/testimonials" element={<AdminWebsiteTestimonials />} />
+              <Route path="website/faqs" element={<AdminWebsiteFaqs />} />
               <Route path="support" element={<AdminSupport />} />
               <Route path="usage" element={<AdminUsage />} />
               <Route path="activity" element={<AdminActivity />} />

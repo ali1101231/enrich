@@ -15,6 +15,7 @@ import { OfferController } from "../controllers/offer.controller.js";
 import { GuideController } from "../controllers/guide.controller.js";
 import { NewsController } from "../controllers/news.controller.js";
 import { SupportController } from "../controllers/support.controller.js";
+import { WebsiteContentController } from "../controllers/website-content.controller.js";
 
 const router = Router();
 const exportController = new ExportController();
@@ -26,6 +27,7 @@ const offerController = new OfferController();
 const guideController = new GuideController();
 const newsController = new NewsController();
 const supportController = new SupportController();
+const websiteContentController = new WebsiteContentController();
 
 router.get("/health", async (_req, res) => {
   const checks: Record<string, string> = {};
@@ -42,6 +44,12 @@ router.get("/health", async (_req, res) => {
 });
 
 router.use("/auth", authRoutes);
+
+// Public website content (no auth required)
+router.get("/website-content/logos", asyncHandler(websiteContentController.listLogos));
+router.get("/website-content/testimonials", asyncHandler(websiteContentController.listTestimonials));
+router.get("/website-content/faqs", asyncHandler(websiteContentController.listFaqs));
+router.get("/website-content/all", asyncHandler(websiteContentController.listAll));
 
 // Public: active packages for pricing page
 router.get("/packages", asyncHandler(packageController.listActive));
