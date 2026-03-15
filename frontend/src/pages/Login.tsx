@@ -149,26 +149,26 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#262223] text-white">
+    <div className="min-h-screen koldify-shell-bg text-[#2f2453]">
       <div className="grid min-h-screen lg:grid-cols-[43.2%_56.8%]">
-        <section className="relative flex min-h-screen flex-col bg-[#262223] px-7 pb-8 pt-6 sm:px-10 lg:px-0 lg:pt-5">
-          <div className="mb-10 flex items-center gap-3 pl-1 text-[15px] font-semibold tracking-tight text-white/95 lg:ml-7 lg:mb-0 lg:mt-1">
-            <div className="grid h-7 w-7 place-items-center rounded-full border border-white/20 bg-white/6 text-white">
-              <div className="h-3.5 w-3.5 rounded-full border border-white/80 border-l-transparent border-r-transparent" />
+        <section className="relative flex min-h-screen flex-col bg-transparent px-7 pb-8 pt-6 sm:px-10 lg:px-0 lg:pt-5">
+          <div className="mb-10 flex items-center gap-3 pl-1 text-[15px] font-semibold tracking-tight text-[#3b2a68] lg:ml-7 lg:mb-0 lg:mt-1">
+            <div className="grid h-7 w-7 place-items-center rounded-full border border-[#d8cbff] bg-white text-[#6f4cc6] shadow-[0_8px_20px_rgba(111,76,198,0.15)]">
+              <div className="h-3.5 w-3.5 rounded-full border border-[#6f4cc6] border-l-transparent border-r-transparent" />
             </div>
-            <span>Apollo</span>
+            <span>Enrich It</span>
           </div>
 
           <div className="mx-auto flex w-full max-w-[354px] flex-1 flex-col justify-center lg:ml-[clamp(176px,24vw,248px)] lg:mr-0 lg:max-w-[354px] lg:justify-start lg:pt-[104px] xl:pt-[110px]">
-            <div className="mb-[27px] rounded-[13px] border border-white/10 bg-white/[0.035] p-1.5 shadow-[0_20px_60px_rgba(0,0,0,0.22)]">
+            <div className="mb-[27px] rounded-[13px] border border-[#e3d7ff] bg-white p-1.5 shadow-[0_16px_34px_rgba(121,95,194,0.14)]">
               <div className="grid grid-cols-2 gap-1.5 text-sm font-semibold">
                 <button
                   type="button"
                   onClick={() => switchTo('login')}
                   className={`rounded-[10px] px-4 py-[13px] transition ${
                     activeTab === 'login'
-                      ? 'bg-[#e6e3e4] text-[#2a2727] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.6)]'
-                      : 'text-white/78 hover:bg-white/[0.04] hover:text-white'
+                      ? 'bg-[#6f4cc6] text-white shadow-[0_8px_20px_rgba(111,76,198,0.28)]'
+                      : 'text-[#6b5f90] hover:bg-[#f7f2ff] hover:text-[#4f3c85]'
                   }`}
                 >
                   Log In
@@ -178,8 +178,8 @@ export default function LoginPage() {
                   onClick={() => switchTo('signup')}
                   className={`flex items-center justify-center gap-2 rounded-[10px] px-4 py-[13px] transition ${
                     activeTab === 'signup'
-                      ? 'bg-[#e6e3e4] text-[#2a2727] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.6)]'
-                      : 'text-white/78 hover:bg-white/[0.04] hover:text-white'
+                      ? 'bg-[#6f4cc6] text-white shadow-[0_8px_20px_rgba(111,76,198,0.28)]'
+                      : 'text-[#6b5f90] hover:bg-[#f7f2ff] hover:text-[#4f3c85]'
                   }`}
                 >
                   <ArrowUpRight className="h-4 w-4" />
@@ -193,23 +193,23 @@ export default function LoginPage() {
                 <button
                   key={provider.label}
                   type="button"
-                  className="flex h-[49px] w-full items-center justify-center gap-3 rounded-[11px] border border-white/10 bg-transparent px-4 text-[15px] font-semibold text-white/88 transition hover:border-white/20 hover:bg-white/[0.04]"
+                  className="flex h-[49px] w-full items-center justify-center gap-3 rounded-[11px] border border-[#e2d8ff] bg-white px-4 text-[15px] font-semibold text-[#4d3f7d] transition hover:border-[#cdbaff] hover:bg-[#f8f4ff]"
                 >
-                  <span className="grid h-5 w-5 place-items-center text-white/92">{provider.icon}</span>
+                  <span className="grid h-5 w-5 place-items-center text-[#6f4cc6]">{provider.icon}</span>
                   <span>{provider.label}</span>
                 </button>
               ))}
             </div>
 
-            <div className="mb-[30px] flex items-center gap-4 px-9 text-sm text-white/45">
-              <div className="h-px flex-1 bg-white/12" />
+            <div className="mb-[30px] flex items-center gap-4 px-9 text-sm text-[#7f74a7]">
+              <div className="h-px flex-1 bg-[#e6ddff]" />
               <span>Or</span>
-              <div className="h-px flex-1 bg-white/12" />
+              <div className="h-px flex-1 bg-[#e6ddff]" />
             </div>
 
             {formError && (
               <div
-                className="mb-5 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-200"
+                className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
               >
                 {formError}
               </div>
@@ -218,7 +218,7 @@ export default function LoginPage() {
             {activeTab === 'login' ? (
               <form onSubmit={handleSignIn} className="space-y-[18px]">
                 <div className="space-y-2.5">
-                  <label htmlFor="sign-in-email" className="block text-[15px] font-semibold text-white/82">
+                  <label htmlFor="sign-in-email" className="block text-[15px] font-semibold text-[#4a3e74]">
                     Email
                   </label>
                   <input
@@ -226,13 +226,13 @@ export default function LoginPage() {
                     type="email"
                     value={signInEmail}
                     onChange={(event) => setSignInEmail(event.target.value)}
-                    className="h-[42px] w-full rounded-[10px] border border-white/16 bg-[#211d1e] px-4 text-[15px] text-white outline-none transition placeholder:text-white/24 focus:border-[#eef75c] focus:bg-[#191617]"
+                    className="h-[42px] w-full rounded-[10px] border border-[#ddd0ff] bg-white px-4 text-[15px] text-[#2f2453] outline-none transition placeholder:text-[#b2a5d6] focus:border-[#8b5cf6] focus:bg-white"
                     required
                   />
                 </div>
 
                 <div className="space-y-2.5">
-                  <label htmlFor="sign-in-password" className="block text-[15px] font-semibold text-white/82">
+                  <label htmlFor="sign-in-password" className="block text-[15px] font-semibold text-[#4a3e74]">
                     Password
                   </label>
                   <div className="relative">
@@ -241,13 +241,13 @@ export default function LoginPage() {
                       type={showPassword ? 'text' : 'password'}
                       value={signInPassword}
                       onChange={(event) => setSignInPassword(event.target.value)}
-                      className="h-[42px] w-full rounded-[10px] border border-white/16 bg-[#211d1e] px-4 pr-12 text-[15px] text-white outline-none transition placeholder:text-white/24 focus:border-[#eef75c] focus:bg-[#191617]"
+                      className="h-[42px] w-full rounded-[10px] border border-[#ddd0ff] bg-white px-4 pr-12 text-[15px] text-[#2f2453] outline-none transition placeholder:text-[#b2a5d6] focus:border-[#8b5cf6] focus:bg-white"
                       required
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword((current) => !current)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-white/45 transition hover:text-white/72"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9c8dc8] transition hover:text-[#5f4b99]"
                       aria-label={showPassword ? 'Hide password' : 'Show password'}
                     >
                       {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -258,7 +258,7 @@ export default function LoginPage() {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="mt-1 flex h-[41px] w-full items-center justify-center rounded-[10px] bg-[#f3f75f] text-[16px] font-bold text-[#2b2a24] transition hover:bg-[#edf04a] disabled:cursor-not-allowed disabled:opacity-70"
+                  className="mt-1 flex h-[41px] w-full items-center justify-center rounded-[10px] bg-[#6f4cc6] text-[16px] font-bold text-white shadow-[0_12px_26px_rgba(111,76,198,0.28)] transition hover:bg-[#603cb9] disabled:cursor-not-allowed disabled:opacity-70"
                 >
                   {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Log In'}
                 </button>
@@ -267,11 +267,11 @@ export default function LoginPage() {
                   <button
                     type="button"
                     onClick={() => setKeepSignedIn((current) => !current)}
-                    className="flex items-center gap-2 text-white/72 transition hover:text-white"
+                    className="flex items-center gap-2 text-[#6e6198] transition hover:text-[#4f3c85]"
                   >
                     <span
                       className={`grid h-5 w-5 place-items-center rounded border transition ${
-                        keepSignedIn ? 'border-white/30 bg-[#e6e3e4] text-[#2b2a24]' : 'border-white/20 bg-transparent text-transparent'
+                        keepSignedIn ? 'border-[#6f4cc6] bg-[#6f4cc6] text-white' : 'border-[#cbbef0] bg-white text-transparent'
                       }`}
                     >
                       <Check className="h-3.5 w-3.5" />
@@ -282,7 +282,7 @@ export default function LoginPage() {
                   <button
                     type="button"
                     onClick={() => navigate('/forgot-password', { replace: true })}
-                    className="text-[#b7d7ff] underline-offset-2 transition hover:text-white hover:underline"
+                    className="text-[#7b5ad3] underline-offset-2 transition hover:text-[#5a3eb1] hover:underline"
                   >
                     Forgot password?
                   </button>
@@ -291,7 +291,7 @@ export default function LoginPage() {
             ) : (
               <form onSubmit={handleSignUp} className="space-y-[18px]">
                 <div className="space-y-2.5">
-                  <label htmlFor="sign-up-name" className="block text-[15px] font-semibold text-white/82">
+                  <label htmlFor="sign-up-name" className="block text-[15px] font-semibold text-[#4a3e74]">
                     Full name
                   </label>
                   <input
@@ -299,14 +299,14 @@ export default function LoginPage() {
                     type="text"
                     value={signUpName}
                     onChange={(event) => setSignUpName(event.target.value)}
-                    className="h-[42px] w-full rounded-[10px] border border-white/16 bg-[#211d1e] px-4 text-[15px] text-white outline-none transition placeholder:text-white/24 focus:border-[#eef75c] focus:bg-[#191617]"
+                    className="h-[42px] w-full rounded-[10px] border border-[#ddd0ff] bg-white px-4 text-[15px] text-[#2f2453] outline-none transition placeholder:text-[#b2a5d6] focus:border-[#8b5cf6] focus:bg-white"
                     placeholder="Tim Zheng"
                     required
                   />
                 </div>
 
                 <div className="space-y-2.5">
-                  <label htmlFor="sign-up-email" className="block text-[15px] font-semibold text-white/82">
+                  <label htmlFor="sign-up-email" className="block text-[15px] font-semibold text-[#4a3e74]">
                     Work email
                   </label>
                   <input
@@ -314,14 +314,14 @@ export default function LoginPage() {
                     type="email"
                     value={signUpEmail}
                     onChange={(event) => setSignUpEmail(event.target.value)}
-                    className="h-[42px] w-full rounded-[10px] border border-white/16 bg-[#211d1e] px-4 text-[15px] text-white outline-none transition placeholder:text-white/24 focus:border-[#eef75c] focus:bg-[#191617]"
+                    className="h-[42px] w-full rounded-[10px] border border-[#ddd0ff] bg-white px-4 text-[15px] text-[#2f2453] outline-none transition placeholder:text-[#b2a5d6] focus:border-[#8b5cf6] focus:bg-white"
                     placeholder="you@company.com"
                     required
                   />
                 </div>
 
                 <div className="space-y-2.5">
-                  <label htmlFor="sign-up-password" className="block text-[15px] font-semibold text-white/82">
+                  <label htmlFor="sign-up-password" className="block text-[15px] font-semibold text-[#4a3e74]">
                     Password
                   </label>
                   <div className="relative">
@@ -330,14 +330,14 @@ export default function LoginPage() {
                       type={showPassword ? 'text' : 'password'}
                       value={signUpPassword}
                       onChange={(event) => setSignUpPassword(event.target.value)}
-                      className="h-[42px] w-full rounded-[10px] border border-white/16 bg-[#211d1e] px-4 pr-12 text-[15px] text-white outline-none transition placeholder:text-white/24 focus:border-[#eef75c] focus:bg-[#191617]"
+                      className="h-[42px] w-full rounded-[10px] border border-[#ddd0ff] bg-white px-4 pr-12 text-[15px] text-[#2f2453] outline-none transition placeholder:text-[#b2a5d6] focus:border-[#8b5cf6] focus:bg-white"
                       placeholder="Create a password"
                       required
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword((current) => !current)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-white/45 transition hover:text-white/72"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9c8dc8] transition hover:text-[#5f4b99]"
                       aria-label={showPassword ? 'Hide password' : 'Show password'}
                     >
                       {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -346,7 +346,7 @@ export default function LoginPage() {
                 </div>
 
                 <div className="space-y-2.5">
-                  <label htmlFor="sign-up-confirm" className="block text-[15px] font-semibold text-white/82">
+                  <label htmlFor="sign-up-confirm" className="block text-[15px] font-semibold text-[#4a3e74]">
                     Confirm password
                   </label>
                   <div className="relative">
@@ -355,14 +355,14 @@ export default function LoginPage() {
                       type={showConfirmPassword ? 'text' : 'password'}
                       value={signUpConfirm}
                       onChange={(event) => setSignUpConfirm(event.target.value)}
-                      className="h-[42px] w-full rounded-[10px] border border-white/16 bg-[#211d1e] px-4 pr-12 text-[15px] text-white outline-none transition placeholder:text-white/24 focus:border-[#eef75c] focus:bg-[#191617]"
+                      className="h-[42px] w-full rounded-[10px] border border-[#ddd0ff] bg-white px-4 pr-12 text-[15px] text-[#2f2453] outline-none transition placeholder:text-[#b2a5d6] focus:border-[#8b5cf6] focus:bg-white"
                       placeholder="Repeat your password"
                       required
                     />
                     <button
                       type="button"
                       onClick={() => setShowConfirmPassword((current) => !current)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-white/45 transition hover:text-white/72"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9c8dc8] transition hover:text-[#5f4b99]"
                       aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
                     >
                       {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -373,54 +373,54 @@ export default function LoginPage() {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="mt-1 flex h-[41px] w-full items-center justify-center rounded-[10px] bg-[#f3f75f] text-[16px] font-bold text-[#2b2a24] transition hover:bg-[#edf04a] disabled:cursor-not-allowed disabled:opacity-70"
+                  className="mt-1 flex h-[41px] w-full items-center justify-center rounded-[10px] bg-[#6f4cc6] text-[16px] font-bold text-white shadow-[0_12px_26px_rgba(111,76,198,0.28)] transition hover:bg-[#603cb9] disabled:cursor-not-allowed disabled:opacity-70"
                 >
                   {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Create account'}
                 </button>
               </form>
             )}
 
-            <div className="mt-[70px] pl-1 text-center text-[13px] text-white/48 lg:mt-[74px]">2026 All Rights Reserved.</div>
+            <div className="mt-[70px] pl-1 text-center text-[13px] text-[#978bbb] lg:mt-[74px]">2026 All Rights Reserved.</div>
           </div>
         </section>
 
         <section className="relative hidden overflow-hidden bg-transparent lg:block">
 
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="relative h-[720px] w-[880px] origin-center scale-[0.88] xl:scale-[0.96] 2xl:scale-100">
-              <div className="absolute left-[126px] top-[62px] h-[606px] w-[520px] overflow-hidden bg-[#d7e0f4] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.44)] [clip-path:polygon(14%_0%,100%_0%,100%_100%,16%_100%,0%_86%,0.8%_22%)]">
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_16%_14%,rgba(255,255,255,0.56),transparent_24%),radial-gradient(circle_at_86%_10%,rgba(255,255,255,0.42),transparent_24%)]" />
+            <div className="relative h-[820px] w-[940px] origin-center scale-[0.82] xl:scale-[0.9] 2xl:scale-[0.97]">
+              <div className="absolute left-[42px] top-[16px] h-[774px] w-[742px] overflow-hidden bg-[#ede7ff] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.5)] [clip-path:polygon(14%_0%,100%_0%,100%_100%,16%_100%,0%_86%,0.8%_22%)]">
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_16%_14%,rgba(255,255,255,0.62),transparent_24%),radial-gradient(circle_at_86%_10%,rgba(167,139,250,0.28),transparent_28%)]" />
               </div>
 
-              <div className="absolute left-[356px] top-[108px] z-20 grid h-[31px] w-[31px] place-items-center rounded-[6px] bg-[#f3f75f] text-[#1d1c14] shadow-[0_12px_24px_rgba(76,82,20,0.18)]">
+              <div className="absolute left-[348px] top-[104px] z-20 grid h-[31px] w-[31px] place-items-center rounded-[6px] bg-[#8b5cf6] text-white shadow-[0_12px_24px_rgba(88,56,170,0.28)]">
                 <span className="text-[18px] leading-none">✳</span>
               </div>
 
-              <div className="absolute left-[252px] top-[236px] z-10 h-[146px] w-[226px] rounded-[18px] border border-[#d1d9ee] bg-white/78 shadow-[0_20px_40px_rgba(111,132,168,0.18)] backdrop-blur-sm">
-                <div className="flex h-7 items-center gap-1 rounded-t-[18px] bg-[#2d6698] px-3">
+              <div className="absolute left-[236px] top-[248px] z-10 h-[146px] w-[226px] rounded-[18px] border border-[#ddd2ff] bg-white/85 shadow-[0_20px_40px_rgba(126,102,201,0.2)] backdrop-blur-sm">
+                <div className="flex h-7 items-center gap-1 rounded-t-[18px] bg-[#6f4cc6] px-3">
                   <span className="h-1.5 w-1.5 rounded-full bg-white/90" />
                   <span className="h-1.5 w-1.5 rounded-full bg-white/60" />
                   <span className="h-1.5 w-1.5 rounded-full bg-white/40" />
                 </div>
                 <div className="space-y-3 px-4 py-4">
-                  <div className="h-4 w-16 rounded-full bg-[#edf1f7]" />
-                  <div className="h-4 w-24 rounded-full bg-[#edf1f7]" />
-                  <div className="h-16 rounded-2xl bg-[#f5f7fb]" />
+                  <div className="h-4 w-16 rounded-full bg-[#f2ebff]" />
+                  <div className="h-4 w-24 rounded-full bg-[#f2ebff]" />
+                  <div className="h-16 rounded-2xl bg-[#f8f4ff]" />
                 </div>
               </div>
 
-              <div className="absolute left-[416px] top-[76px] z-30 w-[274px] rounded-[18px] border border-[#d8d5d1] bg-[#f6f2ee] shadow-[0_24px_60px_rgba(105,110,128,0.24)]">
-                <div className="flex items-center justify-between border-b border-[#e5ded6] px-4 py-3 text-[#2d2926]">
+              <div className="absolute left-[402px] top-[70px] z-30 w-[274px] rounded-[18px] border border-[#e2d8ff] bg-[#f8f4ff] shadow-[0_24px_60px_rgba(95,82,148,0.24)]">
+                <div className="flex items-center justify-between border-b border-[#eee5ff] px-4 py-3 text-[#31245d]">
                   <div className="flex items-center gap-2 text-[15px] font-semibold">
                     <span className="text-[13px] leading-none">✳</span>
-                    <span>Apollo</span>
+                    <span>Enrich It</span>
                   </div>
-                  <X className="h-4 w-4 text-[#746e68]" />
+                  <X className="h-4 w-4 text-[#7a6fa2]" />
                 </div>
 
                 <div className="px-4 pb-4 pt-3">
-                  <div className="mb-5 grid grid-cols-2 gap-2 rounded-xl bg-white/75 p-1 text-[11px] font-semibold text-[#7a746e] shadow-[inset_0_0_0_1px_rgba(213,205,196,0.65)]">
-                    <div className="flex items-center justify-center gap-1.5 rounded-lg bg-[#45403c] px-3 py-[8px] text-white">
+                  <div className="mb-5 grid grid-cols-2 gap-2 rounded-xl bg-white/90 p-1 text-[11px] font-semibold text-[#7a709e] shadow-[inset_0_0_0_1px_rgba(215,201,255,0.75)]">
+                    <div className="flex items-center justify-center gap-1.5 rounded-lg bg-[#6f4cc6] px-3 py-[8px] text-white">
                       <UserRound className="h-3.5 w-3.5" />
                       <span>Person</span>
                     </div>
@@ -431,23 +431,23 @@ export default function LoginPage() {
                   </div>
 
                   <div className="mb-4">
-                    <div className="text-[13px] font-bold text-[#2d2926]">Tim Zheng</div>
-                    <div className="mt-1 text-[11px] font-medium text-[#7b7671]">CEO & Founder at Apollo</div>
-                    <div className="mt-3 inline-flex items-center gap-1 rounded-full bg-[#d9efd6] px-2 py-1 text-[10px] font-semibold text-[#547b53]">
+                    <div className="text-[13px] font-bold text-[#31245d]">Tim Zheng</div>
+                    <div className="mt-1 text-[11px] font-medium text-[#7a709e]">CEO & Founder at Enrich It</div>
+                    <div className="mt-3 inline-flex items-center gap-1 rounded-full bg-[#e8defd] px-2 py-1 text-[10px] font-semibold text-[#5d409f]">
                       <span>95</span>
                       <span>Excellent match</span>
                     </div>
                   </div>
 
-                  <div className="mb-5 rounded-[18px] border border-[#e7e1db] bg-white/95 px-2 py-3 shadow-[0_12px_24px_rgba(112,115,131,0.1)]">
-                    <div className="grid grid-cols-3 gap-2 text-center text-[10px] font-semibold text-[#6e6964]">
+                  <div className="mb-5 rounded-[18px] border border-[#ece4ff] bg-white/95 px-2 py-3 shadow-[0_12px_24px_rgba(109,92,163,0.12)]">
+                    <div className="grid grid-cols-3 gap-2 text-center text-[10px] font-semibold text-[#756b97]">
                       {quickActions.map((action) => (
                         <button
                           key={action.label}
                           type="button"
-                          className="flex flex-col items-center gap-2 rounded-xl px-2 py-2 transition hover:bg-[#f7f3ef]"
+                          className="flex flex-col items-center gap-2 rounded-xl px-2 py-2 transition hover:bg-[#f6f1ff]"
                         >
-                          <span className="grid h-8 w-8 place-items-center rounded-full bg-[#f5f2ee] text-[#6c6760]">
+                          <span className="grid h-8 w-8 place-items-center rounded-full bg-[#f4edff] text-[#685c91]">
                             {action.icon}
                           </span>
                           <span>{action.label}</span>
@@ -456,49 +456,43 @@ export default function LoginPage() {
                     </div>
                   </div>
 
-                  <div className="space-y-4 border-b border-[#e7e1db] pb-5 text-[#5a5754]">
+                  <div className="space-y-4 border-b border-[#ece4ff] pb-5 text-[#635b7f]">
                     <div className="flex items-start gap-3">
-                      <span className="grid h-8 w-8 place-items-center rounded-full bg-[#f7f3ef] text-[#4d8a57]">
+                      <span className="grid h-8 w-8 place-items-center rounded-full bg-[#f4edff] text-[#6f4cc6]">
                         <Mail className="h-4 w-4" />
                       </span>
                       <div>
-                        <div className="text-[12px] font-semibold text-[#4e4a46]">tz@apollo.io</div>
-                        <div className="text-[10px] font-medium text-[#9a948e]">Work</div>
+                        <div className="text-[12px] font-semibold text-[#4a3e74]">hello@enrichit.ai</div>
+                        <div className="text-[10px] font-medium text-[#9a8ec2]">Work</div>
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
-                      <span className="grid h-8 w-8 place-items-center rounded-full bg-[#f7f3ef] text-[#6d665d]">
+                      <span className="grid h-8 w-8 place-items-center rounded-full bg-[#f4edff] text-[#6b6291]">
                         <Phone className="h-4 w-4" />
                       </span>
                       <div>
-                        <div className="text-[12px] font-semibold text-[#4e4a46]">(123) 456-7890</div>
-                        <div className="text-[10px] font-medium text-[#9a948e]">Mobile</div>
+                        <div className="text-[12px] font-semibold text-[#4a3e74]">(123) 456-7890</div>
+                        <div className="text-[10px] font-medium text-[#9a8ec2]">Mobile</div>
                       </div>
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-around pt-4 text-[#5f5a56]">
-                    <div className="grid h-8 w-8 place-items-center rounded-full text-[14px] hover:bg-[#ede7e0]">✳</div>
-                    <div className="grid h-8 w-8 place-items-center rounded-full text-[18px] font-semibold hover:bg-[#ede7e0]">in</div>
-                    <div className="grid h-8 w-8 place-items-center rounded-full hover:bg-[#ede7e0]">
+                  <div className="flex items-center justify-around pt-4 text-[#6a618b]">
+                    <div className="grid h-8 w-8 place-items-center rounded-full text-[14px] hover:bg-[#efe6ff]">✳</div>
+                    <div className="grid h-8 w-8 place-items-center rounded-full text-[18px] font-semibold hover:bg-[#efe6ff]">in</div>
+                    <div className="grid h-8 w-8 place-items-center rounded-full hover:bg-[#efe6ff]">
                       <Link2 className="h-4 w-4" />
                     </div>
-                    <div className="grid h-8 w-8 place-items-center rounded-full text-[18px] hover:bg-[#ede7e0]">𝕏</div>
+                    <div className="grid h-8 w-8 place-items-center rounded-full text-[18px] hover:bg-[#efe6ff]">𝕏</div>
                   </div>
                 </div>
               </div>
 
-              <div className="absolute left-[346px] top-[610px] z-20 w-[410px] text-center text-[#23221f]">
+              <div className="absolute left-[326px] top-[570px] z-20 w-[430px] text-center text-[#33295a]">
                 <div className="text-[51px] font-semibold tracking-[-0.05em]">800,000+</div>
-                <p className="mx-auto mt-2 max-w-[410px] text-[17px] leading-[1.55] text-[#2f2d2a]">
-                  Salespeople and marketers use our extension to prospect, connect, and convert leads faster.
+                <p className="mx-auto mt-2 max-w-[410px] text-[17px] leading-[1.55] text-[#43336f]">
+                  Teams use Enrich It to find better contacts, connect faster, and convert more leads.
                 </p>
-                <button
-                  type="button"
-                  className="mt-7 inline-flex h-[45px] items-center justify-center rounded-[13px] bg-[#2f2c2a] px-[30px] text-[17px] font-semibold text-white shadow-[0_20px_40px_rgba(37,35,33,0.18)] transition hover:bg-[#252220]"
-                >
-                  Get Apollo Chrome Extension
-                </button>
               </div>
             </div>
           </div>
