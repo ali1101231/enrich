@@ -64,7 +64,7 @@ const orderedFeaturesInclude = {
   features: {
     orderBy: [{ sortOrder: "asc" as const }, { createdAt: "asc" as const }],
   },
-} as const;
+};
 
 function ensureRequiredText(value: string, fieldName: string): string {
   const normalized = value.trim();
