@@ -58,18 +58,6 @@ const socialProviders: SocialProvider[] = [
       </svg>
     ),
   },
-  {
-    label: 'Sign in with Apple',
-    icon: (
-      <svg viewBox="0 0 24 24" className="h-4 w-4 fill-current" aria-hidden="true">
-        <path d="M16.84 12.6c.03 2.9 2.55 3.87 2.58 3.89-.02.07-.4 1.37-1.32 2.72-.79 1.17-1.62 2.34-2.91 2.36-1.27.02-1.68-.76-3.13-.76-1.46 0-1.9.74-3.1.78-1.24.05-2.19-1.25-2.99-2.41C4.3 16.66 3 12.98 4.7 10.03c.84-1.47 2.35-2.4 3.99-2.42 1.25-.03 2.43.84 3.13.84.69 0 1.99-1.04 3.35-.89.57.02 2.15.23 3.17 1.73-.08.05-1.89 1.1-1.86 3.31ZM14.35 5.93c.66-.8 1.1-1.92.98-3.03-.95.04-2.1.64-2.78 1.43-.61.7-1.15 1.83-1.01 2.91 1.05.08 2.13-.53 2.81-1.31Z" />
-      </svg>
-    ),
-  },
-  {
-    label: 'Log In with your Organization',
-    icon: <Link2 className="h-4 w-4" aria-hidden="true" />,
-  },
 ];
 
 const quickActions = [
@@ -144,8 +132,12 @@ export default function LoginPage() {
   const switchTo = (tab: AuthMode) => {
     setFormError(null);
     setIsSubmitting(false);
+    if (tab === 'signup') {
+      navigate('/signup');
+      return;
+    }
     setActiveTab(tab);
-    navigate(tab === 'signup' ? '/signup' : '/login', { replace: true });
+    navigate('/login', { replace: true });
   };
 
   return (
@@ -175,12 +167,8 @@ export default function LoginPage() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => switchTo('signup')}
-                  className={`flex items-center justify-center gap-2 rounded-[10px] px-4 py-[13px] transition ${
-                    activeTab === 'signup'
-                      ? 'bg-[#6f4cc6] text-white shadow-[0_8px_20px_rgba(111,76,198,0.28)]'
-                      : 'text-[#6b5f90] hover:bg-[#f7f2ff] hover:text-[#4f3c85]'
-                  }`}
+                  onClick={() => window.open('/signup', '_blank')}
+                  className="flex items-center justify-center gap-2 rounded-[10px] px-4 py-[13px] text-[#6b5f90] transition hover:bg-[#f7f2ff] hover:text-[#4f3c85]"
                 >
                   <ArrowUpRight className="h-4 w-4" />
                   Sign Up
