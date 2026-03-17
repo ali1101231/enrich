@@ -16,6 +16,7 @@ import SettingsAccount from "@/pages/SettingsAccount";
 import SettingsPreferences from "@/pages/SettingsPreferences";
 import ToolPage from "@/pages/ToolPage";
 import Login from "@/pages/Login";
+import Signup from "@/pages/Signup";
 import NotFound from "./pages/NotFound";
 import Guide from "@/pages/Guide";
 import News from "@/pages/News";
@@ -58,7 +59,7 @@ const App = () => (
           <Routes>
             {/* Auth */}
             <Route path="/login" element={<RedirectIfAuthenticated><Login /></RedirectIfAuthenticated>} />
-            <Route path="/signup" element={<RedirectIfAuthenticated><Login /></RedirectIfAuthenticated>} />
+            <Route path="/signup" element={<RedirectIfAuthenticated><Signup /></RedirectIfAuthenticated>} />
             <Route path="/forgot-password" element={<RedirectIfAuthenticated><Login /></RedirectIfAuthenticated>} />
             
             {/* App (protected by AppLayout) */}
