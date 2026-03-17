@@ -1,4 +1,9 @@
-const API_BASE = "/api";
+const configuredApiBase = (import.meta.env.VITE_API_BASE_URL ?? "").trim().replace(/\/+$/, "");
+const API_BASE = configuredApiBase
+  ? configuredApiBase.endsWith("/api")
+    ? configuredApiBase
+    : `${configuredApiBase}/api`
+  : "/api";
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
   const token = localStorage.getItem("koldify-token");
