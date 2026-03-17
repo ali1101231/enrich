@@ -1,5 +1,8 @@
 import express from "express";
 import cors from "cors";
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { apiRouter } from "./routes/index.js";
 import { env } from "./lib/env.js";
 import { logError, logInfo } from "./lib/logger.js";
@@ -10,6 +13,11 @@ import { FairSchedulerService } from "./services/fair-scheduler.service.js";
 
 const app = express();
 const scheduler = new FairSchedulerService();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const frontendDistPath = path.resolve(__dirname, "../../../frontend/dist");
+const frontendIndexPath = path.join(frontendDistPath, "index.html");
+const hasBundledFrontend = fs.existsSync(frontendIndexPath);
 
 app.disable("x-powered-by");
 app.use(cors({ origin: true, credentials: true }));
@@ -17,6 +25,26 @@ app.use(express.json({ limit: "10mb" }));
 app.use(attachRequestId);
 app.use(attachAuthContext);
 app.use("/api", apiRouter);
+
+if (hasBundledFrontend) {
+  app.use(express.static(frontendDistPath));
+  app.get("*", (req, res, next) => {
+    if (req.path.startsWith("/api")) {
+      next();
+      return;
+    }
+    res.sendFile(frontendIndexPath);
+  });
+} else {
+  app.get("/", (_req, res) => {
+    res.status(200).json({
+      ok: true,
+      message: "Koldify API is running. Frontend build not found in this service.",
+      apiBasePath: "/api",
+    });
+  });
+}
+
 app.use(errorHandler);
 
 setInterval(async () => {
