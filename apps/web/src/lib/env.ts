@@ -27,6 +27,8 @@ const envSchema = z.object({
   R2_BUCKET_NAME: z.string().min(1),
   R2_ENDPOINT: z.string().url(),
   R2_PUBLIC_BASE_URL: z.string().url().optional(),
+  SENDGRID_API_KEY: z.string().min(1).optional(),
+  SENDGRID_FROM_EMAIL: z.string().email().optional(),
 });
 
 const parsed = envSchema.safeParse(process.env);
