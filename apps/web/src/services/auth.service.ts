@@ -17,6 +17,11 @@ interface UserRow {
 }
 
 export class AuthService {
+  async findByEmail(email: string): Promise<{ id: string } | null> {
+    const user = await prisma.user.findUnique({ where: { email }, select: { id: true } });
+    return user;
+  }
+
   async register(email: string, password: string, displayName?: string): Promise<AuthResult> {
     const existing = await prisma.user.findUnique({ where: { email } });
     if (existing) {

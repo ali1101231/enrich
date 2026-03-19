@@ -17,6 +17,7 @@ interface AppContextType extends AppState {
   // Auth
   login: (email: string, password: string) => Promise<string | null>;
   register: (email: string, password: string, displayName?: string) => Promise<string | null>;
+  authenticate: (response: { user: AuthUser; token: string }) => void;
   logout: () => void;
   authError: string | null;
   
@@ -176,6 +177,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const authenticate = useCallback(({ user: authUser, token }: { user: AuthUser; token: string }) => {
+    localStorage.setItem('koldify-token', token);
+    setState(prev => ({
+      ...prev,
+      user: authUserToUser(authUser),
+      isAuthenticated: true,
+    }));
+  }, []);
+
   const logout = useCallback(() => {
     localStorage.removeItem('koldify-token');
     queryClient.clear();
@@ -212,6 +222,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       ...state,
       login,
       register,
+      authenticate,
       logout,
       authError,
       updatePreferences,

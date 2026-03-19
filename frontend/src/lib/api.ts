@@ -83,6 +83,24 @@ export const authApi = {
   me() {
     return request<AuthUser>("/auth/me");
   },
+  sendOtp(email: string) {
+    return request<{ ok: boolean; cooldownSeconds?: number }>("/auth/send-otp", {
+      method: "POST",
+      body: JSON.stringify({ email }),
+    });
+  },
+  verifyOtp(email: string, otp: string) {
+    return request<{ ok: boolean }>("/auth/verify-otp", {
+      method: "POST",
+      body: JSON.stringify({ email, otp }),
+    });
+  },
+  completeRegister(email: string, password: string, displayName: string) {
+    return request<AuthResponse>("/auth/complete-register", {
+      method: "POST",
+      body: JSON.stringify({ email, password, displayName }),
+    });
+  },
 };
 
 // ---- Admin ----
