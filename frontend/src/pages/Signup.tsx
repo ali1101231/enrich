@@ -17,8 +17,8 @@ function AppPreview() {
   return (
     <div className="grid h-full grid-cols-[220px_1fr] blur-[1.2px]">
       <aside className="border-r border-[#e2dcf4] bg-[#f3efff] px-3 py-4">
-        <div className="mb-5 flex items-center gap-2 text-[#2e2348]">
-          <div className="grid h-9 w-9 place-items-center rounded-xl bg-[#6738dd] text-white text-lg">âœ¦</div>
+        <div className="mb-5 flex items-center gap-1.5 text-[#2e2348]">
+          <img src="/logo-web.png" alt="Enrich it" className="h-9 w-9 rounded-xl object-cover" />
           <div className="text-[28px] font-semibold tracking-tight">Enrich it</div>
         </div>
         <div className="space-y-2 text-[23px] text-[#433e57]">

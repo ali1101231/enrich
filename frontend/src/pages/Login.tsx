@@ -75,12 +75,12 @@ const socialProviders: SocialProvider[] = [
 
 const previewActionsByMode: Record<PreviewMode, PreviewAction[]> = {
   person: [
-    { label: 'Email enricher', icon: <Mail className="h-4 w-4" aria-hidden="true" />, href: 'https://enrich-it.io' },
-    { label: 'Phone finder', icon: <Phone className="h-4 w-4" aria-hidden="true" />, href: 'https://enrich-it.io' },
+    { label: 'Email enricher', icon: <Mail className="h-4 w-4" aria-hidden="true" />, href: 'https://enrich-it.io/email-enricher' },
+    { label: 'Phone finder', icon: <Phone className="h-4 w-4" aria-hidden="true" />, href: 'https://enrich-it.io/phone-finder' },
   ],
   company: [
-    { label: 'Company enricher', icon: <Building2 className="h-4 w-4" aria-hidden="true" />, href: 'https://enrich-it.io' },
-    { label: 'Domain to LinkedIn', icon: <Link2 className="h-4 w-4" aria-hidden="true" />, href: 'https://www.linkedin.com' },
+    { label: 'Company enricher', icon: <Building2 className="h-4 w-4" aria-hidden="true" />, href: 'https://enrich-it.io/company-enricher' },
+    { label: 'Domain to LinkedIn', icon: <Link2 className="h-4 w-4" aria-hidden="true" />, href: 'https://enrich-it.io/domain-to-linkedin' },
   ],
 };
 
@@ -214,7 +214,7 @@ export default function LoginPage() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => window.open('/signup', '_blank')}
+                  onClick={() => switchTo('signup')}
                   className="flex items-center justify-center gap-2 rounded-[10px] px-4 py-[13px] text-[#6b5f90] transition hover:bg-[#f7f2ff] hover:text-[#4f3c85]"
                 >
                   <ArrowUpRight className="h-4 w-4" />
