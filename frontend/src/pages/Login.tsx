@@ -144,10 +144,8 @@ export default function LoginPage() {
     <div className="min-h-screen koldify-shell-bg text-[#2f2453]">
       <div className="grid min-h-screen lg:grid-cols-[43.2%_56.8%]">
         <section className="relative flex min-h-screen flex-col bg-transparent px-7 pb-8 pt-6 sm:px-10 lg:px-0 lg:pt-5">
-          <div className="mb-10 flex items-center gap-3 pl-1 text-[15px] font-semibold tracking-tight text-[#3b2a68] lg:ml-7 lg:mb-0 lg:mt-1">
-            <div className="grid h-7 w-7 place-items-center rounded-full border border-[#d8cbff] bg-white text-[#6f4cc6] shadow-[0_8px_20px_rgba(111,76,198,0.15)]">
-              <div className="h-3.5 w-3.5 rounded-full border border-[#6f4cc6] border-l-transparent border-r-transparent" />
-            </div>
+          <div className="mb-10 flex items-center gap-0.5 pl-1 text-[20px] font-semibold tracking-tight text-[#3b2a68] lg:ml-7 lg:mb-0 lg:mt-1">
+            <img src="/favicon.png" alt="Enrich it" className="h-10 w-10 object-contain" />
             <span>Enrich It</span>
           </div>
 
