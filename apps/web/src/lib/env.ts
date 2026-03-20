@@ -31,7 +31,12 @@ const envSchema = z.object({
   SENDGRID_FROM_EMAIL: z.string().email().optional(),
 });
 
-const parsed = envSchema.safeParse(process.env);
+const rawEnv = {
+  ...process.env,
+  WEB_PORT: process.env.PORT ?? process.env.WEB_PORT ?? "4000",
+};
+
+const parsed = envSchema.safeParse(rawEnv);
 if (!parsed.success) {
   console.error("Invalid environment configuration:");
   console.error(parsed.error.format());
