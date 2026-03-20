@@ -4,7 +4,6 @@ import {
   LayoutDashboard,
   Users,
   Key,
-  Sparkles,
   Activity,
   ChevronLeft,
   ChevronRight,
@@ -143,9 +142,9 @@ export default function AdminLayout() {
           {/* Logo */}
           <div className="flex h-16 items-center justify-between px-4 border-b border-sidebar-border">
             {!collapsed && (
-              <Link to="/admin" className="flex items-center gap-2.5">
+              <Link to="/admin" className="flex items-center gap-1.5">
                 <div className="flex h-9 w-9 items-center justify-center rounded-xl gradient-koldify shadow-glow-sm">
-                  <Sparkles className="h-4 w-4 text-white" />
+                  <img src="/logo-web.png" alt="Enrich it" className="h-5 w-5 rounded-md object-cover" />
                 </div>
                 <div className="flex flex-col">
                   <span className="text-lg font-bold gradient-koldify-text tracking-tight leading-tight">Koldify</span>
@@ -156,7 +155,7 @@ export default function AdminLayout() {
             {collapsed && (
               <Link to="/admin" className="mx-auto">
                 <div className="flex h-9 w-9 items-center justify-center rounded-xl gradient-koldify shadow-glow-sm">
-                  <Sparkles className="h-4 w-4 text-white" />
+                  <img src="/logo-web.png" alt="Enrich it" className="h-5 w-5 rounded-md object-cover" />
                 </div>
               </Link>
             )}
