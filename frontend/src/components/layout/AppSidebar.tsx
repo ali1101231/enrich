@@ -3,7 +3,6 @@ import { Link, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard,
   Play,
-  Sparkles,
   FolderOutput,
   Settings,
   LogOut,
@@ -97,18 +96,14 @@ export function AppSidebar() {
       {/* Logo */}
       <div className="flex h-[74px] items-center justify-between border-b border-sidebar-border/90 px-4">
         {!collapsed && (
-          <Link to="/dashboard" className="flex items-center gap-2.5">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl gradient-koldify shadow-glow-sm">
-              <Sparkles className="h-4 w-4 text-white" />
-            </div>
+          <Link to="/dashboard" className="flex items-center gap-1.5">
+            <img src="/favicon.png" alt="Enrich it" className="h-10 w-10 object-contain" />
             <span className="text-[1.35rem] font-bold gradient-koldify-text tracking-tight">Enrich it</span>
           </Link>
         )}
         {collapsed && (
           <Link to="/dashboard" className="mx-auto">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl gradient-koldify shadow-glow-sm">
-              <Sparkles className="h-4 w-4 text-white" />
-            </div>
+            <img src="/favicon.png" alt="Enrich it" className="h-10 w-10 object-contain" />
           </Link>
         )}
         <Button
