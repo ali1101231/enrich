@@ -17,10 +17,23 @@ import {
 import { useApp } from '@/contexts/AppContext';
 
 type AuthMode = 'login' | 'signup';
+type PreviewMode = 'person' | 'company';
 
 type SocialProvider = {
   label: string;
   icon: ReactNode;
+};
+
+type PreviewAction = {
+  label: string;
+  icon: ReactNode;
+  href: string;
+};
+
+type PreviewFooterLink = {
+  label: string;
+  icon: ReactNode;
+  href: string;
 };
 
 const socialProviders: SocialProvider[] = [
@@ -60,11 +73,39 @@ const socialProviders: SocialProvider[] = [
   },
 ];
 
-const quickActions = [
-  { label: 'Add to list', icon: <Building2 className="h-4 w-4" aria-hidden="true" /> },
-  { label: 'Add to sequence', icon: <ChevronRight className="h-4 w-4" aria-hidden="true" /> },
-  { label: 'Compose email', icon: <Mail className="h-4 w-4" aria-hidden="true" /> },
-];
+const previewActionsByMode: Record<PreviewMode, PreviewAction[]> = {
+  person: [
+    { label: 'Email enricher', icon: <Mail className="h-4 w-4" aria-hidden="true" />, href: 'https://enrich-it.io' },
+    { label: 'Phone finder', icon: <Phone className="h-4 w-4" aria-hidden="true" />, href: 'https://enrich-it.io' },
+  ],
+  company: [
+    { label: 'Company enricher', icon: <Building2 className="h-4 w-4" aria-hidden="true" />, href: 'https://enrich-it.io' },
+    { label: 'Domain to LinkedIn', icon: <Link2 className="h-4 w-4" aria-hidden="true" />, href: 'https://www.linkedin.com' },
+  ],
+};
+
+const previewFooterLinksByMode: Record<PreviewMode, PreviewFooterLink[]> = {
+  person: [
+    {
+      label: 'Open Enrich It',
+      icon: <img src="/favicon.png" alt="" aria-hidden="true" className="h-4 w-4 object-contain" />,
+      href: 'https://enrich-it.io',
+    },
+    { label: 'Open LinkedIn profile', icon: <span className="text-[18px] font-semibold">in</span>, href: 'https://www.linkedin.com' },
+    { label: 'Open personal website', icon: <Link2 className="h-4 w-4" />, href: 'https://enrich-it.io' },
+    { label: 'Open X profile', icon: <span className="text-[18px]">𝕏</span>, href: 'https://x.com' },
+  ],
+  company: [
+    {
+      label: 'Open Enrich It',
+      icon: <img src="/favicon.png" alt="" aria-hidden="true" className="h-4 w-4 object-contain" />,
+      href: 'https://enrich-it.io',
+    },
+    { label: 'Open Company LinkedIn', icon: <span className="text-[18px] font-semibold">in</span>, href: 'https://www.linkedin.com' },
+    { label: 'Open company website', icon: <Link2 className="h-4 w-4" />, href: 'https://enrich-it.io' },
+    { label: 'Open Company X', icon: <span className="text-[18px]">𝕏</span>, href: 'https://x.com' },
+  ],
+};
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -76,6 +117,7 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [keepSignedIn, setKeepSignedIn] = useState(true);
+  const [previewMode, setPreviewMode] = useState<PreviewMode>('person');
   const [signInEmail, setSignInEmail] = useState('arlo.simmons@thebussin-design.info');
   const [signInPassword, setSignInPassword] = useState('password123');
   const [signUpName, setSignUpName] = useState('');
@@ -139,6 +181,13 @@ export default function LoginPage() {
     setActiveTab(tab);
     navigate('/login', { replace: true });
   };
+
+  const previewActions = previewActionsByMode[previewMode];
+  const previewFooterLinks = previewFooterLinksByMode[previewMode];
+  const previewName = previewMode === 'person' ? 'Tim Zheng' : 'Enrich It';
+  const previewRole = previewMode === 'person' ? 'CEO & Founder at Enrich It' : 'B2B Data Enrichment Platform';
+  const previewScore = previewMode === 'person' ? '95' : '92';
+  const previewScoreLabel = previewMode === 'person' ? 'Excellent match' : 'Company match';
 
   return (
     <div className="min-h-screen koldify-shell-bg text-[#2f2453]">
@@ -378,8 +427,8 @@ export default function LoginPage() {
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_16%_14%,rgba(255,255,255,0.62),transparent_24%),radial-gradient(circle_at_86%_10%,rgba(167,139,250,0.28),transparent_28%)]" />
               </div>
 
-              <div className="absolute left-[348px] top-[104px] z-20 grid h-[31px] w-[31px] place-items-center rounded-[6px] bg-[#8b5cf6] text-white shadow-[0_12px_24px_rgba(88,56,170,0.28)]">
-                <span className="text-[18px] leading-none">✳</span>
+              <div className="absolute left-[348px] top-[104px] z-20 grid h-[31px] w-[31px] place-items-center rounded-[6px] bg-[#efe7ff] shadow-[0_12px_24px_rgba(88,56,170,0.22)]">
+                <img src="/favicon.png" alt="Enrich it" className="h-5 w-5 object-contain" />
               </div>
 
               <div className="absolute left-[236px] top-[248px] z-10 h-[146px] w-[226px] rounded-[18px] border border-[#ddd2ff] bg-white/85 shadow-[0_20px_40px_rgba(126,102,201,0.2)] backdrop-blur-sm">
@@ -398,7 +447,7 @@ export default function LoginPage() {
               <div className="absolute left-[402px] top-[70px] z-30 w-[274px] rounded-[18px] border border-[#e2d8ff] bg-[#f8f4ff] shadow-[0_24px_60px_rgba(95,82,148,0.24)]">
                 <div className="flex items-center justify-between border-b border-[#eee5ff] px-4 py-3 text-[#31245d]">
                   <div className="flex items-center gap-2 text-[15px] font-semibold">
-                    <span className="text-[13px] leading-none">✳</span>
+                    <img src="/favicon.png" alt="Enrich it" className="h-4 w-4 object-contain" />
                     <span>Enrich It</span>
                   </div>
                   <X className="h-4 w-4 text-[#7a6fa2]" />
@@ -406,38 +455,52 @@ export default function LoginPage() {
 
                 <div className="px-4 pb-4 pt-3">
                   <div className="mb-5 grid grid-cols-2 gap-2 rounded-xl bg-white/90 p-1 text-[11px] font-semibold text-[#7a709e] shadow-[inset_0_0_0_1px_rgba(215,201,255,0.75)]">
-                    <div className="flex items-center justify-center gap-1.5 rounded-lg bg-[#6f4cc6] px-3 py-[8px] text-white">
+                    <button
+                      type="button"
+                      onClick={() => setPreviewMode('person')}
+                      className={`flex items-center justify-center gap-1.5 rounded-lg px-3 py-[8px] transition ${
+                        previewMode === 'person' ? 'bg-[#6f4cc6] text-white' : 'hover:bg-[#f6f1ff]'
+                      }`}
+                    >
                       <UserRound className="h-3.5 w-3.5" />
                       <span>Person</span>
-                    </div>
-                    <div className="flex items-center justify-center gap-1.5 rounded-lg px-3 py-[8px]">
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPreviewMode('company')}
+                      className={`flex items-center justify-center gap-1.5 rounded-lg px-3 py-[8px] transition ${
+                        previewMode === 'company' ? 'bg-[#6f4cc6] text-white' : 'hover:bg-[#f6f1ff]'
+                      }`}
+                    >
                       <Building2 className="h-3.5 w-3.5" />
                       <span>Company</span>
-                    </div>
+                    </button>
                   </div>
 
                   <div className="mb-4">
-                    <div className="text-[13px] font-bold text-[#31245d]">Tim Zheng</div>
-                    <div className="mt-1 text-[11px] font-medium text-[#7a709e]">CEO & Founder at Enrich It</div>
+                    <div className="text-[13px] font-bold text-[#31245d]">{previewName}</div>
+                    <div className="mt-1 text-[11px] font-medium text-[#7a709e]">{previewRole}</div>
                     <div className="mt-3 inline-flex items-center gap-1 rounded-full bg-[#e8defd] px-2 py-1 text-[10px] font-semibold text-[#5d409f]">
-                      <span>95</span>
-                      <span>Excellent match</span>
+                      <span>{previewScore}</span>
+                      <span>{previewScoreLabel}</span>
                     </div>
                   </div>
 
                   <div className="mb-5 rounded-[18px] border border-[#ece4ff] bg-white/95 px-2 py-3 shadow-[0_12px_24px_rgba(109,92,163,0.12)]">
-                    <div className="grid grid-cols-3 gap-2 text-center text-[10px] font-semibold text-[#756b97]">
-                      {quickActions.map((action) => (
-                        <button
+                    <div className="grid grid-cols-2 gap-2 text-center text-[10px] font-semibold text-[#756b97]">
+                      {previewActions.map((action) => (
+                        <a
                           key={action.label}
-                          type="button"
+                          href={action.href}
+                          target="_blank"
+                          rel="noreferrer"
                           className="flex flex-col items-center gap-2 rounded-xl px-2 py-2 transition hover:bg-[#f6f1ff]"
                         >
                           <span className="grid h-8 w-8 place-items-center rounded-full bg-[#f4edff] text-[#685c91]">
                             {action.icon}
                           </span>
                           <span>{action.label}</span>
-                        </button>
+                        </a>
                       ))}
                     </div>
                   </div>
@@ -445,31 +508,45 @@ export default function LoginPage() {
                   <div className="space-y-4 border-b border-[#ece4ff] pb-5 text-[#635b7f]">
                     <div className="flex items-start gap-3">
                       <span className="grid h-8 w-8 place-items-center rounded-full bg-[#f4edff] text-[#6f4cc6]">
-                        <Mail className="h-4 w-4" />
+                        {previewMode === 'person' ? <Mail className="h-4 w-4" /> : <Building2 className="h-4 w-4" />}
                       </span>
                       <div>
-                        <div className="text-[12px] font-semibold text-[#4a3e74]">hello@enrichit.ai</div>
-                        <div className="text-[10px] font-medium text-[#9a8ec2]">Work</div>
+                        <div className="text-[12px] font-semibold text-[#4a3e74]">
+                          {previewMode === 'person' ? 'hello@enrich-it.io' : 'enrich-it.io'}
+                        </div>
+                        <div className="text-[10px] font-medium text-[#9a8ec2]">
+                          {previewMode === 'person' ? 'Email Enricher' : 'Company Enricher'}
+                        </div>
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
                       <span className="grid h-8 w-8 place-items-center rounded-full bg-[#f4edff] text-[#6b6291]">
-                        <Phone className="h-4 w-4" />
+                        {previewMode === 'person' ? <Phone className="h-4 w-4" /> : <Link2 className="h-4 w-4" />}
                       </span>
                       <div>
-                        <div className="text-[12px] font-semibold text-[#4a3e74]">(123) 456-7890</div>
-                        <div className="text-[10px] font-medium text-[#9a8ec2]">Mobile</div>
+                        <div className="text-[12px] font-semibold text-[#4a3e74]">
+                          {previewMode === 'person' ? '(123) 456-7890' : 'enrich-it.io/linkedin'}
+                        </div>
+                        <div className="text-[10px] font-medium text-[#9a8ec2]">
+                          {previewMode === 'person' ? 'Phone Finder' : 'Domain to LinkedIn'}
+                        </div>
                       </div>
                     </div>
                   </div>
 
                   <div className="flex items-center justify-around pt-4 text-[#6a618b]">
-                    <div className="grid h-8 w-8 place-items-center rounded-full text-[14px] hover:bg-[#efe6ff]">✳</div>
-                    <div className="grid h-8 w-8 place-items-center rounded-full text-[18px] font-semibold hover:bg-[#efe6ff]">in</div>
-                    <div className="grid h-8 w-8 place-items-center rounded-full hover:bg-[#efe6ff]">
-                      <Link2 className="h-4 w-4" />
-                    </div>
-                    <div className="grid h-8 w-8 place-items-center rounded-full text-[18px] hover:bg-[#efe6ff]">𝕏</div>
+                    {previewFooterLinks.map((link) => (
+                      <a
+                        key={link.label}
+                        href={link.href}
+                        target="_blank"
+                        rel="noreferrer"
+                        aria-label={link.label}
+                        className="grid h-8 w-8 place-items-center rounded-full hover:bg-[#efe6ff]"
+                      >
+                        {link.icon}
+                      </a>
+                    ))}
                   </div>
                 </div>
               </div>
