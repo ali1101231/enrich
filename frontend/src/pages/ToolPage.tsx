@@ -498,7 +498,7 @@ export default function ToolPage() {
               <div className="rounded-xl border border-primary/15 bg-primary/5 px-4 py-3">
                 <div className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">Mapped Field</div>
                 <div className="mt-1 text-sm text-foreground">
-                  {showcase.mappedFieldLabel} <span className="text-muted-foreground">-></span> {showcase.mappedColumnLabel}
+                  {showcase.mappedFieldLabel} <span className="text-muted-foreground">-&gt;</span> {showcase.mappedColumnLabel}
                 </div>
               </div>
             </CardContent>
